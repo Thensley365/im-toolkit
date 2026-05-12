@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acid-Base Interpreter — ICU / ED Tool</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:       #0d1b2a;
+      --navy-mid:   #112233;
+      --navy-card:  #162a3f;
+      --navy-border:#1e3a55;
+      --teal:       #0d9488;
+      --teal-light: #14b8a6;
+      --teal-dim:   #0f766e;
+      --sky:        #38bdf8;
+      --sky-dim:    #0ea5e9;
+      --white:      #f0f9ff;
+      --muted:      #94a3b8;
+      --amber:      #f59e0b;
+      --amber-bg:   #451a03;
+      --red:        #f87171;
+      --red-bg:     #450a0a;
+      --green:      #34d399;
+      --green-bg:   #022c22;
+      --label:      #7dd3fc;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      padding: 0 0 3rem;
+    }
+
+    /* ── Header ── */
+    header {
+      background: linear-gradient(135deg, #0a1628 0%, #0f2d44 60%, #0d3d4f 100%);
+      border-bottom: 2px solid var(--teal-dim);
+      padding: 1.5rem 2rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .header-icon {
+      font-size: 2rem;
+      line-height: 1;
+    }
+    header h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--teal-light);
+      letter-spacing: 0.01em;
+    }
+    header p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    /* ── Main layout ── */
+    main {
+      max-width: 900px;
+      margin: 2rem auto 0;
+      padding: 0 1.25rem;
+    }
+
+    /* ── Form card ── */
+    .form-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-radius: 12px;
+      padding: 1.75rem 2rem;
+      margin-bottom: 1.75rem;
+    }
+    .form-card h2 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--label);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 1.25rem;
+    }
+
+    /* ── Field groups ── */
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--label);
+    }
+    label span.hint {
+      color: var(--muted);
+      font-weight: 400;
+      font-size: 0.76rem;
+    }
+    input[type="number"], input[type="text"] {
+      background: #0a1628;
+      border: 1px solid var(--navy-border);
+      border-radius: 6px;
+      color: var(--white);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      padding: 0.5rem 0.75rem;
+      width: 100%;
+      transition: border-color 0.15s;
+    }
+    input[type="number"]:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--teal);
+    }
+    input[type="number"]::placeholder {
+      color: #3a5068;
+    }
+
+    /* ── Radio group ── */
+    .radio-group {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      margin-bottom: 1.25rem;
+    }
+    .radio-group label {
+      color: var(--white);
+      font-size: 0.92rem;
+      font-weight: 400;
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      cursor: pointer;
+    }
+    input[type="radio"] {
+      accent-color: var(--teal);
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
+    }
+
+    /* ── Section separator ── */
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--teal-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 1.25rem 0 0.75rem;
+      padding-bottom: 0.35rem;
+      border-bottom: 1px solid var(--navy-border);
+    }
+
+    /* ── Osmolar sub-fields toggle ── */
+    #osmolar-sub { display: none; }
+    #osmolar-sub.visible { display: contents; }
+
+    /* ── Submit button ── */
+    .btn-row {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    button {
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 8px;
+      padding: 0.65rem 1.5rem;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    button:active { transform: scale(0.98); }
+    .btn-primary {
+      background: var(--teal);
+      color: #fff;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--navy-border);
+      color: var(--muted);
+    }
+    .btn-secondary:hover { border-color: var(--teal-dim); color: var(--white); }
+
+    /* ── Results area ── */
+    #results { display: none; }
+    #results.visible { display: block; }
+
+    /* ── Result cards ── */
+    .result-card {
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+    .result-card h3 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.9rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--navy-border);
+      color: var(--teal-light);
+    }
+    .result-card ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .result-card ul li {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      padding-left: 1.1rem;
+      position: relative;
+      line-height: 1.5;
+    }
+    .result-card ul li::before {
+      content: '•';
+      position: absolute;
+      left: 0;
+      color: var(--teal-dim);
+    }
+
+    /* ── Primary interp card ── */
+    .card-primary h3 { color: var(--sky); border-bottom-color: #1e3a55; }
+    .card-primary .ph-badge {
+      display: inline-block;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--sky);
+      background: #0c2a42;
+      border: 1px solid var(--sky-dim);
+      border-radius: 6px;
+      padding: 0.2rem 0.6rem;
+      margin-bottom: 0.75rem;
+    }
+    .card-primary ul li {
+      color: var(--white);
+      font-weight: 500;
+      font-size: 0.92rem;
+    }
+    .card-primary ul li::before { color: var(--sky); }
+
+    /* ── Anion gap card ── */
+    .card-ag .ag-values {
+      display: flex;
+      gap: 1.25rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .ag-chip {
+      background: #0a1e30;
+      border: 1px solid var(--navy-border);
+      border-radius: 6px;
+      padding: 0.45rem 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+    }
+    .ag-chip span { color: var(--muted); font-size: 0.75rem; display: block; }
+    .ag-chip strong { color: var(--teal-light); }
+    .ag-elevated strong { color: var(--amber); }
+
+    /* ── Alert card ── */
+    .card-alerts {
+      border-color: #7f1d1d;
+      background: #1a0707;
+    }
+    .card-alerts h3 { color: var(--red); border-bottom-color: #7f1d1d; }
+    .card-alerts ul li { color: #fca5a5; }
+    .card-alerts ul li::before { color: var(--red); content: '⚠'; font-size: 0.8rem; }
+
+    /* ── VBG caveat card ── */
+    .card-vbg {
+      border-color: #78350f;
+      background: #1c1000;
+    }
+    .card-vbg h3 { color: var(--amber); border-bottom-color: #78350f; }
+    .card-vbg p { font-size: 0.87rem; color: #fcd34d; line-height: 1.6; }
+
+    /* ── Next steps card ── */
+    .card-steps h3 { color: var(--green); border-bottom-color: #14532d; }
+    .step-section { margin-bottom: 1rem; }
+    .step-section:last-child { margin-bottom: 0; }
+    .step-section-title {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--green);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 0.4rem;
+    }
+    .step-section ul li { color: #a7f3d0; }
+    .step-section ul li::before { color: var(--green); content: '→'; }
+
+    /* ── Likely causes card ── */
+    .card-causes h3 { color: var(--amber); }
+    .card-causes ul li::before { color: var(--amber); }
+    .card-causes ul li { color: #fde68a; }
+
+    /* ── Compensation card ── */
+    .comp-row {
+      font-size: 0.86rem;
+      color: #cbd5e1;
+      padding: 0.3rem 0;
+      border-bottom: 1px solid #1a2f42;
+      line-height: 1.5;
+    }
+    .comp-row:last-child { border-bottom: none; }
+    .comp-row .comp-label { color: var(--muted); font-size: 0.78rem; }
+    .comp-ok { color: var(--green); }
+    .comp-warn { color: var(--amber); }
+    .comp-alert { color: var(--red); }
+
+    /* ── Delta ratio card ── */
+    .delta-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--sky);
+      margin-bottom: 0.5rem;
+    }
+    .delta-interp {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+    }
+
+    /* ── Lactate card ── */
+    .lactate-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .lactate-normal { color: var(--green); }
+    .lactate-elevated { color: var(--amber); }
+    .lactate-severe { color: var(--red); }
+
+    /* ── Osmolar gap card ── */
+    .osm-display {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .osm-normal { color: var(--green); }
+    .osm-elevated { color: var(--red); }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.76rem;
+      margin-top: 2.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--navy-border);
+    }
+
+    /* ── Validation error ── */
+    .error-msg {
+      background: var(--red-bg);
+      border: 1px solid #7f1d1d;
+      border-radius: 6px;
+      color: var(--red);
+      font-size: 0.85rem;
+      padding: 0.6rem 1rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+
+    @media (max-width: 600px) {
+      .field-grid { grid-template-columns: 1fr 1fr; }
+      header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">🫁</div>
+  <div>
+    <h1>Acid-Base Interpreter — ICU / ED Tool</h1>
+    <p>Full 11-step ABG / VBG analysis with compensation checks, delta ratio, osmolar gap, and alerts</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- Input Form -->
+  <div class="form-card">
+    <h2>Enter Blood Gas Values</h2>
+
+    <!-- Sample type -->
+    <div class="section-label">Sample Type</div>
+    <div class="radio-group">
+      <label><input type="radio" name="sample_type" value="ABG" checked /> ABG (Arterial)</label>
+      <label><input type="radio" name="sample_type" value="VBG" /> VBG (Venous)</label>
+    </div>
+
+    <!-- Required fields -->
+    <div class="section-label">Required Values</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="ph">pH</label>
+        <input type="number" id="ph" step="0.001" min="6.5" max="8.0" placeholder="7.40" required />
+      </div>
+      <div class="field">
+        <label for="pco2">pCO<sub>2</sub> <span class="hint">(mmHg)</span></label>
+        <input type="number" id="pco2" step="0.1" min="5" max="150" placeholder="40" required />
+      </div>
+      <div class="field">
+        <label for="hco3">HCO<sub>3</sub> <span class="hint">(mEq/L)</span></label>
+        <input type="number" id="hco3" step="0.1" min="1" max="60" placeholder="24" required />
+      </div>
+      <div class="field">
+        <label for="na">Sodium (Na) <span class="hint">(mEq/L)</span></label>
+        <input type="number" id="na" step="0.1" min="100" max="180" placeholder="140" required />
+      </div>
+      <div class="field">
+        <label for="cl">Chloride (Cl) <span class="hint">(mEq/L)</span></label>
+        <input type="number" id="cl" step="0.1" min="60" max="150" placeholder="104" required />
+      </div>
+    </div>
+
+    <!-- Optional fields -->
+    <div class="section-label">Optional Values</div>
+    <div class="field-grid">
+      <div class="field">
+        <label for="albumin">Albumin <span class="hint">(g/dL) — for corrected AG</span></label>
+        <input type="number" id="albumin" step="0.1" min="0" max="6" placeholder="Leave blank" />
+      </div>
+      <div class="field">
+        <label for="lactate">Lactate <span class="hint">(mmol/L)</span></label>
+        <input type="number" id="lactate" step="0.1" min="0" max="30" placeholder="Leave blank" />
+      </div>
+      <div class="field">
+        <label for="measured_osm">Measured Osm <span class="hint">(mOsm/kg) — reveals glucose/BUN/EtOH fields</span></label>
+        <input type="number" id="measured_osm" step="0.1" min="200" max="450" placeholder="Leave blank" />
+      </div>
+
+      <!-- Osmolar sub-fields — revealed when measured_osm entered -->
+      <div id="osmolar-sub">
+        <div class="field">
+          <label for="glucose">Glucose <span class="hint">(mg/dL)</span></label>
+          <input type="number" id="glucose" step="1" min="0" max="2000" placeholder="100" />
+        </div>
+        <div class="field">
+          <label for="bun">BUN <span class="hint">(mg/dL)</span></label>
+          <input type="number" id="bun" step="0.1" min="0" max="300" placeholder="14" />
+        </div>
+        <div class="field">
+          <label for="ethanol">Ethanol <span class="hint">(mg/dL) — optional</span></label>
+          <input type="number" id="ethanol" step="0.1" min="0" max="500" placeholder="Leave blank" />
+        </div>
+      </div>
+    </div>
+
+    <div class="error-msg" id="error-msg">Please fill in all required fields (pH, pCO₂, HCO₃, Na, Cl).</div>
+
+    <div class="btn-row">
+      <button class="btn-primary" onclick="runInterpreter()">Interpret ABG/VBG</button>
+      <button class="btn-secondary" onclick="clearAll()">Clear / New</button>
+    </div>
+  </div>
+
+  <!-- Results -->
+  <div id="results">
+
+    <!-- 1. Primary Interpretation -->
+    <div class="result-card card-primary">
+      <h3>1 — Primary Interpretation</h3>
+      <div class="ph-badge" id="res-ph-badge"></div>
+      <ul id="res-primary"></ul>
+    </div>
+
+    <!-- 2. Key Findings -->
+    <div class="result-card">
+      <h3>2 — Key Findings</h3>
+      <ul id="res-findings"></ul>
+    </div>
+
+    <!-- 3. Anion Gap -->
+    <div class="result-card card-ag">
+      <h3>3 — Anion Gap</h3>
+      <div class="ag-values" id="res-ag-values"></div>
+      <div id="res-ag-note" style="font-size:0.83rem;color:var(--muted);margin-top:0.4rem;"></div>
+    </div>
+
+    <!-- 4. Compensation Check -->
+    <div class="result-card">
+      <h3>4 — Compensation Check</h3>
+      <div id="res-comp"></div>
+    </div>
+
+    <!-- 5. Delta Ratio -->
+    <div class="result-card" id="card-delta" style="display:none">
+      <h3>5 — Delta Ratio</h3>
+      <div class="delta-display" id="res-delta-value"></div>
+      <div class="delta-interp" id="res-delta-interp"></div>
+    </div>
+
+    <!-- 6. Lactate -->
+    <div class="result-card" id="card-lactate" style="display:none">
+      <h3>6 — Lactate</h3>
+      <div class="lactate-display" id="res-lactate-value"></div>
+      <div id="res-lactate-interp" style="font-size:0.87rem;color:#cbd5e1;"></div>
+    </div>
+
+    <!-- 7. Osmolar Gap -->
+    <div class="result-card" id="card-osm" style="display:none">
+      <h3>7 — Osmolar Gap</h3>
+      <div class="osm-display" id="res-osm-value"></div>
+      <div id="res-osm-interp" style="font-size:0.87rem;color:#cbd5e1;"></div>
+    </div>
+
+    <!-- 8. Must-Not-Miss Alerts -->
+    <div class="result-card card-alerts" id="card-alerts" style="display:none">
+      <h3>8 — Must-Not-Miss Alerts</h3>
+      <ul id="res-alerts"></ul>
+    </div>
+
+    <!-- 9. Likely Causes -->
+    <div class="result-card card-causes" id="card-causes" style="display:none">
+      <h3>9 — Likely Causes to Consider</h3>
+      <ul id="res-causes"></ul>
+    </div>
+
+    <!-- 10. Suggested Next Steps -->
+    <div class="result-card card-steps">
+      <h3>10 — Suggested Next Steps</h3>
+      <div id="res-steps"></div>
+    </div>
+
+    <!-- 11. VBG Caveat -->
+    <div class="result-card card-vbg" id="card-vbg" style="display:none">
+      <h3>VBG Caveat</h3>
+      <p>pH and pCO₂ are useful for acid-base screening on venous blood gas, but <strong>do not use VBG pO₂ or O₂ saturation to assess oxygenation</strong>. If oxygenation or ventilator titration is the clinical question, obtain an ABG.</p>
+    </div>
+
+    <div class="btn-row" style="margin-top:0.5rem;">
+      <button class="btn-secondary" onclick="clearAll()">Add Another</button>
+    </div>
+
+  </div>
+
+</main>
+
+<footer>
+  Educational decision support only — not a substitute for clinical judgment.<br />
+  Logic translated from <em>Acid_base_analyzer.py</em> · Acid-Base Interpreter v1.0
+</footer>
+
+<script>
+// ── Reveal osmolar sub-fields when measured_osm has a value ──
+document.getElementById('measured_osm').addEventListener('input', function() {
+  const sub = document.getElementById('osmolar-sub');
+  if (this.value !== '') {
+    sub.classList.add('visible');
+  } else {
+    sub.classList.remove('visible');
+    document.getElementById('glucose').value = '';
+    document.getElementById('bun').value = '';
+    document.getElementById('ethanol').value = '';
+  }
+});
+
+// ── Utility: parse float or null ──
+function pf(id) {
+  const v = document.getElementById(id).value.trim();
+  if (v === '') return null;
+  const n = parseFloat(v);
+  return isNaN(n) ? null : n;
+}
+
+// ── Core math functions (translated from Python) ──
+
+function calculateAnionGap(na, cl, hco3) {
+  return na - (cl + hco3);
+}
+
+function correctAnionGapForAlbumin(ag, albumin) {
+  if (albumin === null) return null;
+  return ag + 2.5 * (4.0 - albumin);
+}
+
+function calculateExpectedPco2Winters(hco3) {
+  const expected = 1.5 * hco3 + 8;
+  return [expected - 2, expected + 2];
+}
+
+function calculateExpectedPco2MetabolicAlkalosis(hco3) {
+  const expected = 0.7 * (hco3 - 24) + 40;
+  return [expected - 5, expected + 5];
+}
+
+function calculateExpectedHco3RespiratoryAcidosis(pco2, chronic) {
+  const delta = (pco2 - 40) / 10;
+  return chronic ? 24 + 4 * delta : 24 + 1 * delta;
+}
+
+function calculateExpectedHco3RespiratoryAlkalosis(pco2, chronic) {
+  const delta = (40 - pco2) / 10;
+  return chronic ? 24 - 5 * delta : 24 - 2 * delta;
+}
+
+function calculateDeltaRatio(correctedAg, hco3) {
+  const denom = 24 - hco3;
+  if (denom <= 0) return null;
+  return (correctedAg - 12) / denom;
+}
+
+function calculateOsmolarGap(measuredOsm, na, glucose, bun, ethanol) {
+  if (measuredOsm === null || glucose === null || bun === null) return null;
+  const ethanolComponent = ethanol !== null ? ethanol / 3.7 : 0;
+  const calculatedOsm = 2 * na + glucose / 18 + bun / 2.8 + ethanolComponent;
+  return measuredOsm - calculatedOsm;
+}
+
+// ── Main interpreter (translated from Python interpret_acid_base) ──
+function interpretAcidBase(data) {
+  const findings = [];
+  const alerts = [];
+  const likelyCauses = [];
+  const compRows = []; // structured for display
+
+  const { sampleType, ph, pco2, hco3, na, cl, albumin, lactate, measuredOsm, glucose, bun, ethanol } = data;
+
+  // pH status
+  let phStatus;
+  if (ph < 7.35) phStatus = 'Acidemia';
+  else if (ph > 7.45) phStatus = 'Alkalemia';
+  else phStatus = 'Near-normal pH';
+
+  findings.push(`pH status: ${phStatus}`);
+
+  const metabolicAcidosis = hco3 < 22;
+  const metabolicAlkalosis = hco3 > 26;
+  const respiratoryAcidosis = pco2 > 45;
+  const respiratoryAlkalosis = pco2 < 35;
+
+  const primaryDisorders = [];
+
+  if (ph < 7.35) {
+    if (metabolicAcidosis) primaryDisorders.push('Primary metabolic acidosis');
+    if (respiratoryAcidosis) primaryDisorders.push('Primary respiratory acidosis');
+  } else if (ph > 7.45) {
+    if (metabolicAlkalosis) primaryDisorders.push('Primary metabolic alkalosis');
+    if (respiratoryAlkalosis) primaryDisorders.push('Primary respiratory alkalosis');
+  } else {
+    if (metabolicAcidosis && respiratoryAlkalosis)
+      primaryDisorders.push('Mixed metabolic acidosis + respiratory alkalosis with near-normal pH');
+    else if (metabolicAlkalosis && respiratoryAcidosis)
+      primaryDisorders.push('Mixed metabolic alkalosis + respiratory acidosis with near-normal pH');
+    else if (metabolicAcidosis)
+      primaryDisorders.push('Metabolic acidosis with compensation or mixed disorder');
+    else if (metabolicAlkalosis)
+      primaryDisorders.push('Metabolic alkalosis with compensation or mixed disorder');
+    else if (respiratoryAcidosis)
+      primaryDisorders.push('Respiratory acidosis with compensation or mixed disorder');
+    else if (respiratoryAlkalosis)
+      primaryDisorders.push('Respiratory alkalosis with compensation or mixed disorder');
+    else
+      primaryDisorders.push('No major acid-base disorder detected by standard ranges');
+  }
+
+  findings.push(...primaryDisorders);
+
+  // Anion gap
+  const ag = calculateAnionGap(na, cl, hco3);
+  const correctedAg = correctAnionGapForAlbumin(ag, albumin);
+
+  findings.push(`Anion gap: ${ag.toFixed(1)}`);
+  if (correctedAg !== null) {
+    findings.push(`Albumin-corrected anion gap: ${correctedAg.toFixed(1)}`);
+  } else {
+    findings.push('Albumin-corrected anion gap: not calculated — albumin not provided');
+  }
+
+  const agForInterp = correctedAg !== null ? correctedAg : ag;
+
+  if (agForInterp > 12) {
+    findings.push('Elevated anion gap metabolic acidosis is present or contributing');
+    likelyCauses.push(
+      'Lactic acidosis',
+      'Ketoacidosis: DKA, alcoholic ketoacidosis, starvation ketosis',
+      'Renal failure / uremia',
+      'Toxic alcohols or salicylates',
+      'Medication/toxin-associated acidosis'
+    );
+  } else if (metabolicAcidosis) {
+    findings.push('Normal anion gap metabolic acidosis pattern is present');
+    likelyCauses.push(
+      'GI bicarbonate loss: diarrhea, fistula',
+      'Renal tubular acidosis',
+      'Early renal failure',
+      'Large-volume normal saline administration',
+      'Ureteral diversion'
+    );
+  }
+
+  // Compensation checks
+  if (metabolicAcidosis) {
+    const [wLow, wHigh] = calculateExpectedPco2Winters(hco3);
+    findings.push(`Expected pCO₂ by Winter's formula: ${wLow.toFixed(1)}–${wHigh.toFixed(1)} mmHg`);
+
+    let compStatus, compClass;
+    if (pco2 < wLow) {
+      compStatus = `pCO₂ ${pco2} < ${wLow.toFixed(1)} expected → additional respiratory alkalosis`;
+      compClass = 'comp-warn';
+      findings.push('pCO₂ is lower than expected → additional respiratory alkalosis');
+      likelyCauses.push('Sepsis', 'Pain/anxiety', 'Hypoxemia', 'Pregnancy', 'Liver disease', 'Salicylate toxicity');
+    } else if (pco2 > wHigh) {
+      compStatus = `pCO₂ ${pco2} > ${wHigh.toFixed(1)} expected → additional respiratory acidosis`;
+      compClass = 'comp-alert';
+      findings.push('pCO₂ is higher than expected → additional respiratory acidosis');
+      alerts.push("Inadequate respiratory compensation in metabolic acidosis can signal impending ventilatory failure.");
+      likelyCauses.push('COPD/asthma exacerbation', 'CNS depression', 'Opioids/sedatives', 'Neuromuscular weakness', 'Severe fatigue', 'Airway obstruction');
+    } else {
+      compStatus = `pCO₂ ${pco2} within expected ${wLow.toFixed(1)}–${wHigh.toFixed(1)} → appropriate compensation`;
+      compClass = 'comp-ok';
+      findings.push("Respiratory compensation is appropriate for metabolic acidosis");
+    }
+    compRows.push({ label: "Winter's formula (metabolic acidosis)", expected: `${wLow.toFixed(1)}–${wHigh.toFixed(1)} mmHg`, status: compStatus, cls: compClass });
+  }
+
+  if (metabolicAlkalosis) {
+    const [mLow, mHigh] = calculateExpectedPco2MetabolicAlkalosis(hco3);
+    findings.push(`Expected pCO₂ for metabolic alkalosis compensation: ${mLow.toFixed(1)}–${mHigh.toFixed(1)} mmHg`);
+
+    let compStatus, compClass;
+    if (pco2 < mLow) {
+      compStatus = `pCO₂ ${pco2} < ${mLow.toFixed(1)} expected → additional respiratory alkalosis`;
+      compClass = 'comp-warn';
+      findings.push('pCO₂ is lower than expected → additional respiratory alkalosis');
+    } else if (pco2 > mHigh) {
+      compStatus = `pCO₂ ${pco2} > ${mHigh.toFixed(1)} expected → additional respiratory acidosis`;
+      compClass = 'comp-warn';
+      findings.push('pCO₂ is higher than expected → additional respiratory acidosis');
+    } else {
+      compStatus = `pCO₂ ${pco2} within expected ${mLow.toFixed(1)}–${mHigh.toFixed(1)} → appropriate compensation`;
+      compClass = 'comp-ok';
+      findings.push("Respiratory compensation is appropriate for metabolic alkalosis");
+    }
+    compRows.push({ label: 'Metabolic alkalosis compensation', expected: `${mLow.toFixed(1)}–${mHigh.toFixed(1)} mmHg`, status: compStatus, cls: compClass });
+  }
+
+  if (respiratoryAcidosis) {
+    const acuteExp = calculateExpectedHco3RespiratoryAcidosis(pco2, false);
+    const chronicExp = calculateExpectedHco3RespiratoryAcidosis(pco2, true);
+    findings.push(`Expected HCO₃ if acute respiratory acidosis: ~${acuteExp.toFixed(1)}`);
+    findings.push(`Expected HCO₃ if chronic respiratory acidosis: ~${chronicExp.toFixed(1)}`);
+
+    let compStatus, compClass;
+    if (hco3 < acuteExp - 3) {
+      compStatus = `HCO₃ ${hco3} below acute expected ${acuteExp.toFixed(1)} → additional metabolic acidosis`;
+      compClass = 'comp-alert';
+      findings.push('HCO₃ is lower than expected → additional metabolic acidosis');
+    } else if (hco3 > chronicExp + 3) {
+      compStatus = `HCO₃ ${hco3} above chronic expected ${chronicExp.toFixed(1)} → additional metabolic alkalosis`;
+      compClass = 'comp-warn';
+      findings.push('HCO₃ is higher than expected → additional metabolic alkalosis');
+    } else {
+      compStatus = `HCO₃ ${hco3} within acute/chronic range ${acuteExp.toFixed(1)}–${chronicExp.toFixed(1)} → expected compensation`;
+      compClass = 'comp-ok';
+      findings.push('HCO₃ is within expected acute/chronic respiratory acidosis compensation range');
+    }
+    compRows.push({ label: 'Respiratory acidosis (acute/chronic HCO₃ expected)', expected: `Acute: ${acuteExp.toFixed(1)} | Chronic: ${chronicExp.toFixed(1)}`, status: compStatus, cls: compClass });
+  }
+
+  if (respiratoryAlkalosis) {
+    const acuteExp = calculateExpectedHco3RespiratoryAlkalosis(pco2, false);
+    const chronicExp = calculateExpectedHco3RespiratoryAlkalosis(pco2, true);
+    findings.push(`Expected HCO₃ if acute respiratory alkalosis: ~${acuteExp.toFixed(1)}`);
+    findings.push(`Expected HCO₃ if chronic respiratory alkalosis: ~${chronicExp.toFixed(1)}`);
+
+    let compStatus, compClass;
+    if (hco3 < chronicExp - 3) {
+      compStatus = `HCO₃ ${hco3} below chronic expected ${chronicExp.toFixed(1)} → additional metabolic acidosis`;
+      compClass = 'comp-alert';
+      findings.push('HCO₃ is lower than expected → additional metabolic acidosis');
+    } else if (hco3 > acuteExp + 3) {
+      compStatus = `HCO₃ ${hco3} above acute expected ${acuteExp.toFixed(1)} → additional metabolic alkalosis`;
+      compClass = 'comp-warn';
+      findings.push('HCO₃ is higher than expected → additional metabolic alkalosis');
+    } else {
+      compStatus = `HCO₃ ${hco3} within acute/chronic range ${chronicExp.toFixed(1)}–${acuteExp.toFixed(1)} → expected compensation`;
+      compClass = 'comp-ok';
+      findings.push('HCO₃ is within expected acute/chronic respiratory alkalosis compensation range');
+    }
+    compRows.push({ label: 'Respiratory alkalosis (acute/chronic HCO₃ expected)', expected: `Acute: ${acuteExp.toFixed(1)} | Chronic: ${chronicExp.toFixed(1)}`, status: compStatus, cls: compClass });
+  }
+
+  if (compRows.length === 0) {
+    compRows.push({ label: 'No primary disorder requiring compensation check', expected: '—', status: 'No compensation formula applicable with current values', cls: 'comp-ok' });
+  }
+
+  // Delta ratio
+  let deltaRatio = null;
+  let deltaInterp = null;
+  if (agForInterp > 12 && hco3 < 24) {
+    deltaRatio = calculateDeltaRatio(agForInterp, hco3);
+    if (deltaRatio !== null) {
+      findings.push(`Delta ratio: ${deltaRatio.toFixed(2)}`);
+      if (deltaRatio < 0.4)
+        deltaInterp = 'Delta ratio < 0.4 → dominant normal anion gap metabolic acidosis';
+      else if (deltaRatio < 0.8)
+        deltaInterp = 'Delta ratio 0.4–0.8 → mixed high anion gap + normal anion gap metabolic acidosis';
+      else if (deltaRatio <= 2.0)
+        deltaInterp = 'Delta ratio 0.8–2.0 → consistent with typical high anion gap metabolic acidosis';
+      else
+        deltaInterp = 'Delta ratio > 2.0 → high anion gap metabolic acidosis plus metabolic alkalosis or chronic respiratory acidosis';
+      findings.push(deltaInterp);
+    }
+  }
+
+  // Lactate
+  let lactateSeverity = null;
+  if (lactate !== null) {
+    findings.push(`Lactate: ${lactate.toFixed(1)} mmol/L`);
+    if (lactate >= 4) {
+      lactateSeverity = 'severe';
+      alerts.push('Lactate ≥4 mmol/L: severe hyperlactatemia. Assess for shock, sepsis, hypoperfusion, ischemia, seizures, or toxin/medication causes.');
+    } else if (lactate >= 2) {
+      lactateSeverity = 'elevated';
+      findings.push('Lactate is elevated. Trend lactate and evaluate perfusion, infection, ischemia, and medications.');
+    } else {
+      lactateSeverity = 'normal';
+    }
+  }
+
+  // Osmolar gap
+  const osmGap = calculateOsmolarGap(measuredOsm, na, glucose, bun, ethanol);
+  if (osmGap !== null) {
+    findings.push(`Osmolar gap: ${osmGap.toFixed(1)}`);
+    if (osmGap > 10 && agForInterp > 12) {
+      alerts.push('Elevated osmolar gap + elevated anion gap: consider toxic alcohol ingestion until proven otherwise.');
+      likelyCauses.push(
+        'Methanol',
+        'Ethylene glycol',
+        'Propylene glycol',
+        'Isopropanol (usually causes osmolar gap without metabolic acidosis unless shock/ketosis is present)'
+      );
+    }
+  }
+
+  // Severe pH alerts
+  if (ph < 7.10)
+    alerts.push('Severe acidemia: pH <7.10. Assess airway, ventilation, perfusion, potassium, and need for ICU-level intervention.');
+  if (ph > 7.55)
+    alerts.push('Severe alkalemia: pH >7.55. Increased risk of arrhythmia, seizure, ↓ cerebral blood flow, and electrolyte shifts.');
+
+  // Deduplicate
+  const uniqueAlerts = [...new Set(alerts)];
+  const uniqueCauses = [...new Set(likelyCauses)];
+
+  return {
+    sampleType,
+    phStatus,
+    ph,
+    primaryDisorders,
+    findings,
+    alerts: uniqueAlerts,
+    likelyCauses: uniqueCauses,
+    ag,
+    correctedAg,
+    agForInterp,
+    compRows,
+    deltaRatio,
+    deltaInterp,
+    lactate,
+    lactateSeverity,
+    osmGap,
+    agElevated: agForInterp > 12
+  };
+}
+
+// ── Next steps data (from print_interpretation in Python) ──
+const NEXT_STEPS = {
+  'Immediate Bedside Check': [
+    'Confirm sample type: ABG preferred if oxygenation or ventilator titration matters.',
+    'Assess airway, breathing, circulation, mental status, and hemodynamic stability.',
+    'Look for shock, sepsis, respiratory fatigue, hypoxemia, sedative/opioid exposure, or ventilator issues.'
+  ],
+  'Trend These Labs': [
+    'Repeat blood gas if unstable or if treatment changes are made.',
+    'Trend pH, pCO₂, HCO₃, lactate, potassium, creatinine, and anion gap.',
+    'Check potassium and magnesium — acid-base disorders can cause dangerous electrolyte shifts.'
+  ],
+  'If High Anion Gap Metabolic Acidosis': [
+    'Check lactate.',
+    'Check serum or urine ketones; beta-hydroxybutyrate is preferred for DKA.',
+    'Assess renal function and urine output.',
+    'Consider salicylate level.',
+    'Consider toxic alcohol evaluation if osmolar gap is elevated or history suggests ingestion.'
+  ],
+  'If Normal Anion Gap Metabolic Acidosis': [
+    'Evaluate for diarrhea or GI bicarbonate loss.',
+    'Review chloride load, especially large-volume normal saline.',
+    'Assess renal function.',
+    'Consider renal tubular acidosis.',
+    'Consider urine anion gap if the diagnosis is unclear.'
+  ],
+  'If Metabolic Alkalosis': [
+    'Assess vomiting, NG suction, loop/thiazide diuretics, and volume depletion.',
+    'Check urine chloride.',
+    'Assess potassium and magnesium.',
+    'Consider mineralocorticoid excess if hypertensive or volume expanded.'
+  ],
+  'If Respiratory Acidosis': [
+    'Assess ventilation and work of breathing.',
+    'Review opioids, benzodiazepines, sedatives, neuromuscular weakness, COPD, asthma, and airway obstruction.',
+    'Consider noninvasive ventilation or intubation if worsening mental status, fatigue, hypoxemia, or severe acidemia.'
+  ],
+  'If Respiratory Alkalosis': [
+    'Assess hypoxemia, sepsis, pain, anxiety, pregnancy, liver disease, pulmonary embolism, CNS pathology, and salicylates.',
+    "Do not dismiss respiratory alkalosis in the ICU — it can be an early sign of sepsis, PE, or salicylate toxicity."
+  ]
+};
+
+// ── Render results ──
+function renderResults(r) {
+
+  // Primary interpretation
+  document.getElementById('res-ph-badge').textContent = `${r.sampleType} · pH ${r.ph.toFixed(3)} · ${r.phStatus}`;
+  const primEl = document.getElementById('res-primary');
+  primEl.innerHTML = '';
+  r.primaryDisorders.forEach(d => {
+    const li = document.createElement('li');
+    li.textContent = d;
+    primEl.appendChild(li);
+  });
+
+  // Key findings (skip AG and comp rows already shown elsewhere — show all for completeness)
+  const findEl = document.getElementById('res-findings');
+  findEl.innerHTML = '';
+  r.findings.forEach(f => {
+    const li = document.createElement('li');
+    li.textContent = f;
+    findEl.appendChild(li);
+  });
+
+  // Anion gap chips
+  const agValues = document.getElementById('res-ag-values');
+  agValues.innerHTML = '';
+  const rawChip = document.createElement('div');
+  rawChip.className = 'ag-chip' + (r.ag > 12 ? ' ag-elevated' : '');
+  rawChip.innerHTML = `<span>Raw AG</span><strong>${r.ag.toFixed(1)}</strong>`;
+  agValues.appendChild(rawChip);
+
+  if (r.correctedAg !== null) {
+    const corrChip = document.createElement('div');
+    corrChip.className = 'ag-chip' + (r.correctedAg > 12 ? ' ag-elevated' : '');
+    corrChip.innerHTML = `<span>Albumin-corrected AG</span><strong>${r.correctedAg.toFixed(1)}</strong>`;
+    agValues.appendChild(corrChip);
+  }
+
+  const normChip = document.createElement('div');
+  normChip.className = 'ag-chip';
+  normChip.innerHTML = `<span>Normal range</span><strong style="color:var(--muted)">8–12</strong>`;
+  agValues.appendChild(normChip);
+
+  document.getElementById('res-ag-note').textContent =
+    r.correctedAg === null
+      ? 'Albumin not provided — corrected AG not calculated. Hypoalbuminemia lowers the measured AG by ~2.5 per 1 g/dL below 4.0.'
+      : `Albumin-corrected AG is preferred in hypoalbuminemic patients.`;
+
+  // Compensation
+  const compEl = document.getElementById('res-comp');
+  compEl.innerHTML = '';
+  r.compRows.forEach(row => {
+    const div = document.createElement('div');
+    div.className = 'comp-row';
+    div.innerHTML = `<span class="comp-label">${row.label}</span><br /><span class="${row.cls}">${row.status}</span>`;
+    compEl.appendChild(div);
+  });
+
+  // Delta ratio
+  if (r.deltaRatio !== null) {
+    document.getElementById('card-delta').style.display = '';
+    document.getElementById('res-delta-value').textContent = r.deltaRatio.toFixed(2);
+    document.getElementById('res-delta-interp').textContent = r.deltaInterp;
+  } else {
+    document.getElementById('card-delta').style.display = 'none';
+  }
+
+  // Lactate
+  if (r.lactate !== null) {
+    document.getElementById('card-lactate').style.display = '';
+    const lacEl = document.getElementById('res-lactate-value');
+    const interp = document.getElementById('res-lactate-interp');
+    lacEl.textContent = `${r.lactate.toFixed(1)} mmol/L`;
+    if (r.lactateSeverity === 'severe') {
+      lacEl.className = 'lactate-display lactate-severe';
+      interp.textContent = 'Severe hyperlactatemia (≥4 mmol/L). See Alerts section.';
+    } else if (r.lactateSeverity === 'elevated') {
+      lacEl.className = 'lactate-display lactate-elevated';
+      interp.textContent = 'Elevated lactate (2–3.9 mmol/L). Trend and evaluate perfusion, infection, ischemia, medications.';
+    } else {
+      lacEl.className = 'lactate-display lactate-normal';
+      interp.textContent = 'Lactate within normal range (<2 mmol/L).';
+    }
+  } else {
+    document.getElementById('card-lactate').style.display = 'none';
+  }
+
+  // Osmolar gap
+  if (r.osmGap !== null) {
+    document.getElementById('card-osm').style.display = '';
+    const osmEl = document.getElementById('res-osm-value');
+    const osmInterp = document.getElementById('res-osm-interp');
+    osmEl.textContent = `${r.osmGap.toFixed(1)} mOsm/kg`;
+    if (r.osmGap > 10) {
+      osmEl.className = 'osm-display osm-elevated';
+      osmInterp.textContent = 'Elevated osmolar gap (>10). If also elevated AG, consider toxic alcohol until proven otherwise. See Alerts.';
+    } else {
+      osmEl.className = 'osm-display osm-normal';
+      osmInterp.textContent = 'Osmolar gap within normal range (≤10 mOsm/kg).';
+    }
+  } else {
+    document.getElementById('card-osm').style.display = 'none';
+  }
+
+  // Alerts
+  if (r.alerts.length > 0) {
+    document.getElementById('card-alerts').style.display = '';
+    const alertEl = document.getElementById('res-alerts');
+    alertEl.innerHTML = '';
+    r.alerts.forEach(a => {
+      const li = document.createElement('li');
+      li.textContent = a;
+      alertEl.appendChild(li);
+    });
+  } else {
+    document.getElementById('card-alerts').style.display = 'none';
+  }
+
+  // Likely causes
+  if (r.likelyCauses.length > 0) {
+    document.getElementById('card-causes').style.display = '';
+    const causesEl = document.getElementById('res-causes');
+    causesEl.innerHTML = '';
+    r.likelyCauses.forEach(c => {
+      const li = document.createElement('li');
+      li.textContent = c;
+      causesEl.appendChild(li);
+    });
+  } else {
+    document.getElementById('card-causes').style.display = 'none';
+  }
+
+  // Next steps
+  const stepsEl = document.getElementById('res-steps');
+  stepsEl.innerHTML = '';
+  Object.entries(NEXT_STEPS).forEach(([section, steps]) => {
+    const div = document.createElement('div');
+    div.className = 'step-section';
+    div.innerHTML = `<div class="step-section-title">${section}</div>`;
+    const ul = document.createElement('ul');
+    steps.forEach(s => {
+      const li = document.createElement('li');
+      li.textContent = s;
+      ul.appendChild(li);
+    });
+    div.appendChild(ul);
+    stepsEl.appendChild(div);
+  });
+
+  // VBG caveat
+  document.getElementById('card-vbg').style.display = r.sampleType === 'VBG' ? '' : 'none';
+
+  // Show results
+  document.getElementById('results').classList.add('visible');
+  document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Run interpreter ──
+function runInterpreter() {
+  const errEl = document.getElementById('error-msg');
+
+  const ph = pf('ph');
+  const pco2 = pf('pco2');
+  const hco3 = pf('hco3');
+  const na = pf('na');
+  const cl = pf('cl');
+
+  if (ph === null || pco2 === null || hco3 === null || na === null || cl === null) {
+    errEl.classList.add('visible');
+    return;
+  }
+  errEl.classList.remove('visible');
+
+  const sampleType = document.querySelector('input[name="sample_type"]:checked').value;
+  const albumin = pf('albumin');
+  const lactate = pf('lactate');
+  const measuredOsm = pf('measured_osm');
+  const glucose = measuredOsm !== null ? pf('glucose') : null;
+  const bun = measuredOsm !== null ? pf('bun') : null;
+  const ethanol = measuredOsm !== null ? pf('ethanol') : null;
+
+  const data = { sampleType, ph, pco2, hco3, na, cl, albumin, lactate, measuredOsm, glucose, bun, ethanol };
+  const result = interpretAcidBase(data);
+  renderResults(result);
+}
+
+// ── Clear / reset ──
+function clearAll() {
+  ['ph','pco2','hco3','na','cl','albumin','lactate','measured_osm','glucose','bun','ethanol']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  document.querySelector('input[name="sample_type"][value="ABG"]').checked = true;
+  document.getElementById('osmolar-sub').classList.remove('visible');
+  document.getElementById('results').classList.remove('visible');
+  document.getElementById('error-msg').classList.remove('visible');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// Enter key submits
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') runInterpreter();
+});
+</script>
+</body>
+</html>

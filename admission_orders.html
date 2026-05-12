@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IM Admission Order Checker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy-900: #0a1628;
+      --navy-800: #0f2040;
+      --navy-700: #142952;
+      --navy-600: #1a3464;
+      --navy-500: #1e3d73;
+      --teal-600: #0e7a7a;
+      --teal-500: #0f9090;
+      --teal-400: #14b8b8;
+      --teal-300: #2dd4d4;
+      --teal-100: #ccf5f5;
+      --slate-300: #94a3b8;
+      --slate-200: #cbd5e1;
+      --slate-100: #e2e8f0;
+      --white: #f8fafc;
+      --red-600: #dc2626;
+      --red-500: #ef4444;
+      --red-100: #fee2e2;
+      --amber-600: #d97706;
+      --amber-500: #f59e0b;
+      --amber-100: #fef3c7;
+      --green-600: #16a34a;
+      --green-500: #22c55e;
+      --green-100: #dcfce7;
+      --blue-400: #60a5fa;
+      --card-bg: #111f3a;
+      --card-border: #1e3464;
+      --input-bg: #0d1b33;
+      --input-border: #1e3464;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy-900);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .page-wrapper { max-width: 1000px; margin: 0 auto; padding: 32px 20px 80px; }
+
+    /* ── Header ── */
+    .page-header { margin-bottom: 28px; }
+    .page-title { font-size: 1.75rem; font-weight: 700; color: var(--teal-300); letter-spacing: -0.02em; }
+    .page-subtitle { margin-top: 6px; font-size: 0.875rem; color: var(--text-secondary); }
+    .header-rule { margin-top: 16px; border: none; border-top: 1px solid var(--card-border); }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+    .card-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--teal-400);
+      margin-bottom: 14px;
+    }
+
+    /* ── Diagnosis Selector ── */
+    .search-row { display: flex; gap: 10px; margin-bottom: 12px; }
+    .search-input {
+      flex: 1;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      padding: 9px 14px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .search-input:focus { border-color: var(--teal-500); }
+    .search-input::placeholder { color: var(--text-muted); }
+
+    .dx-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 8px;
+      max-height: 340px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .dx-grid::-webkit-scrollbar { width: 4px; }
+    .dx-grid::-webkit-scrollbar-track { background: transparent; }
+    .dx-grid::-webkit-scrollbar-thumb { background: var(--navy-600); border-radius: 4px; }
+
+    .dx-btn {
+      background: var(--navy-800);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      padding: 9px 12px;
+      text-align: left;
+      transition: all 0.15s;
+    }
+    .dx-btn:hover { border-color: var(--teal-500); color: var(--teal-300); background: var(--navy-700); }
+    .dx-btn.active { border-color: var(--teal-400); color: var(--teal-300); background: var(--navy-700); font-weight: 600; }
+    .dx-btn.hidden { display: none; }
+
+    /* ── Mode Tabs ── */
+    .mode-tabs { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+    .mode-tab {
+      background: var(--navy-800);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
+      padding: 8px 18px;
+      transition: all 0.15s;
+    }
+    .mode-tab:hover { border-color: var(--teal-500); color: var(--teal-300); }
+    .mode-tab.active { background: var(--teal-600); border-color: var(--teal-500); color: #fff; font-weight: 600; }
+
+    /* ── Checklist ── */
+    .checklist-list { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+    .checklist-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      transition: all 0.15s;
+      cursor: pointer;
+    }
+    .checklist-item:hover { background: var(--navy-700); border-color: var(--card-border); }
+    .checklist-item.checked {
+      background: rgba(34, 197, 94, 0.08);
+      border-color: rgba(34, 197, 94, 0.2);
+    }
+    .checklist-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--teal-500);
+      cursor: pointer;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .checklist-item label {
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      line-height: 1.5;
+    }
+    .checklist-item.checked label { color: var(--text-muted); text-decoration: line-through; }
+
+    /* ── Progress bar ── */
+    .progress-wrap { margin-bottom: 16px; }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+    .progress-bar-bg {
+      background: var(--navy-700);
+      border-radius: 99px;
+      height: 6px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: var(--teal-400);
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.3s ease;
+    }
+
+    /* ── Order check textarea ── */
+    .order-textarea {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 8px;
+      color: var(--text-primary);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+      padding: 14px;
+      outline: none;
+      resize: vertical;
+      min-height: 180px;
+      transition: border-color 0.15s;
+    }
+    .order-textarea:focus { border-color: var(--teal-500); }
+    .order-textarea::placeholder { color: var(--text-muted); font-family: 'Inter', sans-serif; font-size: 0.85rem; }
+
+    /* ── Buttons ── */
+    .btn {
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 9px 20px;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--teal-500); color: #fff; }
+    .btn-primary:hover { background: var(--teal-400); }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--card-border);
+      color: var(--text-secondary);
+    }
+    .btn-ghost:hover { border-color: var(--teal-500); color: var(--teal-300); }
+    .btn-row { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; align-items: center; }
+
+    /* ── Result rows ── */
+    .result-section { margin-top: 20px; }
+    .result-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+    .result-label.green { color: var(--green-500); }
+    .result-label.red   { color: var(--red-500); }
+    .result-label.amber { color: var(--amber-500); }
+
+    .result-list { list-style: none; display: flex; flex-direction: column; gap: 5px; }
+    .result-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      line-height: 1.5;
+    }
+    .result-row.covered  { background: rgba(34,197,94,0.07);  border: 1px solid rgba(34,197,94,0.2); }
+    .result-row.missing  { background: rgba(239,68,68,0.07);  border: 1px solid rgba(239,68,68,0.2); }
+    .result-row.warning  { background: rgba(245,158,11,0.07); border: 1px solid rgba(245,158,11,0.2); }
+    .result-icon { font-size: 0.85rem; flex-shrink: 0; margin-top: 1px; }
+
+    /* ── Summary bar ── */
+    .summary-bar {
+      display: flex;
+      gap: 20px;
+      padding: 14px 18px;
+      background: var(--navy-800);
+      border: 1px solid var(--card-border);
+      border-radius: 8px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+    .summary-stat { display: flex; flex-direction: column; gap: 2px; }
+    .summary-stat .stat-val { font-size: 1.3rem; font-weight: 700; line-height: 1; }
+    .summary-stat .stat-lbl { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+    .stat-green { color: var(--green-500); }
+    .stat-red   { color: var(--red-500); }
+    .stat-amber { color: var(--amber-500); }
+
+    /* ── Print checklist ── */
+    .print-list { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .print-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 7px 0;
+      border-bottom: 1px solid var(--navy-700);
+      font-size: 0.875rem;
+    }
+    .print-box {
+      width: 16px;
+      height: 16px;
+      border: 1.5px solid var(--text-muted);
+      border-radius: 3px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .empty-state .icon { font-size: 2rem; margin-bottom: 10px; }
+
+    /* ── Utility ── */
+    .hidden { display: none !important; }
+    .mt-12 { margin-top: 12px; }
+    .dx-name-badge {
+      display: inline-block;
+      background: var(--navy-700);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      color: var(--teal-300);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 3px 12px;
+      margin-bottom: 16px;
+    }
+
+    @media print {
+      body { background: #fff; color: #000; }
+      .no-print { display: none !important; }
+      .print-box { border-color: #000; }
+      .print-row { border-color: #ccc; color: #000; }
+    }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+
+  <!-- Header -->
+  <div class="page-header no-print">
+    <div class="page-title">IM Admission Order Checker</div>
+    <div class="page-subtitle">Evidence-based admission checklists for 25 common IM diagnoses</div>
+    <hr class="header-rule" />
+  </div>
+
+  <!-- Diagnosis Selector -->
+  <div class="card no-print">
+    <div class="card-title">Select Diagnosis</div>
+    <div class="search-row">
+      <input class="search-input" id="dxSearch" type="text" placeholder="Search diagnoses…" oninput="filterDx(this.value)" autocomplete="off" />
+    </div>
+    <div class="dx-grid" id="dxGrid"></div>
+  </div>
+
+  <!-- Main Panel -->
+  <div id="mainPanel" class="hidden">
+
+    <!-- Dx badge + mode tabs -->
+    <div class="no-print">
+      <div id="dxBadge" class="dx-name-badge"></div>
+      <div class="mode-tabs">
+        <button class="mode-tab active" onclick="setMode('checklist')">☑ Interactive Checklist</button>
+        <button class="mode-tab" onclick="setMode('check')">⚡ Check My Orders</button>
+        <button class="mode-tab" onclick="setMode('print')">🖨 Print Checklist</button>
+      </div>
+    </div>
+
+    <!-- ── Mode: Interactive Checklist ── -->
+    <div id="modeChecklist">
+      <div class="card">
+        <div class="card-title">Must-Have Orders</div>
+        <div class="progress-wrap">
+          <div class="progress-header">
+            <span id="progressLabel">0 / 0 completed</span>
+            <span id="progressPct">0%</span>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill" style="width:0%"></div></div>
+        </div>
+        <ul class="checklist-list" id="checklistItems"></ul>
+        <div class="btn-row">
+          <button class="btn btn-ghost" onclick="resetChecklist()">Reset</button>
+          <button class="btn btn-ghost" onclick="copyMissing()">Copy Missing</button>
+        </div>
+      </div>
+      <div class="card" id="checklistMisses">
+        <div class="card-title">Common Misses</div>
+        <ul class="result-list" id="checklistMissesList"></ul>
+      </div>
+    </div>
+
+    <!-- ── Mode: Check Orders ── -->
+    <div id="modeCheck" class="hidden">
+      <div class="card">
+        <div class="card-title">Paste Your Current Orders</div>
+        <textarea class="order-textarea" id="orderText" placeholder="Paste your admission orders here — one item per line or free text. Click Analyze when done."></textarea>
+        <div class="btn-row">
+          <button class="btn btn-primary" onclick="analyzeOrders()">Analyze Orders</button>
+          <button class="btn btn-ghost" onclick="clearOrderText()">Clear</button>
+        </div>
+      </div>
+      <div id="checkResults" class="hidden">
+        <div class="summary-bar" id="checkSummary"></div>
+        <div class="card">
+          <div id="checkCoveredSection" class="result-section hidden">
+            <div class="result-label green">✓ Detected in your orders</div>
+            <ul class="result-list" id="checkCoveredList"></ul>
+          </div>
+          <div id="checkMissingSection" class="result-section hidden" style="margin-top:16px">
+            <div class="result-label red">✗ Not found — consider adding</div>
+            <ul class="result-list" id="checkMissingList"></ul>
+          </div>
+          <div class="result-section" style="margin-top:16px">
+            <div class="result-label amber">⚠ Common Misses — verify explicitly</div>
+            <ul class="result-list" id="checkMissesList2"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Mode: Print Checklist ── -->
+    <div id="modePrint" class="hidden">
+      <div class="card">
+        <div class="card-title" id="printDxTitle"></div>
+        <ul class="print-list" id="printItems"></ul>
+        <div class="btn-row no-print" style="margin-top:16px">
+          <button class="btn btn-primary" onclick="window.print()">Print / Save PDF</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title" style="color:var(--amber-500)">Common Misses</div>
+        <ul class="result-list" id="printMissesList"></ul>
+      </div>
+    </div>
+
+  </div><!-- /mainPanel -->
+
+  <!-- Empty state -->
+  <div id="emptyState" class="empty-state no-print">
+    <div class="icon">📋</div>
+    <div>Select a diagnosis above to get started</div>
+  </div>
+
+</div><!-- /page-wrapper -->
+
+<script>
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const BUNDLES = {
+  "General Admission": {
+    must_have: [
+      "Admit status: observation vs inpatient",
+      "Service/team assignment",
+      "Attending physician",
+      "Diagnosis/problem list",
+      "Code status",
+      "Allergies reviewed",
+      "Medication reconciliation",
+      "Vitals frequency",
+      "Nursing instructions",
+      "Activity level",
+      "Diet order",
+      "VTE prophylaxis or documented contraindication",
+      "Labs ordered",
+      "Imaging ordered if indicated",
+      "Consults ordered if indicated",
+      "Disposition goal documented",
+    ],
+    common_misses: [
+      "No code status",
+      "No VTE prophylaxis",
+      "No diet order",
+      "No home med reconciliation",
+      "No PRN pain/nausea/constipation orders",
+      "No electrolyte repletion plan",
+    ],
+  },
+  "Sepsis / Septic Shock": {
+    must_have: [
+      "Blood cultures x2 before antibiotics if feasible",
+      "Lactate",
+      "CBC",
+      "CMP",
+      "UA with culture if urinary source possible",
+      "Source-directed imaging",
+      "Broad-spectrum antibiotics within 1 hour of recognition",
+      "IV fluid bolus 30 mL/kg if hypotensive or lactate ≥4",
+      "Repeat lactate if initially elevated",
+      "Strict I/O",
+      "Vasopressors if MAP <65 despite fluids",
+      "Consider ICU if shock, escalating oxygen, AMS, or pressors needed",
+    ],
+    common_misses: [
+      "Antibiotics delayed >1 hour",
+      "No cultures before antibiotics",
+      "No repeat lactate",
+      "No source control plan",
+      "Under- or over-resuscitation in HF/CKD",
+      "No de-escalation plan",
+    ],
+  },
+  "Pneumonia (CAP/HAP)": {
+    must_have: [
+      "CXR",
+      "Pulse oximetry",
+      "CBC",
+      "CMP",
+      "Blood cultures if severe CAP or hospitalized with risk factors",
+      "Sputum culture if severe CAP, MRSA/Pseudomonas risk, or intubated",
+      "CURB-65 or PSI severity assessment",
+      "Empiric antibiotics",
+      "Oxygen order with target saturation documented",
+      "Legionella and Strep pneumo urine antigens if severe CAP",
+      "VTE prophylaxis",
+    ],
+    common_misses: [
+      "No severity assessment (CURB-65/PSI)",
+      "No oxygen target documented",
+      "No MRSA/Pseudomonas risk assessment",
+      "No de-escalation plan",
+      "No follow-up imaging plan when indicated",
+    ],
+  },
+  "COPD Exacerbation": {
+    must_have: [
+      "Oxygen target 88–92% if CO2 retention risk",
+      "Duonebs or bronchodilator therapy",
+      "Systemic steroids (prednisone 40 mg x5 days or methylpred equivalent)",
+      "Antibiotics if increased sputum purulence/volume or severe exacerbation",
+      "CXR",
+      "VBG or ABG if hypercapnia, severe distress, or AMS",
+      "Consider BiPAP if respiratory acidosis or increased work of breathing",
+      "Smoking cessation counseling if applicable",
+      "VTE prophylaxis",
+    ],
+    common_misses: [
+      "Over-oxygenation (target >92% in CO2 retainer)",
+      "No VBG/ABG in severe exacerbation",
+      "No BiPAP consideration",
+      "No steroid stop date",
+      "No inhaler optimization before discharge",
+    ],
+  },
+  "Heart Failure Exacerbation": {
+    must_have: [
+      "Daily weights",
+      "Strict I/O",
+      "Telemetry if significant decompensation or arrhythmia concern",
+      "BMP and magnesium",
+      "BNP or NT-proBNP if diagnostic uncertainty",
+      "CXR",
+      "EKG",
+      "IV diuresis plan",
+      "Electrolyte repletion goals (potassium and magnesium targets)",
+      "Assess GDMT continuation vs hold",
+      "Low sodium diet",
+      "Fluid restriction if severe hyponatremia or refractory volume overload",
+    ],
+    common_misses: [
+      "No strict I/O",
+      "No daily weights",
+      "No potassium/magnesium repletion goals",
+      "No diuretic response reassessment plan",
+      "Continuing ACE/ARB/MRA/SGLT2i in AKI or hypotension",
+      "No echo if EF unknown",
+    ],
+  },
+  "ACS / Chest Pain": {
+    must_have: [
+      "EKG within 10 minutes of arrival",
+      "Serial troponins (baseline + 1–2 hr delta)",
+      "Telemetry",
+      "Aspirin 325 mg unless contraindicated",
+      "High-intensity statin if ACS suspected",
+      "Nitroglycerin PRN if appropriate and no contraindication",
+      "Heparin or enoxaparin if NSTEMI/UA and no contraindication",
+      "Cardiology consult if ACS suspected",
+      "NPO if possible cath planned",
+      "Risk stratification documented (HEART, TIMI, or GRACE)",
+      "Bleeding risk assessed before anticoagulation",
+    ],
+    common_misses: [
+      "No repeat EKG with recurrent pain",
+      "Nitro ordered despite hypotension or PDE-5 inhibitor use",
+      "No statin",
+      "No telemetry",
+      "No bleeding risk check before anticoagulation",
+      "Single troponin without delta — insufficient to rule out",
+      "No right-sided leads in inferior STEMI",
+    ],
+  },
+  "GI Bleed": {
+    must_have: [
+      "Two large-bore IVs (16g or larger)",
+      "Type and crossmatch",
+      "CBC trend",
+      "CMP",
+      "PT/INR",
+      "IV PPI if upper GI bleed suspected (pantoprazole 80 mg bolus then drip)",
+      "Hold anticoagulants and antiplatelets when appropriate",
+      "Transfusion threshold documented (Hgb <7 in stable; <8 in cardiac)",
+      "GI consult",
+      "NPO if endoscopy likely",
+      "Hemodynamic monitoring",
+      "Consider octreotide if variceal bleed suspected",
+    ],
+    common_misses: [
+      "No type and crossmatch",
+      "No large-bore IV access",
+      "No anticoagulation reversal plan",
+      "No transfusion threshold documented",
+      "No cirrhosis/variceal bleed assessment",
+    ],
+  },
+  "DKA / HHS": {
+    must_have: [
+      "BMP q2–4h while on insulin infusion",
+      "Glucose checks q1h while on insulin drip",
+      "Serum/urine ketones or beta-hydroxybutyrate",
+      "VBG or ABG",
+      "Serum osmolality if HHS suspected",
+      "IV fluids (normal saline initially)",
+      "Potassium level before starting insulin — hold if K+ <3.5",
+      "Insulin infusion if anion gap criteria met",
+      "Switch to dextrose-containing fluids when glucose reaches threshold",
+      "Anion gap monitoring",
+      "Identify precipitant: infection, MI, missed insulin, steroids, SGLT2i",
+      "Subcutaneous insulin bridge plan before stopping drip",
+    ],
+    common_misses: [
+      "Starting insulin before potassium is known",
+      "No potassium replacement plan",
+      "No anion gap closure monitoring",
+      "Stopping insulin drip before gap fully closed",
+      "No bridge to subcutaneous insulin",
+      "Missing euglycemic DKA in SGLT2i users",
+    ],
+  },
+  "AKI": {
+    must_have: [
+      "Baseline creatinine documented",
+      "BMP trend",
+      "Urinalysis with microscopy",
+      "Urine sodium and FeNa or FeUrea",
+      "Bladder scan or renal ultrasound if obstruction possible",
+      "Medication review for nephrotoxins (NSAIDs, ACE/ARB, contrast, aminoglycosides)",
+      "Hold NSAIDs, ACE/ARB, diuretics, metformin, SGLT2i when appropriate",
+      "Volume status assessment",
+      "Strict I/O",
+      "Renal dose adjustments for all renally cleared medications",
+    ],
+    common_misses: [
+      "No UA with microscopy",
+      "No obstruction evaluation",
+      "Continuing nephrotoxins",
+      "No renal dosing review",
+      "No urine output monitoring",
+    ],
+  },
+  "Hyponatremia": {
+    must_have: [
+      "Serum osmolality",
+      "Urine osmolality",
+      "Urine sodium",
+      "Glucose for corrected sodium calculation",
+      "Volume status assessment (clinical + urine sodium)",
+      "BMP trend frequency based on severity",
+      "Seizure and AMS assessment",
+      "Correction goal documented (≤10–12 mEq/L per 24 hr)",
+      "TSH and AM cortisol if SIADH workup incomplete",
+      "Hypertonic saline plan if severe symptoms (seizure, coma)",
+    ],
+    common_misses: [
+      "No serum osmolality",
+      "No urine osmolality or urine sodium",
+      "Overcorrection risk not addressed",
+      "No BMP monitoring frequency documented",
+      "No desmopressin or D5W rescue plan if ODS risk",
+    ],
+  },
+  "Hyperkalemia": {
+    must_have: [
+      "EKG",
+      "Repeat potassium if hemolysis possible",
+      "Calcium gluconate if EKG changes or K+ ≥6.5",
+      "Insulin 10 units IV + dextrose 25g if significant elevation",
+      "Albuterol nebulization if appropriate",
+      "Potassium binder (kayexalate, patiromer, or sodium zirconium)",
+      "Assess renal function",
+      "Hold potassium-raising medications (ACE/ARB, MRA, K+ supplements, TMP-SMX)",
+      "Telemetry if severe or EKG changes",
+      "Repeat BMP after treatment",
+    ],
+    common_misses: [
+      "No EKG",
+      "No calcium when EKG changes present",
+      "No repeat potassium check",
+      "No medication review",
+      "No elimination plan (relying on redistribution only)",
+    ],
+  },
+  "Altered Mental Status": {
+    must_have: [
+      "Point-of-care glucose",
+      "Vitals and oxygen saturation",
+      "CBC",
+      "CMP",
+      "UA with culture if infection possible",
+      "CXR if respiratory or infectious concern",
+      "EKG",
+      "Medication and toxin review",
+      "CT head if focal deficits, trauma, anticoagulation, or unclear cause",
+      "TSH, B12, ammonia, VBG/ABG, ethanol, urine drug screen when indicated",
+      "Delirium precautions",
+      "Aspiration precautions if somnolent",
+      "NPO until swallow safety assessed if aspiration risk",
+    ],
+    common_misses: [
+      "No glucose check",
+      "No medication review",
+      "No delirium precautions",
+      "No aspiration precautions",
+      "Ordering sedatives in delirium — worsens AMS",
+    ],
+  },
+  "Syncope": {
+    must_have: [
+      "Orthostatic vitals (lying → standing x3 minutes)",
+      "EKG",
+      "Telemetry if cardiac syncope concern",
+      "CBC",
+      "BMP",
+      "Troponin if ischemic symptoms or cardiac risk",
+      "Pregnancy test if applicable",
+      "Medication review",
+      "Volume status assessment",
+      "Fall precautions",
+      "Echocardiogram if murmur, structural disease, exertional syncope, or abnormal EKG",
+    ],
+    common_misses: [
+      "No orthostatic vitals",
+      "No EKG",
+      "Unnecessary CT head without focal neuro findings",
+      "No medication review",
+      "No telemetry when cardiac cause possible",
+    ],
+  },
+  "Stroke / TIA": {
+    must_have: [
+      "Last known well documented",
+      "NIHSS or neuro exam documented",
+      "CT head without contrast",
+      "CTA head and neck if LVO concern",
+      "MRI brain if TIA or subacute stroke",
+      "Telemetry (48–72 hr minimum for AF detection)",
+      "EKG",
+      "Glucose check",
+      "Aspirin or antiplatelet plan if no hemorrhage",
+      "High-intensity statin",
+      "Permissive hypertension if ischemic and not tPA candidate (allow ≤220/120)",
+      "Swallow evaluation before PO intake",
+      "PT, OT, and speech therapy consults",
+      "DVT prophylaxis",
+    ],
+    common_misses: [
+      "No last known well documented",
+      "No swallow screen before PO",
+      "No telemetry for AF detection",
+      "Lowering BP too aggressively in ischemic stroke",
+      "No rehab consults",
+    ],
+  },
+  "Pulmonary Embolism": {
+    must_have: [
+      "Risk stratification: massive, submassive, or low-risk",
+      "CTA chest or V/Q scan if CTA contraindicated",
+      "Troponin and BNP for risk stratification",
+      "EKG",
+      "Telemetry",
+      "Oxygen if hypoxic",
+      "Anticoagulation unless contraindicated",
+      "Bleeding risk assessment",
+      "Lower extremity duplex if adds clinical value",
+      "Echocardiogram if RV strain, hypotension, or intermediate/high-risk PE",
+      "ICU or PERT consult if hypotension, RV strain, or thrombolysis consideration",
+    ],
+    common_misses: [
+      "No risk stratification documented",
+      "No bleeding risk assessment",
+      "No RV strain evaluation in submassive PE",
+      "No anticoagulation transition plan",
+      "No treatment duration plan",
+    ],
+  },
+  "Atrial Fibrillation with RVR": {
+    must_have: [
+      "EKG",
+      "Telemetry",
+      "BMP and magnesium",
+      "TSH if new onset or unclear trigger",
+      "Troponin if ischemic symptoms or high-risk presentation",
+      "Rate vs rhythm strategy documented",
+      "Hemodynamic stability assessment",
+      "CHA2DS2-VASc score calculated",
+      "Anticoagulation decision documented",
+      "HAS-BLED bleeding risk assessment",
+      "Identify trigger: infection, PE, ACS, thyroid, alcohol, pain, hypovolemia",
+      "Avoid diltiazem in decompensated HFrEF",
+    ],
+    common_misses: [
+      "No anticoagulation assessment",
+      "No trigger evaluation",
+      "Using diltiazem in decompensated HFrEF",
+      "No electrolyte repletion",
+      "No cardiology consult when refractory or hemodynamically unstable",
+    ],
+  },
+  "Acute Hypoxemic Respiratory Failure": {
+    must_have: [
+      "Continuous pulse oximetry",
+      "Oxygen delivery method and target saturation documented",
+      "CXR",
+      "VBG or ABG if severe distress or hypercapnia",
+      "CBC",
+      "CMP",
+      "EKG",
+      "BNP and troponin if cardiac cause possible",
+      "CTA chest if PE concern",
+      "Empiric treatment based on most likely cause",
+      "Escalation plan documented: HFNC → BiPAP → ICU/intubation",
+    ],
+    common_misses: [
+      "No oxygen target documented",
+      "No escalation plan",
+      "No ABG/VBG when severe",
+      "No differentiation: PE vs HF vs pneumonia",
+      "Delayed ICU consult",
+    ],
+  },
+  "Acute Pancreatitis": {
+    must_have: [
+      "Lipase",
+      "CBC",
+      "CMP",
+      "Calcium",
+      "Triglycerides if etiology unclear",
+      "RUQ ultrasound if gallstone pancreatitis possible",
+      "IV fluids (LR preferred over NS)",
+      "Pain control",
+      "Antiemetics",
+      "Diet advancement plan as tolerated",
+      "Severity assessment: SIRS, BUN, hematocrit, organ failure",
+      "No prophylactic antibiotics unless infected necrosis",
+    ],
+    common_misses: [
+      "No gallstone evaluation (RUQ US)",
+      "No triglyceride check when etiology unclear",
+      "CT scan ordered too early",
+      "Antibiotics without confirmed infection",
+      "No severity reassessment at 24–48 hours",
+    ],
+  },
+  "Acute Decompensated Cirrhosis": {
+    must_have: [
+      "CBC",
+      "CMP",
+      "PT/INR",
+      "Bilirubin",
+      "Albumin",
+      "Diagnostic paracentesis if new or worsening ascites",
+      "Ascitic fluid: cell count, culture, albumin, total protein",
+      "Evaluate for SBP (PMN ≥250)",
+      "Assess for GI bleed",
+      "Assess for hepatic encephalopathy",
+      "Medication review: hold NSAIDs, sedatives, nephrotoxins",
+      "Sodium restriction if ascites",
+      "Hepatology consult",
+    ],
+    common_misses: [
+      "No diagnostic paracentesis with new ascites",
+      "No SBP evaluation",
+      "No medication review",
+      "No encephalopathy assessment",
+      "Continuing diuretics with active AKI",
+    ],
+  },
+  "Hepatic Encephalopathy": {
+    must_have: [
+      "Mental status grading (West Haven criteria)",
+      "Identify trigger: GI bleed, infection, constipation, renal failure, sedatives",
+      "CBC",
+      "CMP",
+      "PT/INR",
+      "UA and CXR if infection concern",
+      "Diagnostic paracentesis if ascites present",
+      "Lactulose with bowel movement goal (2–3 soft stools/day)",
+      "Rifaximin if recurrent or severe",
+      "Aspiration precautions",
+      "Avoid benzodiazepines and sedatives",
+    ],
+    common_misses: [
+      "Checking ammonia without trigger workup",
+      "No bowel movement goal for lactulose",
+      "No SBP evaluation if ascites",
+      "Continuing sedatives",
+      "No aspiration precautions",
+    ],
+  },
+  "Alcohol Withdrawal": {
+    must_have: [
+      "CIWA protocol or withdrawal severity assessment",
+      "Benzodiazepine or phenobarbital protocol per institution",
+      "Thiamine 500 mg IV before any glucose if malnutrition risk",
+      "Folic acid",
+      "Multivitamin",
+      "Magnesium and phosphate check and replacement",
+      "BMP",
+      "LFTs",
+      "Seizure precautions",
+      "Telemetry if severe withdrawal or major electrolyte abnormalities",
+      "History of prior withdrawal seizures or DTs documented",
+    ],
+    common_misses: [
+      "No thiamine — Wernicke encephalopathy risk",
+      "No seizure precautions",
+      "No magnesium/phosphate check",
+      "Under-triaging prior DT/seizure history",
+      "Using CIWA in patients unable to self-report",
+    ],
+  },
+  "Cellulitis": {
+    must_have: [
+      "Mark borders of erythema with pen/marker",
+      "Assess for purulence or abscess",
+      "Assess MRSA risk factors",
+      "CBC if systemic symptoms",
+      "Blood cultures if severe systemic toxicity or immunocompromised",
+      "Antibiotics targeting likely organism",
+      "Pain control",
+      "Elevation of affected limb",
+      "Imaging if abscess, necrotizing fasciitis, or osteomyelitis concern",
+      "Surgical consult if necrotizing infection suspected",
+    ],
+    common_misses: [
+      "No border marking",
+      "No abscess assessment",
+      "No MRSA risk assessment",
+      "Missing necrotizing fasciitis red flags",
+      "No oral antibiotic transition plan",
+    ],
+  },
+  "Pyelonephritis / Complicated UTI": {
+    must_have: [
+      "Urinalysis",
+      "Urine culture before antibiotics",
+      "CBC",
+      "CMP",
+      "Blood cultures if septic or systemically ill",
+      "Empiric antibiotics",
+      "IV fluids if volume depleted or septic",
+      "Pregnancy test if applicable",
+      "Renal imaging if obstruction, stone, persistent fever, or AKI",
+      "Review prior culture data and resistant organism risk",
+      "Antibiotic duration plan",
+    ],
+    common_misses: [
+      "No urine culture before antibiotics",
+      "No prior culture review",
+      "No obstruction assessment",
+      "No renal dosing adjustment",
+      "No oral step-down plan",
+    ],
+  },
+  "Endocarditis Rule-Out": {
+    must_have: [
+      "Blood cultures x3 from separate sites before antibiotics if stable",
+      "CBC",
+      "CMP",
+      "ESR and CRP",
+      "EKG",
+      "Transthoracic echo (TTE)",
+      "TEE if high suspicion, prosthetic valve, or nondiagnostic TTE",
+      "Empiric antibiotics after cultures if clinically indicated",
+      "Assess for embolic phenomena",
+      "Infectious disease consult",
+      "Cardiology or CT surgery consult if HF, abscess, prosthetic valve",
+    ],
+    common_misses: [
+      "Antibiotics before cultures in stable patient",
+      "Too few blood culture sets (<3)",
+      "No echo plan",
+      "No prosthetic valve or device assessment",
+      "No ID consult",
+    ],
+  },
+  "Fever of Unknown Source": {
+    must_have: [
+      "Full fever curve review",
+      "Medication review (drug fever evaluation)",
+      "Travel and exposure history",
+      "CBC with differential",
+      "CMP",
+      "ESR and CRP",
+      "UA with culture if indicated",
+      "Blood cultures if febrile or systemically ill",
+      "CXR",
+      "HIV testing if appropriate",
+      "Targeted imaging based on exam",
+      "Avoid empiric antibiotics unless unstable, neutropenic, or clear source",
+    ],
+    common_misses: [
+      "No medication fever review",
+      "Empiric antibiotics in stable patient without clear source",
+      "No exposure or travel history",
+      "No HIV/TB risk assessment",
+      "No malignancy/autoimmune consideration",
+    ],
+  },
+  "Anemia / Transfusion": {
+    must_have: [
+      "CBC with differential",
+      "Reticulocyte count",
+      "Iron studies (ferritin, TSAT, serum iron, TIBC)",
+      "B12 and folate if macrocytosis or unclear cause",
+      "Hemolysis labs if indicated: LDH, haptoglobin, indirect bilirubin, DAT",
+      "Peripheral blood smear if morphology unclear",
+      "Type and screen",
+      "Transfusion threshold documented",
+      "Assess for active bleeding",
+      "Stool guaiac or GI evaluation if occult bleeding suspected",
+      "Hold anticoagulation if active bleeding and appropriate",
+    ],
+    common_misses: [
+      "Transfusing without identifying the cause",
+      "No reticulocyte count",
+      "No iron studies",
+      "No hemolysis evaluation when RPI is elevated",
+      "No bleeding source assessment",
+    ],
+  },
+  "Neutropenic Fever": {
+    must_have: [
+      "Broad-spectrum anti-pseudomonal antibiotics within 60 min",
+      "CBC with differential",
+      "CMP",
+      "Blood cultures: peripheral x2 and from each central line lumen",
+      "UA and urine culture if urinary symptoms or no source",
+      "CXR if respiratory symptoms",
+      "Assess: mucositis, skin, IV line sites, perianal region",
+      "Avoid rectal exam if ANC <0.5",
+      "Neutropenic precautions",
+      "Oncology or hematology notification",
+      "Antifungal coverage if fever persists >4–7 days despite antibiotics",
+    ],
+    common_misses: [
+      "Delayed antibiotics beyond 60 minutes",
+      "No central line cultures",
+      "Rectal exam in severe neutropenia",
+      "No neutropenic precautions",
+      "No oncology notification",
+    ],
+  },
+  "Tumor Lysis Syndrome": {
+    must_have: [
+      "BMP",
+      "Phosphorus",
+      "Calcium",
+      "Uric acid",
+      "LDH",
+      "EKG",
+      "Telemetry if severe electrolyte abnormalities",
+      "Aggressive IV hydration if appropriate",
+      "Allopurinol or rasburicase based on risk/severity",
+      "Strict I/O",
+      "Frequent lab monitoring (q6–8h minimum)",
+      "Avoid potassium- and phosphate-containing IV fluids",
+      "Nephrology consult if severe AKI or dialysis concern",
+    ],
+    common_misses: [
+      "No phosphorus or uric acid ordered",
+      "No telemetry with severe hyperkalemia",
+      "No frequent lab monitoring schedule",
+      "Giving potassium-containing IV fluids",
+      "Delayed rasburicase in high-risk TLS",
+    ],
+  },
+  "Sickle Cell Pain Crisis": {
+    must_have: [
+      "Pain score and individualized pain plan",
+      "CBC with differential",
+      "Reticulocyte count",
+      "CMP",
+      "Type and screen if severe anemia or transfusion possible",
+      "IV hydration (avoid overhydration)",
+      "Opioid analgesia if severe pain — do not under-treat",
+      "Incentive spirometry",
+      "Oxygen only if SpO2 <95%",
+      "Screen for acute chest syndrome: fever, new hypoxia, infiltrate",
+      "VTE prophylaxis if admitted and not contraindicated",
+    ],
+    common_misses: [
+      "No reticulocyte count",
+      "No acute chest syndrome screening",
+      "Overhydration",
+      "Oxygen despite normal saturation",
+      "Under-treating pain",
+    ],
+  },
+};
+
+const KEYWORDS = {
+  "code status":       ["code status","full code","dnr","dni","comfort care"],
+  "vte prophylaxis":   ["vte","dvt","heparin 5000","enoxaparin 40","lovenox","scd","sequential compression","pneumatic"],
+  "diet":              ["diet","npo","regular diet","cardiac diet","diabetic diet","low sodium","2g sodium","clear liquid","full liquid"],
+  "telemetry":         ["telemetry","tele","cardiac monitor","continuous monitor"],
+  "cbc":               ["cbc","complete blood count","h&h","hemoglobin","hematocrit"],
+  "cmp":               ["cmp","comprehensive metabolic"],
+  "bmp":               ["bmp","basic metabolic"],
+  "magnesium":         ["mag ","magnesium","mg level"],
+  "phosphate":         ["phos","phosphate","phosphorus"],
+  "ekg":               ["ekg","ecg","electrocardiogram","12-lead","12 lead"],
+  "troponin":          ["troponin","trop"],
+  "bnp":               ["bnp","nt-probnp","nt-pro bnp","natriuretic"],
+  "blood cultures":    ["blood culture","bcx","bctx","bacteremia"],
+  "urine culture":     ["urine culture","ucx","urine cx"],
+  "lactate":           ["lactate","lactic acid"],
+  "urinalysis":        ["urinalysis","ua ","urine analysis","urine dip"],
+  "type and screen":   ["type and screen","type & screen","t&s","type and crossmatch","t&c"],
+  "strict i/o":        ["strict i/o","ins and outs","intake and output","foley","urine output"],
+  "daily weights":     ["daily weight","qd weight","morning weight"],
+  "oxygen":            ["oxygen","o2 ","nasal cannula"," nc ","hfnc","high flow","simple mask","non-rebreather","nrb","venti"],
+  "insulin":           ["insulin","lispro","aspart","glargine","detemir"],
+  "potassium":         ["potassium","kcl","k+ ","potassium chloride"],
+  "renal ultrasound":  ["renal ultrasound","kidney ultrasound","renal us","us kidney"],
+  "ppi":               ["ppi","pantoprazole","protonix","omeprazole","esomeprazole","proton pump"],
+  "aspirin":           ["aspirin","asa ","acetylsalicylic"],
+  "statin":            ["statin","atorvastatin","rosuvastatin","simvastatin","pravastatin"],
+  "antibiotics":       ["ceftriaxone","vancomycin","zosyn","piperacillin","cefepime","azithromycin","doxycycline","meropenem","ertapenem","ampicillin","unasyn","metronidazole","flagyl","cipro","levofloxacin","bactrim","antibiotic"],
+  "ct head":           ["ct head","head ct","ct brain","nchct"],
+  "cta":               ["cta ","ct angiography","ct angio"],
+  "mri":               ["mri ","mri brain","diffusion weighted"],
+  "cxr":               ["cxr","chest x","chest radiograph","chest film","pa and lateral"],
+  "vbg":               ["vbg","venous blood gas"],
+  "abg":               ["abg","arterial blood gas"],
+  "glucose":           ["glucose","poc glucose","fingerstick","accucheck","accu-chek"],
+  "orthostatic":       ["orthostatic","lying and standing","standing bp"],
+  "swallow":           ["swallow","speech","slp","modified barium"],
+  "pt/ot":             ["physical therapy","occupational therapy","pt consult","ot consult","rehab consult"],
+  "heparin drip":      ["heparin drip","heparin infusion","ufh"],
+  "anticoagulation":   ["heparin","enoxaparin","apixaban","eliquis","rivaroxaban","xarelto","warfarin","coumadin","anticoag","doac","lovenox"],
+  "lasix":             ["lasix","furosemide","bumetanide","torsemide","bumex","diuresis"],
+  "lactulose":         ["lactulose"],
+  "rifaximin":         ["rifaximin","xifaxan"],
+  "ciwa":              ["ciwa","alcohol withdrawal protocol"],
+  "thiamine":          ["thiamine","vitamin b1"],
+  "folate":            ["folate","folic acid"],
+  "b12":               ["b12","vitamin b12","cyanocobalamin"],
+  "paracentesis":      ["paracentesis","ascitic fluid","diagnostic para"],
+  "inr":               ["inr","pt/inr","protime","coagulation"],
+  "lipase":            ["lipase"],
+  "triglycerides":     ["triglyceride"],
+  "calcium":           ["calcium","ca level","ionized calcium"],
+  "uric acid":         ["uric acid","urate"],
+  "ldh":               ["ldh","lactate dehydrogenase"],
+  "reticulocyte":      ["retic","reticulocyte"],
+  "iron studies":      ["ferritin","tibc","transferrin","tsat","iron studies","iron panel"],
+  "haptoglobin":       ["haptoglobin"],
+  "duonebs":           ["duoneb","albuterol","ipratropium","atrovent","combivent","nebulizer","neb treatment"],
+  "steroids":          ["steroid","prednisone","methylpred","solumedrol","dexamethasone","hydrocortisone"],
+  "bipap":             ["bipap","niv","noninvasive ventilation","nppv","cpap"],
+  "echo":              ["echo","echocardiogram","tte","tee","transthoracic echo"],
+  "fall precautions":  ["fall precaution","fall risk","bed alarm"],
+  "aspiration prec":   ["aspiration precaution","aspiration risk","hob elevation","head of bed 30"],
+  "seizure prec":      ["seizure precaution","padded rails","seizure protocol"],
+  "neutropenic prec":  ["neutropenic precaution","neutropenic diet","protective isolation"],
+  "incentive spiro":   ["incentive spirometry"," is ","deep breathing"],
+  "pain":              ["pain","analgesia","opioid","hydromorphone","dilaudid","morphine","oxycodone","fentanyl"],
+  "octreotide":        ["octreotide","sandostatin"],
+  "rasburicase":       ["rasburicase","elitek"],
+  "allopurinol":       ["allopurinol","zyloprim"],
+  "hypertonic saline": ["hypertonic saline","3% saline","3% nacl"],
+};
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let currentDx = null;
+let currentMode = 'checklist';
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  const grid = document.getElementById('dxGrid');
+  Object.keys(BUNDLES).forEach(dx => {
+    const btn = document.createElement('button');
+    btn.className = 'dx-btn';
+    btn.textContent = dx;
+    btn.dataset.dx = dx;
+    btn.onclick = () => selectDx(dx);
+    grid.appendChild(btn);
+  });
+});
+
+function filterDx(q) {
+  const term = q.toLowerCase();
+  document.querySelectorAll('.dx-btn').forEach(btn => {
+    btn.classList.toggle('hidden', term && !btn.dataset.dx.toLowerCase().includes(term));
+  });
+}
+
+// ─── Diagnosis Selection ──────────────────────────────────────────────────────
+function selectDx(dx) {
+  currentDx = dx;
+  document.querySelectorAll('.dx-btn').forEach(b => b.classList.toggle('active', b.dataset.dx === dx));
+  document.getElementById('dxBadge').textContent = dx;
+  document.getElementById('mainPanel').classList.remove('hidden');
+  document.getElementById('emptyState').classList.add('hidden');
+  setMode(currentMode);
+}
+
+// ─── Mode Switching ───────────────────────────────────────────────────────────
+function setMode(mode) {
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach((t, i) => {
+    const modes = ['checklist','check','print'];
+    t.classList.toggle('active', modes[i] === mode);
+  });
+  document.getElementById('modeChecklist').classList.toggle('hidden', mode !== 'checklist');
+  document.getElementById('modeCheck').classList.toggle('hidden', mode !== 'check');
+  document.getElementById('modePrint').classList.toggle('hidden', mode !== 'print');
+
+  if (mode === 'checklist') buildChecklist();
+  if (mode === 'print') buildPrint();
+}
+
+// ─── Checklist Mode ───────────────────────────────────────────────────────────
+function buildChecklist() {
+  if (!currentDx) return;
+  const bundle = BUNDLES[currentDx];
+  const list = document.getElementById('checklistItems');
+  list.innerHTML = '';
+
+  bundle.must_have.forEach((item, i) => {
+    const li = document.createElement('li');
+    li.className = 'checklist-item';
+    li.dataset.idx = i;
+    const id = `chk-${i}`;
+    li.innerHTML = `<input type="checkbox" id="${id}" onchange="tickItem(${i})"><label for="${id}">${item}</label>`;
+    list.appendChild(li);
+  });
+
+  buildMisses('checklistMissesList', bundle.common_misses);
+  updateProgress();
+}
+
+function tickItem(idx) {
+  const li = document.querySelectorAll('.checklist-item')[idx];
+  li.classList.toggle('checked', li.querySelector('input').checked);
+  updateProgress();
+}
+
+function updateProgress() {
+  const items = document.querySelectorAll('.checklist-item');
+  const total = items.length;
+  const done = [...items].filter(li => li.classList.contains('checked')).length;
+  const pct = total ? Math.round(done / total * 100) : 0;
+  document.getElementById('progressLabel').textContent = `${done} / ${total} completed`;
+  document.getElementById('progressPct').textContent = `${pct}%`;
+  document.getElementById('progressFill').style.width = `${pct}%`;
+}
+
+function resetChecklist() {
+  document.querySelectorAll('.checklist-item').forEach(li => {
+    li.classList.remove('checked');
+    li.querySelector('input').checked = false;
+  });
+  updateProgress();
+}
+
+function copyMissing() {
+  if (!currentDx) return;
+  const bundle = BUNDLES[currentDx];
+  const items = document.querySelectorAll('.checklist-item');
+  const missing = [...items]
+    .filter(li => !li.classList.contains('checked'))
+    .map(li => '☐ ' + li.querySelector('label').textContent);
+  if (!missing.length) { alert('Nothing missing — all items checked!'); return; }
+  navigator.clipboard.writeText(`Missing orders — ${currentDx}:\n\n${missing.join('\n')}`);
+  const btn = event.target;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = 'Copy Missing', 1500);
+}
+
+// ─── Order Check Mode ─────────────────────────────────────────────────────────
+function clearOrderText() {
+  document.getElementById('orderText').value = '';
+  document.getElementById('checkResults').classList.add('hidden');
+}
+
+function analyzeOrders() {
+  if (!currentDx) return;
+  const text = document.getElementById('orderText').value;
+  if (!text.trim()) { alert('Paste your orders first.'); return; }
+
+  const bundle = BUNDLES[currentDx];
+  const { covered, missing } = checkOrders(text, bundle);
+  const total = bundle.must_have.length;
+
+  // Summary bar
+  const summaryEl = document.getElementById('checkSummary');
+  summaryEl.innerHTML = `
+    <div class="summary-stat"><div class="stat-val stat-green">${covered.length}</div><div class="stat-lbl">Covered</div></div>
+    <div class="summary-stat"><div class="stat-val stat-red">${missing.length}</div><div class="stat-lbl">Missing</div></div>
+    <div class="summary-stat"><div class="stat-val" style="color:var(--teal-300)">${total}</div><div class="stat-lbl">Total items</div></div>
+    <div class="summary-stat"><div class="stat-val" style="color:var(--text-secondary)">${Math.round(covered.length/total*100)}%</div><div class="stat-lbl">Coverage</div></div>
+  `;
+
+  const coveredSec = document.getElementById('checkCoveredSection');
+  const missingSec = document.getElementById('checkMissingSection');
+  const coveredList = document.getElementById('checkCoveredList');
+  const missingList = document.getElementById('checkMissingList');
+
+  coveredList.innerHTML = '';
+  missingList.innerHTML = '';
+
+  if (covered.length) {
+    covered.forEach(item => coveredList.appendChild(makeResultRow(item, 'covered', '✓')));
+    coveredSec.classList.remove('hidden');
+  } else { coveredSec.classList.add('hidden'); }
+
+  if (missing.length) {
+    missing.forEach(item => missingList.appendChild(makeResultRow(item, 'missing', '✗')));
+    missingSec.classList.remove('hidden');
+  } else { missingSec.classList.add('hidden'); }
+
+  buildMisses('checkMissesList2', bundle.common_misses);
+  document.getElementById('checkResults').classList.remove('hidden');
+}
+
+function makeResultRow(text, cls, icon) {
+  const li = document.createElement('li');
+  li.className = `result-row ${cls}`;
+  li.innerHTML = `<span class="result-icon">${icon}</span><span>${text}</span>`;
+  return li;
+}
+
+function buildMisses(listId, misses) {
+  const list = document.getElementById(listId);
+  list.innerHTML = '';
+  misses.forEach(m => list.appendChild(makeResultRow(m, 'warning', '⚠')));
+}
+
+// ─── Print Mode ───────────────────────────────────────────────────────────────
+function buildPrint() {
+  if (!currentDx) return;
+  const bundle = BUNDLES[currentDx];
+  document.getElementById('printDxTitle').textContent = `Admission Checklist — ${currentDx}`;
+
+  const list = document.getElementById('printItems');
+  list.innerHTML = '';
+  bundle.must_have.forEach(item => {
+    const li = document.createElement('li');
+    li.className = 'print-row';
+    li.innerHTML = `<div class="print-box"></div><span>${item}</span>`;
+    list.appendChild(li);
+  });
+
+  const missesList = document.getElementById('printMissesList');
+  missesList.innerHTML = '';
+  bundle.common_misses.forEach(m => missesList.appendChild(makeResultRow(m, 'warning', '⚠')));
+}
+
+// ─── Order Matching ───────────────────────────────────────────────────────────
+function checkOrders(text, bundle) {
+  const t = text.toLowerCase();
+  const covered = [], missing = [];
+
+  bundle.must_have.forEach(item => {
+    const iL = item.toLowerCase();
+    let found = t.includes(iL);
+
+    if (!found) {
+      for (const [, syns] of Object.entries(KEYWORDS)) {
+        const itemHit = syns.some(s => iL.includes(s));
+        const orderHit = syns.some(s => t.includes(s));
+        if (itemHit && orderHit) { found = true; break; }
+      }
+    }
+
+    if (!found) {
+      const words = iL.match(/\b[a-z]{4,}\b/g) || [];
+      const stop = new Set(['with','when','that','this','from','have','each','before','after','order','check','assess','consider','documented','possible','indicated','appropriate']);
+      const content = words.filter(w => !stop.has(w));
+      if (content.length >= 2) {
+        const hits = content.filter(w => t.includes(w)).length;
+        if (hits >= 2) found = true;
+      }
+    }
+
+    (found ? covered : missing).push(item);
+  });
+
+  return { covered, missing };
+}
+</script>
+</body>
+</html>

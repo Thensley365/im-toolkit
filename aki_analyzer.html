@@ -1,0 +1,1618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AKI Analyzer — KDIGO 2012</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy-900: #0a1628;
+      --navy-800: #0f2040;
+      --navy-700: #142952;
+      --navy-600: #1a3464;
+      --navy-500: #1e3d73;
+      --teal-600: #0e7a7a;
+      --teal-500: #0f9090;
+      --teal-400: #14b8b8;
+      --teal-300: #2dd4d4;
+      --teal-100: #ccf5f5;
+      --slate-300: #94a3b8;
+      --slate-200: #cbd5e1;
+      --slate-100: #e2e8f0;
+      --white: #f8fafc;
+      --red-600: #dc2626;
+      --red-500: #ef4444;
+      --red-100: #fee2e2;
+      --amber-500: #f59e0b;
+      --amber-100: #fef3c7;
+      --green-500: #22c55e;
+      --green-100: #dcfce7;
+      --blue-400: #60a5fa;
+      --card-bg: #111f3a;
+      --card-border: #1e3464;
+      --input-bg: #0d1b33;
+      --input-border: #1e3464;
+      --text-primary: #e2e8f0;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--navy-900);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── Layout ── */
+    .page-wrapper {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 32px 20px 80px;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: var(--teal-300);
+      letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+      margin-top: 6px;
+      font-size: 0.875rem;
+      color: var(--text-secondary);
+    }
+
+    .header-rule {
+      margin-top: 16px;
+      border: none;
+      border-top: 1px solid var(--card-border);
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--teal-400);
+      margin-bottom: 16px;
+    }
+
+    /* ── Form grid ── */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 600px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--slate-300);
+    }
+
+    label .unit {
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+
+    input[type="number"],
+    input[type="text"],
+    select {
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      padding: 8px 12px;
+      outline: none;
+      transition: border-color 0.15s;
+      width: 100%;
+    }
+
+    input[type="number"]:focus,
+    input[type="text"]:focus,
+    select:focus {
+      border-color: var(--teal-500);
+    }
+
+    input[type="number"]::placeholder,
+    input[type="text"]::placeholder {
+      color: var(--text-muted);
+    }
+
+    select option {
+      background: var(--navy-800);
+    }
+
+    /* Checkboxes */
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .checkbox-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--teal-500);
+      cursor: pointer;
+    }
+
+    .checkbox-row span {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+    }
+
+    /* UA findings multi-select */
+    .ua-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .ua-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--input-bg);
+      border: 1px solid var(--input-border);
+      border-radius: 6px;
+      padding: 7px 10px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .ua-item:has(input:checked) {
+      border-color: var(--teal-500);
+      background: rgba(15, 144, 144, 0.08);
+    }
+
+    .ua-item input[type="checkbox"] {
+      accent-color: var(--teal-500);
+      width: 14px;
+      height: 14px;
+    }
+
+    .ua-item span {
+      font-size: 0.8rem;
+      color: var(--text-primary);
+    }
+
+    /* Run button */
+    .run-btn {
+      background: var(--teal-600);
+      border: none;
+      border-radius: 8px;
+      color: #fff;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      padding: 12px 32px;
+      transition: background 0.15s, transform 0.1s;
+      margin-top: 8px;
+    }
+
+    .run-btn:hover {
+      background: var(--teal-500);
+      transform: translateY(-1px);
+    }
+
+    .run-btn:active {
+      transform: translateY(0);
+    }
+
+    /* ── Results ── */
+    #results-section {
+      display: none;
+    }
+
+    .results-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--teal-300);
+      margin-bottom: 20px;
+      margin-top: 8px;
+      border-top: 1px solid var(--card-border);
+      padding-top: 24px;
+    }
+
+    /* Stage badge */
+    .stage-badge {
+      display: inline-block;
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 8px 20px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .stage-0 { background: rgba(100, 116, 139, 0.15); color: var(--slate-300); border: 1px solid var(--slate-300); }
+    .stage-1 { background: rgba(245, 158, 11, 0.12); color: var(--amber-500); border: 1px solid var(--amber-500); }
+    .stage-2 { background: rgba(239, 68, 68, 0.12); color: #f97316; border: 1px solid #f97316; }
+    .stage-3 { background: rgba(220, 38, 38, 0.18); color: var(--red-500); border: 1px solid var(--red-500); }
+
+    /* Key-value rows */
+    .kv-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+    }
+
+    .kv-table td {
+      padding: 5px 0;
+      font-size: 0.875rem;
+      vertical-align: top;
+    }
+
+    .kv-table td:first-child {
+      color: var(--text-secondary);
+      width: 170px;
+      padding-right: 12px;
+      white-space: nowrap;
+    }
+
+    .kv-table td:last-child {
+      color: var(--text-primary);
+    }
+
+    /* Bullet list */
+    .result-list {
+      list-style: none;
+      margin-top: 4px;
+    }
+
+    .result-list li {
+      padding: 5px 0 5px 16px;
+      font-size: 0.875rem;
+      color: var(--text-primary);
+      border-bottom: 1px solid rgba(30, 52, 100, 0.5);
+      position: relative;
+    }
+
+    .result-list li:last-child {
+      border-bottom: none;
+    }
+
+    .result-list li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--teal-400);
+    }
+
+    /* Score pills for etiology */
+    .etiology-scores {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 10px 0;
+    }
+
+    .etio-pill {
+      padding: 5px 14px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: 1px solid;
+    }
+
+    .etio-pill.prerenal { background: rgba(14, 122, 122, 0.12); border-color: var(--teal-500); color: var(--teal-300); }
+    .etio-pill.intrinsic { background: rgba(245, 158, 11, 0.12); border-color: var(--amber-500); color: var(--amber-500); }
+    .etio-pill.postrenal { background: rgba(96, 165, 250, 0.12); border-color: var(--blue-400); color: var(--blue-400); }
+    .etio-pill.winner { outline: 2px solid currentColor; outline-offset: 2px; }
+
+    /* Med culprit cards */
+    .med-card {
+      background: rgba(14, 122, 122, 0.06);
+      border: 1px solid rgba(14, 122, 122, 0.3);
+      border-radius: 7px;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+    }
+
+    .med-card:last-child {
+      margin-bottom: 0;
+    }
+
+    .med-name {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--teal-300);
+      text-transform: capitalize;
+      margin-bottom: 4px;
+    }
+
+    .med-category {
+      font-size: 0.75rem;
+      color: var(--amber-500);
+      font-weight: 500;
+      margin-bottom: 6px;
+    }
+
+    .med-row {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 2px;
+    }
+
+    .med-row strong {
+      color: var(--text-primary);
+    }
+
+    /* Red flags card */
+    .card-red {
+      background: rgba(220, 38, 38, 0.07);
+      border: 1px solid rgba(220, 38, 38, 0.4);
+    }
+
+    .card-red .card-title {
+      color: var(--red-500);
+    }
+
+    .red-flags-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+    }
+
+    @media (max-width: 600px) {
+      .red-flags-list {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .red-flag-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 0.83rem;
+      padding: 6px 8px;
+      border-radius: 5px;
+    }
+
+    .red-flag-item.active {
+      background: rgba(220, 38, 38, 0.12);
+      color: #fca5a5;
+    }
+
+    .red-flag-item.inactive {
+      color: var(--text-muted);
+    }
+
+    .flag-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .flag-dot.active { background: var(--red-500); }
+    .flag-dot.inactive { background: var(--text-muted); }
+
+    /* Criteria pattern tag */
+    .pattern-tag {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+
+    .pattern-both { background: rgba(220, 38, 38, 0.2); color: var(--red-500); }
+    .pattern-cr { background: rgba(245, 158, 11, 0.15); color: var(--amber-500); }
+    .pattern-uop { background: rgba(96, 165, 250, 0.15); color: var(--blue-400); }
+    .pattern-none { background: rgba(100, 116, 139, 0.15); color: var(--slate-300); }
+
+    /* Supporting features */
+    .support-section {
+      margin-top: 10px;
+    }
+
+    .support-section h4 {
+      font-size: 0.77rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-secondary);
+      margin-bottom: 5px;
+      margin-top: 10px;
+    }
+
+    /* References */
+    .ref-item {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--card-border);
+      font-size: 0.82rem;
+    }
+
+    .ref-item:last-child {
+      border-bottom: none;
+    }
+
+    .ref-num {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--teal-400);
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .ref-use {
+      color: var(--text-secondary);
+      font-style: italic;
+      margin-top: 2px;
+    }
+
+    /* Guideline metadata */
+    .guideline-box {
+      background: rgba(14, 122, 122, 0.06);
+      border-left: 3px solid var(--teal-500);
+      padding: 12px 16px;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .guideline-box strong {
+      color: var(--teal-300);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    /* Info text */
+    .info-text {
+      font-size: 0.84rem;
+      color: var(--text-secondary);
+      line-height: 1.65;
+    }
+
+    .info-text + .info-text {
+      margin-top: 6px;
+    }
+
+    /* UOP phenotype badge */
+    .phenotype-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .ph-anuric { background: rgba(220, 38, 38, 0.18); color: var(--red-500); }
+    .ph-severe { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+    .ph-oliguric { background: rgba(245, 158, 11, 0.15); color: var(--amber-500); }
+    .ph-nonoliguric { background: rgba(34, 197, 94, 0.12); color: var(--green-500); }
+    .ph-unknown { background: rgba(100, 116, 139, 0.15); color: var(--slate-300); }
+
+    /* Footer */
+    .page-footer {
+      text-align: center;
+      padding: 20px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      border-top: 1px solid var(--card-border);
+      margin-top: 40px;
+    }
+
+    /* Error */
+    .error-msg {
+      background: rgba(220, 38, 38, 0.1);
+      border: 1px solid var(--red-600);
+      border-radius: 7px;
+      color: #fca5a5;
+      font-size: 0.875rem;
+      padding: 12px 16px;
+      margin-top: 12px;
+      display: none;
+    }
+
+    /* Divider */
+    .section-divider {
+      border: none;
+      border-top: 1px solid var(--card-border);
+      margin: 8px 0 16px;
+    }
+
+    /* Inline mono */
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88em;
+      color: var(--teal-300);
+    }
+  </style>
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- Header -->
+    <div class="page-header">
+      <h1 class="page-title">AKI Analyzer — KDIGO 2012</h1>
+      <p class="page-subtitle">Acute kidney injury staging, etiology, and management decision support</p>
+      <hr class="header-rule" />
+    </div>
+
+    <!-- Input Form -->
+    <div class="card">
+      <div class="card-title">Patient Data Input</div>
+
+      <div class="form-grid">
+
+        <!-- Creatinine -->
+        <div class="form-group">
+          <label for="baseline_cr">Baseline Creatinine <span class="unit">mg/dL</span></label>
+          <input type="number" id="baseline_cr" step="0.01" min="0.01" placeholder="e.g. 0.9" />
+        </div>
+        <div class="form-group">
+          <label for="current_cr">Current Creatinine <span class="unit">mg/dL</span></label>
+          <input type="number" id="current_cr" step="0.01" min="0.01" placeholder="e.g. 1.8" />
+        </div>
+
+        <!-- BUN / FeNa / Urine Na -->
+        <div class="form-group">
+          <label for="bun">BUN <span class="unit">mg/dL (optional)</span></label>
+          <input type="number" id="bun" step="0.1" min="0" placeholder="e.g. 42" />
+        </div>
+        <div class="form-group">
+          <label for="urine_na">Urine Sodium <span class="unit">mEq/L (optional)</span></label>
+          <input type="number" id="urine_na" step="0.1" min="0" placeholder="e.g. 12" />
+        </div>
+        <div class="form-group">
+          <label for="fena">FeNa <span class="unit">% (optional)</span></label>
+          <input type="number" id="fena" step="0.01" min="0" placeholder="e.g. 0.6" />
+        </div>
+
+        <!-- UOP -->
+        <div class="form-group">
+          <label for="uop_rate">Urine Output Rate <span class="unit">mL/kg/hr (optional)</span></label>
+          <input type="number" id="uop_rate" step="0.01" min="0" placeholder="e.g. 0.4" />
+        </div>
+        <div class="form-group">
+          <label for="uop_duration">UOP Duration <span class="unit">hours (optional)</span></label>
+          <input type="number" id="uop_duration" step="0.5" min="0" placeholder="e.g. 8" />
+        </div>
+        <div class="form-group">
+          <label for="anuria_hr">Anuria Duration <span class="unit">hours (optional)</span></label>
+          <input type="number" id="anuria_hr" step="0.5" min="0" placeholder="e.g. 0" />
+        </div>
+
+        <!-- Volume status -->
+        <div class="form-group">
+          <label for="volume_status">Volume Status</label>
+          <select id="volume_status">
+            <option value="unknown">Unknown</option>
+            <option value="hypovolemic">Hypovolemic</option>
+            <option value="euvolemic">Euvolemic</option>
+            <option value="hypervolemic">Hypervolemic</option>
+          </select>
+        </div>
+
+        <!-- Medications -->
+        <div class="form-group full-width">
+          <label for="medications">Medications <span class="unit">(comma-separated, optional)</span></label>
+          <input type="text" id="medications" placeholder="e.g. lisinopril, furosemide, ibuprofen, vancomycin" />
+        </div>
+
+        <!-- Checkboxes -->
+        <div class="form-group">
+          <label style="margin-bottom:8px;">Flags</label>
+          <label class="checkbox-row">
+            <input type="checkbox" id="rrt_required" />
+            <span>RRT Required</span>
+          </label>
+          <div style="height:8px;"></div>
+          <label class="checkbox-row">
+            <input type="checkbox" id="orthostasis" />
+            <span>Orthostasis Present</span>
+          </label>
+          <div style="height:8px;"></div>
+          <label class="checkbox-row">
+            <input type="checkbox" id="obstruction_risk" />
+            <span>Obstruction Risk (BPH, malignancy, stones, hydronephrosis)</span>
+          </label>
+        </div>
+
+        <!-- UA Findings -->
+        <div class="form-group full-width">
+          <label>UA Findings <span class="unit">(select all that apply)</span></label>
+          <div class="ua-grid" id="ua-grid">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+      </div><!-- /form-grid -->
+
+      <div id="error-msg" class="error-msg"></div>
+
+      <div style="margin-top:20px;">
+        <button class="run-btn" onclick="runAnalyzer()">Run Analyzer</button>
+      </div>
+    </div><!-- /card -->
+
+    <!-- Results -->
+    <div id="results-section">
+      <h2 class="results-title">Analysis Results</h2>
+
+      <!-- AKI Stage -->
+      <div class="card" id="card-stage">
+        <div class="card-title">AKI Stage</div>
+        <div id="stage-content"></div>
+      </div>
+
+      <!-- Criteria Pattern -->
+      <div class="card" id="card-criteria">
+        <div class="card-title">AKI Criteria Pattern</div>
+        <div id="criteria-content"></div>
+      </div>
+
+      <!-- UOP Phenotype -->
+      <div class="card" id="card-uop">
+        <div class="card-title">Urine Output Phenotype</div>
+        <div id="uop-content"></div>
+      </div>
+
+      <!-- Mortality -->
+      <div class="card" id="card-mortality">
+        <div class="card-title">Mortality / Severity Context</div>
+        <div id="mortality-content"></div>
+      </div>
+
+      <!-- Etiology -->
+      <div class="card" id="card-etiology">
+        <div class="card-title">Etiology Assessment</div>
+        <div id="etiology-content"></div>
+      </div>
+
+      <!-- Medications -->
+      <div class="card" id="card-meds">
+        <div class="card-title">Medication Culprits</div>
+        <div id="meds-content"></div>
+      </div>
+
+      <!-- Workup -->
+      <div class="card" id="card-workup">
+        <div class="card-title">Suggested Workup</div>
+        <ul class="result-list" id="workup-content"></ul>
+      </div>
+
+      <!-- Fluids -->
+      <div class="card" id="card-fluids">
+        <div class="card-title">Fluid Recommendations</div>
+        <ul class="result-list" id="fluids-content"></ul>
+      </div>
+
+      <!-- Red Flags -->
+      <div class="card card-red" id="card-redflags">
+        <div class="card-title">Red Flags / Nephrology Considerations</div>
+        <ul class="red-flags-list" id="redflags-content"></ul>
+        <p style="font-size:0.78rem;color:var(--text-muted);margin-top:12px;">Active flags are highlighted. Any active flag should prompt urgent nephrology review.</p>
+      </div>
+
+      <!-- Guideline + References -->
+      <div class="card" id="card-refs">
+        <div class="card-title">Guideline Metadata &amp; References</div>
+        <div id="refs-content"></div>
+      </div>
+
+    </div><!-- /results-section -->
+
+  </div><!-- /page-wrapper -->
+
+  <div class="page-footer">
+    Educational decision support only — not a substitute for clinical judgment
+  </div>
+
+  <script>
+    // ── UA Findings setup ──────────────────────────────────────────────────────
+    const UA_OPTIONS = [
+      'muddy brown casts',
+      'granular casts',
+      'rbc casts',
+      'wbc casts',
+      'eosinophils',
+      'proteinuria',
+      'hematuria',
+      'pyuria',
+      'bland'
+    ];
+
+    (function buildUAGrid() {
+      const grid = document.getElementById('ua-grid');
+      UA_OPTIONS.forEach(opt => {
+        const label = document.createElement('label');
+        label.className = 'ua-item';
+        label.innerHTML = `
+          <input type="checkbox" value="${opt}" />
+          <span>${opt.charAt(0).toUpperCase() + opt.slice(1)}</span>
+        `;
+        grid.appendChild(label);
+      });
+    })();
+
+    // ── Nephrotoxic Medications Knowledge Base (full) ───────────────────────
+    const NEPHROTOXIC_MEDICATIONS = {
+      'nsaid': {
+        category: 'Prerenal / hemodynamic AKI',
+        mechanism: 'Afferent arteriole vasoconstriction from ↓ prostaglandins',
+        action: 'Hold if possible, especially with hypovolemia, CKD, HF, ACEi/ARB, or diuretic use.'
+      },
+      'ibuprofen': {
+        category: 'Prerenal / hemodynamic AKI',
+        mechanism: 'NSAID effect: afferent arteriole vasoconstriction',
+        action: 'Hold.'
+      },
+      'naproxen': {
+        category: 'Prerenal / hemodynamic AKI',
+        mechanism: 'NSAID effect: afferent arteriole vasoconstriction',
+        action: 'Hold.'
+      },
+      'ketorolac': {
+        category: 'Prerenal / hemodynamic AKI',
+        mechanism: 'NSAID effect; high AKI risk inpatient',
+        action: 'Stop.'
+      },
+      'ace inhibitor': {
+        category: 'Hemodynamic AKI',
+        mechanism: 'Efferent arteriole dilation → ↓ intraglomerular pressure',
+        action: 'Consider holding during active AKI, hypotension, dehydration, or hyperkalemia.'
+      },
+      'lisinopril': {
+        category: 'Hemodynamic AKI',
+        mechanism: 'ACE inhibitor effect',
+        action: 'Consider holding during active AKI.'
+      },
+      'arb': {
+        category: 'Hemodynamic AKI',
+        mechanism: 'Efferent arteriole dilation → ↓ intraglomerular pressure',
+        action: 'Consider holding during active AKI.'
+      },
+      'losartan': {
+        category: 'Hemodynamic AKI',
+        mechanism: 'ARB effect',
+        action: 'Consider holding during active AKI.'
+      },
+      'diuretic': {
+        category: 'Prerenal AKI / volume depletion',
+        mechanism: '↓ effective circulating volume',
+        action: 'Hold if hypovolemic; continue or intensify only if volume overloaded.'
+      },
+      'furosemide': {
+        category: 'Prerenal AKI / cardiorenal syndrome',
+        mechanism: 'Can worsen AKI if overdiuresed; may help if congested',
+        action: 'Assess volume status carefully.'
+      },
+      'bumetanide': {
+        category: 'Prerenal AKI / cardiorenal syndrome',
+        mechanism: 'Can worsen AKI if overdiuresed; may help if congested',
+        action: 'Assess volume status carefully.'
+      },
+      'spironolactone': {
+        category: 'Hyperkalemia risk in AKI',
+        mechanism: 'Aldosterone blockade → impaired K excretion',
+        action: 'Hold if hyperkalemia, hypotension, or worsening AKI.'
+      },
+      'vancomycin': {
+        category: 'Intrinsic AKI / ATN',
+        mechanism: 'Dose-related tubular toxicity; risk ↑ with pip-tazo, high troughs, CKD',
+        action: 'Check levels, adjust dose, consider alternative if appropriate.'
+      },
+      'piperacillin-tazobactam': {
+        category: 'Intrinsic AKI risk, especially with vancomycin',
+        mechanism: 'Associated with ↑ creatinine/AKI risk when combined with vancomycin',
+        action: 'Review indication and consider cefepime/meropenem alternatives when appropriate.'
+      },
+      'aminoglycoside': {
+        category: 'Intrinsic AKI / ATN',
+        mechanism: 'Proximal tubular toxicity',
+        action: 'Avoid or monitor levels closely.'
+      },
+      'gentamicin': {
+        category: 'Intrinsic AKI / ATN',
+        mechanism: 'Aminoglycoside tubular toxicity',
+        action: 'Avoid or monitor levels closely.'
+      },
+      'tobramycin': {
+        category: 'Intrinsic AKI / ATN',
+        mechanism: 'Aminoglycoside tubular toxicity',
+        action: 'Avoid or monitor levels closely.'
+      },
+      'amphotericin': {
+        category: 'Intrinsic AKI',
+        mechanism: 'Renal vasoconstriction + tubular toxicity',
+        action: 'Consider lipid formulation, hydration strategy, electrolyte monitoring.'
+      },
+      'contrast': {
+        category: 'Contrast-associated AKI',
+        mechanism: 'Renal vasoconstriction/tubular injury risk in susceptible patients',
+        action: 'Avoid nonessential contrast; hydrate if contrast needed.'
+      },
+      'acyclovir': {
+        category: 'Crystal nephropathy',
+        mechanism: 'Tubular crystal precipitation, especially with dehydration or high-dose IV therapy',
+        action: 'Hydrate and renally dose.'
+      },
+      'methotrexate': {
+        category: 'Crystal nephropathy / direct toxicity',
+        mechanism: 'Tubular precipitation and toxicity',
+        action: 'Check level if relevant; alkalinization/leucovorin protocols if high-dose.'
+      },
+      'tenofovir': {
+        category: 'Proximal tubular injury',
+        mechanism: 'Fanconi-like proximal tubulopathy',
+        action: 'Review HIV/HBV regimen and renal dosing.'
+      },
+      'sulfamethoxazole-trimethoprim': {
+        category: 'Pseudo-AKI or true AKI',
+        mechanism: 'Trimethoprim blocks tubular creatinine secretion; can also cause AIN/hyperkalemia',
+        action: 'Check K, UA, trend Cr; distinguish pseudo-rise from true AKI.'
+      },
+      'bactrim': {
+        category: 'Pseudo-AKI or true AKI',
+        mechanism: 'TMP-SMX effect',
+        action: 'Check K, UA, trend Cr.'
+      },
+      'ppi': {
+        category: 'AIN',
+        mechanism: 'Drug-induced interstitial nephritis',
+        action: 'Consider holding if AIN suspected.'
+      },
+      'omeprazole': {
+        category: 'AIN',
+        mechanism: 'PPI-associated interstitial nephritis',
+        action: 'Consider holding if AIN suspected.'
+      }
+    };
+
+    // ── Guideline data ────────────────────────────────────────────────────────
+    const GUIDELINE_METADATA = {
+      guideline: 'KDIGO Clinical Practice Guideline for Acute Kidney Injury',
+      year: '2012',
+      definition: 'AKI is defined by any of the following: increase in serum creatinine by ≥0.3 mg/dL within 48 hr; increase in serum creatinine to ≥1.5x baseline known or presumed to have occurred within 7 days; or urine volume <0.5 mL/kg/hr for 6 hr.',
+      staging_note: 'AKI stage is assigned by the worst creatinine criterion, urine output criterion, or renal replacement therapy criterion met.',
+      clinical_note: 'Creatinine criteria approximate excretory failure. Urine output criteria approximate fluid homeostasis failure.'
+    };
+
+    const REFERENCES = [
+      {
+        id: 1,
+        citation: 'KDIGO Clinical Practice Guideline for Acute Kidney Injury. Kidney Int Suppl. 2012.',
+        use: 'AKI definition and staging criteria.'
+      },
+      {
+        id: 2,
+        citation: 'Kellum JA, Sileanu FE, Murugan R, et al. Classifying AKI by Urine Output versus Serum Creatinine Level. J Am Soc Nephrol. 2015;26(9):2231-2238.',
+        use: 'Patients meeting both creatinine and urine output criteria had greatest short- and long-term risk of death or renal replacement therapy.'
+      },
+      {
+        id: 3,
+        citation: 'Sparrow HG, Swan JT, Moore LW, Gaber AO, Suki WN. Disparate outcomes observed within KDIGO acute kidney injury stage 1. Kidney Int. 2019.',
+        use: 'Higher KDIGO AKI stage was associated with progressively higher in-hospital mortality odds.'
+      }
+    ];
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+    function normalizeTextList(items) {
+      return items.map(s => s.trim().toLowerCase()).filter(s => s.length > 0);
+    }
+
+    function calcBunCrRatio(bun, cr) {
+      if (bun == null || cr <= 0) return null;
+      return Math.round((bun / cr) * 10) / 10;
+    }
+
+    // ── Core logic (translated from Python) ──────────────────────────────────
+
+    function determineAKIStage(data) {
+      const baseline = data.baseline_cr;
+      const current = data.current_cr;
+      if (baseline <= 0) throw new Error('Baseline creatinine must be greater than 0.');
+
+      const crRatio = current / baseline;
+      const crDelta = current - baseline;
+
+      let stage = 0;
+      const reasons = [];
+
+      // Creatinine criteria
+      if (crDelta >= 0.3 || crRatio >= 1.5) {
+        stage = Math.max(stage, 1);
+        reasons.push('Cr rise meets at least Stage 1 criteria.');
+      }
+      if (crRatio >= 2.0) {
+        stage = Math.max(stage, 2);
+        reasons.push('Cr is ≥2.0x baseline.');
+      }
+      if (crRatio >= 3.0 || current >= 4.0 || data.rrt_required) {
+        stage = Math.max(stage, 3);
+        if (crRatio >= 3.0) reasons.push('Cr is ≥3.0x baseline.');
+        if (current >= 4.0) reasons.push('Current Cr is ≥4.0 mg/dL.');
+        if (data.rrt_required) reasons.push('Renal replacement therapy required.');
+      }
+
+      // UOP criteria
+      const uop = data.urine_output_ml_kg_hr;
+      const uopDur = data.urine_output_duration_hr;
+
+      if (uop != null && uopDur != null) {
+        if (uop < 0.5 && uopDur >= 6) {
+          stage = Math.max(stage, 1);
+          reasons.push('UOP <0.5 mL/kg/hr for ≥6 hr.');
+        }
+        if (uop < 0.5 && uopDur >= 12) {
+          stage = Math.max(stage, 2);
+          reasons.push('UOP <0.5 mL/kg/hr for ≥12 hr.');
+        }
+        if (uop < 0.3 && uopDur >= 24) {
+          stage = Math.max(stage, 3);
+          reasons.push('UOP <0.3 mL/kg/hr for ≥24 hr.');
+        }
+      }
+
+      if (data.anuria_duration_hr != null && data.anuria_duration_hr >= 12) {
+        stage = Math.max(stage, 3);
+        reasons.push('Anuria for ≥12 hr.');
+      }
+
+      return {
+        aki_stage: stage,
+        cr_ratio: Math.round(crRatio * 100) / 100,
+        cr_delta: Math.round(crDelta * 100) / 100,
+        stage_reasons: reasons.length ? reasons : ['No AKI by provided creatinine/urine output criteria.']
+      };
+    }
+
+    function determineAKICriteriaMet(data) {
+      const baseline = data.baseline_cr;
+      const current = data.current_cr;
+      if (baseline <= 0) throw new Error('Baseline creatinine must be greater than 0.');
+
+      const crRatio = current / baseline;
+      const crDelta = current - baseline;
+
+      let creatinineCriteria = false;
+      let urineCriteria = false;
+      const notes = [];
+
+      if (crDelta >= 0.3 || crRatio >= 1.5) {
+        creatinineCriteria = true;
+        notes.push('Creatinine criterion met: this reflects excretory failure, but Cr is a delayed marker of kidney injury.');
+      }
+
+      const uop = data.urine_output_ml_kg_hr;
+      const dur = data.urine_output_duration_hr;
+
+      if (uop != null && dur != null) {
+        if (uop < 0.5 && dur >= 6) {
+          urineCriteria = true;
+          notes.push('Urine output criterion met: this reflects fluid homeostasis failure and may signal early or active kidney hypoperfusion/injury before Cr rises.');
+        }
+        if (uop < 0.3 && dur >= 24) {
+          urineCriteria = true;
+          notes.push('Severe oliguria present: UOP <0.3 mL/kg/hr for ≥24 hr is Stage 3-level urine output severity.');
+        }
+      }
+
+      if (data.anuria_duration_hr != null && data.anuria_duration_hr >= 12) {
+        urineCriteria = true;
+        notes.push('Anuria ≥12 hr: high-risk finding concerning for severe intrinsic AKI, obstruction, or vascular catastrophe.');
+      }
+
+      const both = creatinineCriteria && urineCriteria;
+
+      let pattern, significance;
+      if (both) {
+        pattern = 'both creatinine and urine output criteria met';
+        significance = 'Higher-risk AKI pattern. Both excretory failure and fluid homeostasis failure are present. This is associated with more severe kidney dysfunction, higher risk of dialysis, fluid overload, ICU-level deterioration, and mortality compared with one criterion alone.';
+      } else if (creatinineCriteria) {
+        pattern = 'creatinine criteria only';
+        significance = 'Cr-only AKI. This suggests excretory failure without documented oliguria. This may represent non-oliguric AKI or delayed recognition because serum creatinine rises after injury has occurred.';
+      } else if (urineCriteria) {
+        pattern = 'urine output criteria only';
+        significance = 'UOP-only AKI. This suggests fluid homeostasis failure before a creatinine rise. This may represent early AKI, renal hypoperfusion, evolving ATN, obstruction, or inadequate effective circulating volume.';
+      } else {
+        pattern = 'no AKI criteria met';
+        significance = 'No AKI detected by provided Cr or UOP data. Continue monitoring if clinical suspicion remains high.';
+      }
+
+      return {
+        creatinine_criteria_met: creatinineCriteria,
+        urine_output_criteria_met: urineCriteria,
+        both_criteria_met: both,
+        criteria_pattern: pattern,
+        criteria_significance: significance,
+        criteria_notes: notes
+      };
+    }
+
+    function classifyUrinePattern(data) {
+      if (data.anuria_duration_hr != null && data.anuria_duration_hr >= 12) return 'anuric AKI';
+      if (data.urine_output_ml_kg_hr != null) {
+        if (data.urine_output_ml_kg_hr < 0.3) return 'severe oliguric AKI';
+        if (data.urine_output_ml_kg_hr < 0.5) return 'oliguric AKI';
+        return 'non-oliguric AKI';
+      }
+      return 'urine output pattern unknown';
+    }
+
+    function identifyMedicationCulprits(medications) {
+      const meds = normalizeTextList(medications);
+      const culprits = [];
+      const seen = new Set();
+
+      for (const med of meds) {
+        for (const [key, info] of Object.entries(NEPHROTOXIC_MEDICATIONS)) {
+          if (med.includes(key)) {
+            const marker = `${med}|||${info.category}`;
+            if (!seen.has(marker)) {
+              culprits.push({
+                medication: med,
+                category: info.category,
+                mechanism: info.mechanism,
+                suggested_action: info.action
+              });
+              seen.add(marker);
+            }
+          }
+        }
+      }
+
+      return culprits;
+    }
+
+    function classifyAKIEtiology(data) {
+      const ua = normalizeTextList(data.ua_findings);
+      const volume = data.volume_status ? data.volume_status.toLowerCase().trim() : 'unknown';
+      const bunCr = calcBunCrRatio(data.bun, data.current_cr);
+
+      let prerenal = 0, intrinsic = 0, postrenal = 0;
+      const supporting = { prerenal: [], intrinsic: [], postrenal: [] };
+
+      // Prerenal
+      if (data.fena != null && data.fena < 1) {
+        prerenal += 2;
+        supporting.prerenal.push('FeNa <1%.');
+      }
+      if (data.urine_na != null && data.urine_na < 20) {
+        prerenal += 1;
+        supporting.prerenal.push('Urine Na <20 mEq/L.');
+      }
+      if (bunCr != null && bunCr > 20) {
+        prerenal += 1;
+        supporting.prerenal.push('BUN:Cr >20.');
+      }
+      if (data.orthostasis_present === true) {
+        prerenal += 2;
+        supporting.prerenal.push('Orthostasis present.');
+      }
+      if (volume === 'hypovolemic') {
+        prerenal += 2;
+        supporting.prerenal.push('Exam suggests hypovolemia.');
+      }
+      if (ua.includes('bland')) {
+        prerenal += 1;
+        supporting.prerenal.push('Bland UA supports prerenal physiology.');
+      }
+      if (volume === 'hypervolemic') {
+        prerenal += 1;
+        supporting.prerenal.push('Hypervolemia may indicate cardiorenal physiology or venous congestion.');
+      }
+
+      // Intrinsic
+      const intrinsicTerms = {
+        'muddy brown casts': 'Muddy brown casts suggest ATN.',
+        'granular casts': 'Granular casts suggest ATN.',
+        'rbc casts': 'RBC casts suggest glomerulonephritis.',
+        'wbc casts': 'WBC casts suggest AIN or pyelonephritis.',
+        'eosinophils': 'Urine eosinophils may support AIN, though sensitivity/specificity are limited.',
+        'proteinuria': 'Proteinuria raises concern for glomerular disease.',
+        'hematuria': 'Hematuria raises concern for stone, malignancy, infection, or glomerular disease.',
+        'pyuria': 'Pyuria raises concern for UTI, AIN, or pyelonephritis.'
+      };
+      for (const [term, explanation] of Object.entries(intrinsicTerms)) {
+        if (ua.includes(term)) {
+          intrinsic += 2;
+          supporting.intrinsic.push(explanation);
+        }
+      }
+      if (data.fena != null && data.fena > 2) {
+        intrinsic += 1;
+        supporting.intrinsic.push('FeNa >2% can support intrinsic tubular injury, especially ATN.');
+      }
+
+      // Postrenal
+      if (data.obstruction_risk === true) {
+        postrenal += 3;
+        supporting.postrenal.push('Obstruction risk present.');
+      }
+      if (data.anuria_duration_hr != null && data.anuria_duration_hr > 0) {
+        postrenal += 2;
+        supporting.postrenal.push('Anuria raises concern for obstruction or severe intrinsic injury.');
+      }
+
+      const scores = { prerenal, intrinsic, postrenal };
+      let mostLikely = Object.entries(scores).sort((a, b) => b[1] - a[1])[0][0];
+      if (scores[mostLikely] === 0) mostLikely = 'unclear';
+
+      return {
+        most_likely_etiology: mostLikely,
+        scores,
+        supporting_features: supporting,
+        bun_cr_ratio: bunCr
+      };
+    }
+
+    function estimateAKIMortalityContext(stage, criteriaPattern) {
+      const stageCtx = {
+        0: {
+          risk_label: 'No AKI by provided criteria',
+          mortality_context: 'No AKI-stage mortality estimate applies.',
+          interpretation: 'Continue monitoring if clinical suspicion remains high.'
+        },
+        1: {
+          risk_label: 'Lower-stage AKI, but not benign',
+          mortality_context: 'Published cohorts show increased mortality compared with no AKI. Stage 1 AKI should not be dismissed, especially if the patient is septic, hypotensive, cirrhotic, in heart failure, or exposed to nephrotoxins.',
+          interpretation: 'Stage 1 AKI should trigger medication review, volume assessment, urine studies when appropriate, and close Cr/UOP trending.'
+        },
+        2: {
+          risk_label: 'Moderate AKI',
+          mortality_context: 'Mortality risk rises substantially with Stage 2 AKI compared with no AKI or Stage 1 AKI.',
+          interpretation: 'Stage 2 AKI should prompt aggressive cause identification, nephrotoxin review, strict I/Os, and low threshold for nephrology depending on trajectory.'
+        },
+        3: {
+          risk_label: 'Severe AKI',
+          mortality_context: 'Stage 3 AKI carries the highest mortality association among KDIGO stages. Risk is especially high with oliguria/anuria, shock, severe acidosis, hyperkalemia, pulmonary edema, or need for dialysis.',
+          interpretation: 'Stage 3 AKI should trigger urgent review for dialysis indications, obstruction, active sediment, shock, nephrotoxins, and nephrology involvement.'
+        }
+      };
+
+      let patternMod;
+      if (criteriaPattern === 'both creatinine and urine output criteria met') {
+        patternMod = 'Higher-risk AKI phenotype: both excretory failure and fluid homeostasis failure are present. Published data show the greatest risk of death or renal replacement therapy when both creatinine and urine output criteria are met.';
+      } else if (criteriaPattern === 'creatinine criteria only') {
+        patternMod = 'Excretory failure phenotype: creatinine criteria are met without documented oliguria. This may represent non-oliguric AKI or delayed recognition.';
+      } else if (criteriaPattern === 'urine output criteria only') {
+        patternMod = 'Fluid homeostasis failure phenotype: urine output criteria are met before a creatinine rise. This can be an early warning pattern, especially in shock, obstruction, or evolving ATN.';
+      } else {
+        patternMod = 'No creatinine or urine output AKI criterion was met from the provided data.';
+      }
+
+      const base = stageCtx[stage] || stageCtx[0];
+      return { ...base, criteria_pattern_modifier: patternMod };
+    }
+
+    function suggestWorkup(data, etiology) {
+      const workup = [
+        'Repeat BMP to trend Cr, BUN, K, bicarbonate, Na.',
+        'Strict I/Os and daily weights.',
+        'Review medication list for nephrotoxins and renally dose medications.',
+        'Urinalysis with microscopy if not already done.',
+        'Assess volume status: orthostatics, mucous membranes, JVP, edema, lung exam.',
+        'Check bladder scan if urinary retention possible.',
+        'Renal ultrasound if obstruction risk, unclear AKI, severe AKI, persistent AKI, solitary kidney, or anuria/oliguria.'
+      ];
+
+      if (etiology === 'prerenal') {
+        workup.push(
+          'Consider urine sodium, FeNa, or FeUrea if diuretics confound FeNa.',
+          'Evaluate for GI losses, poor PO intake, hemorrhage, sepsis, overdiuresis, or cardiorenal syndrome.',
+          'Reassess Cr after fluid challenge if hypovolemic and no contraindication.'
+        );
+      }
+      if (etiology === 'intrinsic') {
+        workup.push(
+          'Review UA microscopy pattern: muddy brown casts = ATN; RBC casts = GN; WBC casts = AIN/pyelo.',
+          'Check CK if rhabdomyolysis possible.',
+          'Consider urine protein/creatinine ratio if proteinuria.',
+          'If GN suspected: C3/C4, ANA, ANCA, anti-GBM, hepatitis serologies as clinically appropriate.',
+          'Consider nephrology consult for active sediment, rapidly rising Cr, nephrotic-range proteinuria, or unclear severe AKI.'
+        );
+      }
+      if (etiology === 'postrenal') {
+        workup.push(
+          'Bladder scan immediately.',
+          'Place Foley if significant retention and clinically appropriate.',
+          'Renal ultrasound to evaluate hydronephrosis.',
+          'Consider CT abdomen/pelvis if stone, malignancy, or retroperitoneal process suspected.'
+        );
+      }
+
+      return workup;
+    }
+
+    function suggestFluids(data, etiology) {
+      const volume = data.volume_status ? data.volume_status.toLowerCase().trim() : 'unknown';
+      const recs = [];
+
+      if (volume === 'hypovolemic') {
+        recs.push(
+          'Give isotonic crystalloid if no contraindication.',
+          'Reasonable starting approach: 500–1000 mL bolus, then reassess BP, HR, urine output, lungs, edema, and Cr trend.',
+          'Avoid ongoing fluids without reassessment.'
+        );
+      } else if (volume === 'euvolemic') {
+        recs.push(
+          'Avoid automatic fluid boluses unless there is evidence of hypoperfusion.',
+          'Maintain euvolemia and avoid nephrotoxins.',
+          'Use clinical reassessment and I/O trends to guide fluids.'
+        );
+      } else if (volume === 'hypervolemic') {
+        recs.push(
+          'Avoid routine fluid bolus.',
+          'Assess for cardiorenal syndrome or venous congestion.',
+          'Consider diuresis if congested, with close monitoring of Cr, electrolytes, urine output, and hemodynamics.'
+        );
+      } else {
+        recs.push(
+          'Volume status unclear: reassess exam, orthostatics, I/Os, weight trend, JVP, edema, lung findings.',
+          'Consider bedside ultrasound if available: IVC, lungs, cardiac function, bladder.',
+          'Do not give large empiric fluids without reassessment, especially if HF/cirrhosis/CKD risk.'
+        );
+      }
+
+      if (etiology === 'postrenal') recs.push('Fluids alone will not fix postrenal AKI; prioritize decompression if obstructed.');
+      if (etiology === 'intrinsic') recs.push('In intrinsic AKI/ATN, aim for euvolemia; avoid both under-resuscitation and fluid overload.');
+
+      return recs;
+    }
+
+    // ── Red flags detection ───────────────────────────────────────────────────
+    const ALL_RED_FLAGS = [
+      'Stage 3 AKI.',
+      'Both creatinine and urine output criteria met.',
+      'Anuric AKI.',
+      'Rapidly rising creatinine.',
+      'Severe hyperkalemia.',
+      'Severe metabolic acidosis.',
+      'Pulmonary edema or refractory volume overload.',
+      'Uremic symptoms: encephalopathy, pericarditis, bleeding.',
+      'Active urine sediment: RBC casts, heavy proteinuria, dysmorphic RBCs.',
+      'Suspected glomerulonephritis, vasculitis, TMA, myeloma kidney, or AIN.',
+      'Anuria or suspected obstruction.'
+    ];
+
+    function detectActiveRedFlags(data, stageInfo, criteriaInfo, urinePattern) {
+      const active = new Set();
+
+      if (stageInfo.aki_stage === 3) active.add('Stage 3 AKI.');
+      if (criteriaInfo.both_criteria_met) active.add('Both creatinine and urine output criteria met.');
+      if (urinePattern === 'anuric AKI') active.add('Anuric AKI.');
+      if (urinePattern === 'anuric AKI' || (data.anuria_duration_hr != null && data.anuria_duration_hr >= 12)) {
+        active.add('Anuria or suspected obstruction.');
+      }
+      if (data.obstruction_risk) active.add('Anuria or suspected obstruction.');
+
+      // Active sediment
+      const ua = normalizeTextList(data.ua_findings);
+      if (ua.includes('rbc casts') || ua.includes('proteinuria') || ua.includes('hematuria')) {
+        active.add('Active urine sediment: RBC casts, heavy proteinuria, dysmorphic RBCs.');
+      }
+      if (ua.includes('rbc casts') || ua.includes('wbc casts') || ua.includes('eosinophils')) {
+        active.add('Suspected glomerulonephritis, vasculitis, TMA, myeloma kidney, or AIN.');
+      }
+
+      return active;
+    }
+
+    // ── Main Analyzer ─────────────────────────────────────────────────────────
+    function runAnalyzer() {
+      const errorEl = document.getElementById('error-msg');
+      errorEl.style.display = 'none';
+
+      // Collect inputs
+      const baselineCr = parseFloat(document.getElementById('baseline_cr').value);
+      const currentCr = parseFloat(document.getElementById('current_cr').value);
+
+      if (!baselineCr || !currentCr || baselineCr <= 0 || currentCr <= 0) {
+        errorEl.textContent = 'Baseline creatinine and current creatinine are required and must be greater than 0.';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      const bunVal = document.getElementById('bun').value;
+      const urineNaVal = document.getElementById('urine_na').value;
+      const fenaVal = document.getElementById('fena').value;
+      const uopRateVal = document.getElementById('uop_rate').value;
+      const uopDurVal = document.getElementById('uop_duration').value;
+      const anuriaVal = document.getElementById('anuria_hr').value;
+
+      const data = {
+        baseline_cr: baselineCr,
+        current_cr: currentCr,
+        bun: bunVal !== '' ? parseFloat(bunVal) : null,
+        urine_na: urineNaVal !== '' ? parseFloat(urineNaVal) : null,
+        fena: fenaVal !== '' ? parseFloat(fenaVal) : null,
+        urine_output_ml_kg_hr: uopRateVal !== '' ? parseFloat(uopRateVal) : null,
+        urine_output_duration_hr: uopDurVal !== '' ? parseFloat(uopDurVal) : null,
+        anuria_duration_hr: anuriaVal !== '' ? parseFloat(anuriaVal) : null,
+        rrt_required: document.getElementById('rrt_required').checked,
+        medications: document.getElementById('medications').value.split(',').filter(s => s.trim()),
+        volume_status: document.getElementById('volume_status').value,
+        orthostasis_present: document.getElementById('orthostasis').checked ? true : false,
+        obstruction_risk: document.getElementById('obstruction_risk').checked ? true : false,
+        ua_findings: Array.from(document.querySelectorAll('#ua-grid input[type=checkbox]:checked')).map(cb => cb.value)
+      };
+
+      try {
+        const stageInfo = determineAKIStage(data);
+        const criteriaInfo = determineAKICriteriaMet(data);
+        const urinePattern = classifyUrinePattern(data);
+        const etiologyInfo = classifyAKIEtiology(data);
+        const medCulprits = identifyMedicationCulprits(data.medications);
+        const mortalityCtx = estimateAKIMortalityContext(stageInfo.aki_stage, criteriaInfo.criteria_pattern);
+        const workup = suggestWorkup(data, etiologyInfo.most_likely_etiology);
+        const fluids = suggestFluids(data, etiologyInfo.most_likely_etiology);
+        const activeFlags = detectActiveRedFlags(data, stageInfo, criteriaInfo, urinePattern);
+
+        renderResults({ stageInfo, criteriaInfo, urinePattern, etiologyInfo, medCulprits, mortalityCtx, workup, fluids, activeFlags });
+        document.getElementById('results-section').style.display = 'block';
+        document.getElementById('results-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } catch (e) {
+        errorEl.textContent = 'Error: ' + e.message;
+        errorEl.style.display = 'block';
+      }
+    }
+
+    // ── Render functions ──────────────────────────────────────────────────────
+
+    function renderResults(r) {
+      renderStage(r.stageInfo);
+      renderCriteria(r.criteriaInfo);
+      renderUOP(r.urinePattern);
+      renderMortality(r.mortalityCtx);
+      renderEtiology(r.etiologyInfo);
+      renderMeds(r.medCulprits);
+      renderList('workup-content', r.workup);
+      renderList('fluids-content', r.fluids);
+      renderRedFlags(r.activeFlags);
+      renderRefs();
+    }
+
+    function renderStage(s) {
+      const stageLabels = ['No AKI', 'Stage 1', 'Stage 2', 'Stage 3'];
+      const el = document.getElementById('stage-content');
+      const badgeClass = 'stage-' + s.aki_stage;
+      const label = stageLabels[s.aki_stage] || 'Stage ' + s.aki_stage;
+
+      let reasonsHTML = s.stage_reasons.map(r =>
+        `<li class="result-list" style="list-style:none;padding:4px 0 4px 16px;font-size:0.875rem;color:var(--text-primary);position:relative;">
+          <span style="position:absolute;left:0;color:var(--teal-400);">—</span>${r}
+        </li>`
+      ).join('');
+
+      el.innerHTML = `
+        <div class="stage-badge ${badgeClass}">KDIGO ${label}</div>
+        <table class="kv-table" style="margin-top:12px;">
+          <tr><td>Cr ratio</td><td><code>${s.cr_ratio}x</code> baseline</td></tr>
+          <tr><td>Cr delta</td><td><code>+${s.cr_delta} mg/dL</code></td></tr>
+        </table>
+        <div style="margin-top:10px;">
+          <div style="font-size:0.78rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);margin-bottom:6px;">Stage Rationale</div>
+          <ul style="list-style:none;">${reasonsHTML}</ul>
+        </div>
+      `;
+    }
+
+    function renderCriteria(c) {
+      const el = document.getElementById('criteria-content');
+
+      const patternClass = {
+        'both creatinine and urine output criteria met': 'pattern-both',
+        'creatinine criteria only': 'pattern-cr',
+        'urine output criteria only': 'pattern-uop',
+        'no AKI criteria met': 'pattern-none'
+      }[c.criteria_pattern] || 'pattern-none';
+
+      let notesHTML = '';
+      if (c.criteria_notes.length) {
+        notesHTML = c.criteria_notes.map(n =>
+          `<li style="padding:4px 0 4px 16px;font-size:0.875rem;color:var(--text-primary);position:relative;border-bottom:1px solid rgba(30,52,100,0.5);">
+            <span style="position:absolute;left:0;color:var(--teal-400);">—</span>${n}
+          </li>`
+        ).join('');
+        notesHTML = `<ul style="list-style:none;margin-top:10px;">${notesHTML}</ul>`;
+      }
+
+      el.innerHTML = `
+        <span class="pattern-tag ${patternClass}">${c.criteria_pattern}</span>
+        <p class="info-text" style="margin-top:8px;">${c.criteria_significance}</p>
+        ${notesHTML}
+        <table class="kv-table" style="margin-top:12px;">
+          <tr><td>Cr criterion met</td><td>${c.creatinine_criteria_met ? '<span style="color:var(--amber-500);">Yes</span>' : '<span style="color:var(--text-muted);">No</span>'}</td></tr>
+          <tr><td>UOP criterion met</td><td>${c.urine_output_criteria_met ? '<span style="color:var(--amber-500);">Yes</span>' : '<span style="color:var(--text-muted);">No</span>'}</td></tr>
+          <tr><td>Both criteria met</td><td>${c.both_criteria_met ? '<span style="color:var(--red-500);font-weight:600;">Yes — higher risk</span>' : '<span style="color:var(--text-muted);">No</span>'}</td></tr>
+        </table>
+      `;
+    }
+
+    function renderUOP(pattern) {
+      const el = document.getElementById('uop-content');
+      const classes = {
+        'anuric AKI': 'ph-anuric',
+        'severe oliguric AKI': 'ph-severe',
+        'oliguric AKI': 'ph-oliguric',
+        'non-oliguric AKI': 'ph-nonoliguric',
+        'urine output pattern unknown': 'ph-unknown'
+      };
+
+      const descriptions = {
+        'anuric AKI': 'Anuria ≥12 hr. High-risk finding. Obstruction must be ruled out urgently. Severe intrinsic AKI or vascular catastrophe also in differential.',
+        'severe oliguric AKI': 'UOP <0.3 mL/kg/hr. Stage 3-level urine output severity. Suggests critical impairment of fluid homeostasis.',
+        'oliguric AKI': 'UOP <0.5 mL/kg/hr. Suggests impaired renal perfusion or intrinsic tubular injury.',
+        'non-oliguric AKI': 'UOP ≥0.5 mL/kg/hr. Often less severe than oliguric AKI, but still clinically important — excretory failure may still be present.',
+        'urine output pattern unknown': 'No urine output data provided. Cannot classify phenotype. Consider adding UOP if available for a more complete assessment.'
+      };
+
+      el.innerHTML = `
+        <span class="phenotype-badge ${classes[pattern] || 'ph-unknown'}">${pattern}</span>
+        <p class="info-text" style="margin-top:8px;">${descriptions[pattern] || ''}</p>
+      `;
+    }
+
+    function renderMortality(m) {
+      const el = document.getElementById('mortality-content');
+      el.innerHTML = `
+        <table class="kv-table">
+          <tr><td>Risk label</td><td style="font-weight:600;color:var(--teal-300);">${m.risk_label}</td></tr>
+        </table>
+        <p class="info-text" style="margin-top:10px;">${m.mortality_context}</p>
+        <hr class="section-divider" />
+        <div style="font-size:0.77rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);margin-bottom:6px;">Criteria Pattern Modifier</div>
+        <p class="info-text">${m.criteria_pattern_modifier}</p>
+        <hr class="section-divider" />
+        <div style="font-size:0.77rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-secondary);margin-bottom:6px;">Clinical Interpretation</div>
+        <p class="info-text">${m.interpretation}</p>
+        <p style="font-size:0.75rem;color:var(--text-muted);margin-top:10px;">Note: These are cohort-level estimates, not patient-specific predictions. Mortality varies by ICU vs floor, comorbidities, sepsis, shock, and dialysis need.</p>
+      `;
+    }
+
+    function renderEtiology(e) {
+      const el = document.getElementById('etiology-content');
+
+      const maxScore = Math.max(...Object.values(e.scores));
+      const pills = Object.entries(e.scores).map(([cat, score]) => {
+        const isWinner = cat === e.most_likely_etiology && score > 0;
+        return `<span class="etio-pill ${cat} ${isWinner ? 'winner' : ''}">${cat.charAt(0).toUpperCase() + cat.slice(1)}: ${score}</span>`;
+      }).join('');
+
+      let supportHTML = '';
+      for (const [cat, features] of Object.entries(e.supporting_features)) {
+        if (features.length) {
+          const items = features.map(f =>
+            `<li style="padding:3px 0 3px 16px;font-size:0.83rem;color:var(--text-primary);position:relative;">
+              <span style="position:absolute;left:0;color:var(--teal-400);">—</span>${f}
+            </li>`
+          ).join('');
+          supportHTML += `
+            <div class="support-section">
+              <h4>${cat.charAt(0).toUpperCase() + cat.slice(1)}</h4>
+              <ul style="list-style:none;">${items}</ul>
+            </div>`;
+        }
+      }
+
+      const bunCrHTML = e.bun_cr_ratio != null
+        ? `<tr><td>BUN:Cr ratio</td><td><code>${e.bun_cr_ratio}</code>${e.bun_cr_ratio > 20 ? ' <span style="color:var(--amber-500);font-size:0.8rem;">(>20 — supports prerenal)</span>' : ''}</td></tr>`
+        : '';
+
+      el.innerHTML = `
+        <table class="kv-table" style="margin-bottom:10px;">
+          <tr><td>Most likely etiology</td><td style="font-weight:700;color:var(--teal-300);text-transform:capitalize;">${e.most_likely_etiology}</td></tr>
+          ${bunCrHTML}
+        </table>
+        <div class="etiology-scores">${pills}</div>
+        ${supportHTML || '<p class="info-text">No supporting features entered — enter labs and UA findings for etiology scoring.</p>'}
+      `;
+    }
+
+    function renderMeds(culprits) {
+      const el = document.getElementById('meds-content');
+
+      if (!culprits.length) {
+        el.innerHTML = '<p class="info-text">No common nephrotoxic medication culprits detected from the provided list. If the medication list is blank, enter medications above and re-run.</p>';
+        return;
+      }
+
+      el.innerHTML = culprits.map(c => `
+        <div class="med-card">
+          <div class="med-name">${c.medication}</div>
+          <div class="med-category">${c.category}</div>
+          <div class="med-row"><strong>MOA:</strong> ${c.mechanism}</div>
+          <div class="med-row" style="margin-top:4px;color:var(--teal-300);"><strong>Action:</strong> ${c.suggested_action}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderList(id, items) {
+      const el = document.getElementById(id);
+      el.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+    }
+
+    function renderRedFlags(activeFlags) {
+      const el = document.getElementById('redflags-content');
+      el.innerHTML = ALL_RED_FLAGS.map(flag => {
+        const isActive = activeFlags.has(flag);
+        return `
+          <li class="red-flag-item ${isActive ? 'active' : 'inactive'}">
+            <span class="flag-dot ${isActive ? 'active' : 'inactive'}"></span>
+            <span>${flag}</span>
+          </li>`;
+      }).join('');
+    }
+
+    function renderRefs() {
+      const el = document.getElementById('refs-content');
+      el.innerHTML = `
+        <div class="guideline-box">
+          <strong>${GUIDELINE_METADATA.guideline} (${GUIDELINE_METADATA.year})</strong>
+          <div><em>Definition:</em> ${GUIDELINE_METADATA.definition}</div>
+          <div style="margin-top:4px;"><em>Staging:</em> ${GUIDELINE_METADATA.staging_note}</div>
+          <div style="margin-top:4px;"><em>Clinical note:</em> ${GUIDELINE_METADATA.clinical_note}</div>
+        </div>
+        <div style="margin-top:16px;">
+          ${REFERENCES.map(r => `
+            <div class="ref-item">
+              <span class="ref-num">[${r.id}]</span>${r.citation}
+              <div class="ref-use">${r.use}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Antibiotic Advisor — IDSA/ATS/AHA/SSC Evidence-Based</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --bg2: #111827;
+    --bg3: #1a2235;
+    --bg4: #1e2d45;
+    --border: #2a3a5c;
+    --teal: #0d9488;
+    --teal-light: #14b8a6;
+    --teal-dim: #0d948822;
+    --navy: #1e40af;
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-muted: #64748b;
+    --red: #ef4444;
+    --red-dim: #ef444422;
+    --yellow: #f59e0b;
+    --yellow-dim: #f59e0b22;
+    --green: #22c55e;
+    --green-dim: #22c55e22;
+    --orange: #f97316;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.6; }
+
+  /* ── Header ── */
+  .header { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 14px 24px; display: flex; align-items: center; gap: 12px; }
+  .header-icon { font-size: 22px; }
+  .header h1 { font-size: 17px; font-weight: 600; color: var(--teal-light); }
+  .header p { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+  .header-badge { margin-left: auto; background: var(--teal-dim); border: 1px solid var(--teal); color: var(--teal-light); padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+
+  /* ── Tabs ── */
+  .tabs { display: flex; background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 24px; }
+  .tab { padding: 13px 22px; font-size: 13px; font-weight: 500; cursor: pointer; border-bottom: 2px solid transparent; color: var(--text-dim); transition: all 0.2s; white-space: nowrap; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--teal-light); border-bottom-color: var(--teal-light); }
+
+  /* ── Main layout ── */
+  .main { display: flex; height: calc(100vh - 110px); overflow: hidden; }
+  .sidebar { width: 280px; min-width: 220px; background: var(--bg2); border-right: 1px solid var(--border); overflow-y: auto; padding: 16px; flex-shrink: 0; }
+  .content { flex: 1; overflow-y: auto; padding: 20px 24px; }
+
+  /* ── Search ── */
+  .search-box { position: relative; margin-bottom: 14px; }
+  .search-box input { width: 100%; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px 9px 36px; color: var(--text); font-size: 13px; outline: none; font-family: inherit; }
+  .search-box input:focus { border-color: var(--teal); }
+  .search-box::before { content: "⌕"; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; pointer-events: none; }
+
+  /* ── List items ── */
+  .list-item { padding: 9px 12px; border-radius: 6px; cursor: pointer; margin-bottom: 3px; font-size: 12.5px; color: var(--text-dim); transition: all 0.15s; border: 1px solid transparent; }
+  .list-item:hover { background: var(--bg3); color: var(--text); }
+  .list-item.active { background: var(--teal-dim); border-color: var(--teal); color: var(--teal-light); }
+  .list-item .tag { font-size: 10px; color: var(--text-muted); display: block; margin-top: 1px; font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Panel tab switching ── */
+  .panel { display: none; }
+  .panel.active { display: flex; height: 100%; overflow: hidden; }
+
+  /* ── Content blocks ── */
+  .result-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; color: var(--text-muted); }
+  .result-empty .icon { font-size: 48px; opacity: 0.3; }
+
+  .card { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
+  .card-header { padding: 12px 16px; background: var(--bg4); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
+  .card-title { font-size: 13px; font-weight: 600; color: var(--teal-light); }
+  .card-body { padding: 14px 16px; }
+
+  .drug-name { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+  .drug-class { font-size: 12px; color: var(--teal-light); font-weight: 500; margin-bottom: 14px; }
+
+  .info-row { display: flex; gap: 8px; align-items: baseline; margin-bottom: 6px; }
+  .info-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; min-width: 80px; }
+  .info-val { font-size: 13px; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+
+  .section-heading { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); margin: 14px 0 8px; }
+
+  .adr-item { padding: 5px 10px; font-size: 12px; color: var(--text-dim); border-left: 2px solid var(--border); margin-bottom: 4px; }
+
+  .ci-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px; border-radius: 5px; font-size: 11px; font-weight: 500; margin-bottom: 5px; }
+  .ci-badge.high { background: var(--red-dim); border: 1px solid var(--red); color: #fca5a5; }
+  .ci-badge.moderate { background: var(--yellow-dim); border: 1px solid var(--yellow); color: #fde68a; }
+  .ci-badge.low { background: var(--green-dim); border: 1px solid var(--green); color: #86efac; }
+  .ci-item { margin-bottom: 8px; }
+  .ci-desc { font-size: 12px; color: var(--text); margin-bottom: 3px; }
+
+  .alt-box { background: var(--teal-dim); border: 1px solid var(--teal); border-radius: 6px; padding: 10px 12px; font-size: 12px; color: var(--text); margin-top: 10px; }
+  .alt-label { font-weight: 600; color: var(--teal-light); display: block; margin-bottom: 3px; font-size: 11px; text-transform: uppercase; }
+
+  /* ── Contraindication screener ── */
+  .screener { background: var(--bg4); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-top: 14px; }
+  .screener h3 { font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 10px; }
+  .ci-check { display: flex; align-items: center; gap: 9px; padding: 6px 4px; border-radius: 5px; cursor: pointer; transition: background 0.1s; }
+  .ci-check:hover { background: var(--bg3); }
+  .ci-check input[type=checkbox] { width: 15px; height: 15px; accent-color: var(--teal); cursor: pointer; }
+  .ci-check label { font-size: 12.5px; color: var(--text-dim); cursor: pointer; flex: 1; }
+  .ci-check label.checked { color: var(--text); }
+  .screener-result { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 12px; display: none; }
+  .ci-flag { padding: 8px 10px; background: var(--red-dim); border: 1px solid var(--red); border-radius: 6px; margin-bottom: 8px; }
+  .ci-flag .drug-label { font-size: 11px; font-weight: 600; color: #fca5a5; margin-bottom: 3px; }
+  .ci-flag .ci-reason { font-size: 12px; color: var(--text); }
+  .ci-flag .ci-sev { font-size: 10px; color: #f87171; margin-top: 2px; }
+  .ci-ok { padding: 8px 10px; background: var(--green-dim); border: 1px solid var(--green); border-radius: 6px; font-size: 12px; color: #86efac; }
+
+  /* ── Infection view ── */
+  .regimen-card { background: var(--bg4); border: 1px solid var(--border); border-radius: 8px; padding: 14px; margin-bottom: 12px; }
+  .regimen-label { display: inline-flex; align-items: center; gap: 6px; padding: 3px 9px; border-radius: 4px; font-size: 11px; font-weight: 600; margin-bottom: 10px; }
+  .regimen-label.first { background: #16a34a22; border: 1px solid #16a34a; color: #86efac; }
+  .regimen-label.second { background: #1d4ed822; border: 1px solid #3b82f6; color: #93c5fd; }
+  .regimen-label.alt { background: #7c3aed22; border: 1px solid #8b5cf6; color: #c4b5fd; }
+  .regimen-label.add { background: #b45309aa; border: 1px solid #f59e0b; color: #fde68a; }
+
+  .drug-pill { display: inline-flex; align-items: center; gap: 4px; background: var(--bg3); border: 1px solid var(--border); border-radius: 20px; padding: 3px 10px; font-size: 12px; color: var(--text); margin: 2px; cursor: pointer; transition: all 0.15s; }
+  .drug-pill:hover { border-color: var(--teal); color: var(--teal-light); }
+  .combo-sep { color: var(--text-muted); margin: 0 2px; font-size: 11px; font-weight: 600; }
+
+  .duration-badge { background: var(--bg3); border: 1px solid var(--border); border-radius: 4px; padding: 4px 8px; font-size: 11px; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; margin-bottom: 8px; display: inline-block; }
+  .source-cite { font-size: 11px; color: var(--text-muted); font-style: italic; margin-top: 6px; }
+  .notes-text { font-size: 12px; color: var(--text-dim); margin-top: 6px; line-height: 1.5; }
+  .pearl-box { background: #1e3a5f; border: 1px solid #3b82f6; border-radius: 6px; padding: 10px 12px; font-size: 12px; color: #bfdbfe; margin-bottom: 10px; }
+
+  .org-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 14px; }
+  .org-tag { background: var(--bg4); border: 1px solid var(--border); padding: 2px 8px; border-radius: 20px; font-size: 11px; color: var(--text-dim); }
+
+  /* ── Organism view ── */
+  .site-row { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .site-label { font-size: 11px; font-weight: 600; color: var(--text-muted); min-width: 140px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .site-val { font-size: 12.5px; color: var(--text); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── Renal alert ── */
+  .renal-alert { display: flex; align-items: flex-start; gap: 6px; padding: 8px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 6px; }
+  .renal-alert.warn { background: var(--yellow-dim); border: 1px solid var(--yellow); color: #fde68a; }
+  .renal-alert.crit { background: var(--red-dim); border: 1px solid var(--red); color: #fca5a5; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">💊</div>
+  <div>
+    <h1>Antibiotic Advisor</h1>
+    <p>Evidence-based regimens — IDSA / ATS / AHA / SSC / AASLD guidelines</p>
+  </div>
+  <div class="header-badge">Educational Only</div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('infection')">By Infection Type</div>
+  <div class="tab" onclick="switchTab('organism')">By Organism</div>
+  <div class="tab" onclick="switchTab('drug')">Drug Lookup</div>
+</div>
+
+<!-- ═══ TAB 1: By Infection ═══ -->
+<div id="panel-infection" class="panel active">
+  <div class="sidebar">
+    <div class="search-box"><input type="text" id="inf-search" placeholder="Search infections..." oninput="filterList('inf')"></div>
+    <div id="inf-list"></div>
+  </div>
+  <div class="content" id="inf-content">
+    <div class="result-empty"><div class="icon">🦠</div><div>Select an infection type from the left</div></div>
+  </div>
+</div>
+
+<!-- ═══ TAB 2: By Organism ═══ -->
+<div id="panel-organism" class="panel">
+  <div class="sidebar">
+    <div class="search-box"><input type="text" id="org-search" placeholder="Search organisms..." oninput="filterList('org')"></div>
+    <div id="org-list"></div>
+  </div>
+  <div class="content" id="org-content">
+    <div class="result-empty"><div class="icon">🔬</div><div>Select an organism from the left</div></div>
+  </div>
+</div>
+
+<!-- ═══ TAB 3: Drug Lookup ═══ -->
+<div id="panel-drug" class="panel">
+  <div class="sidebar">
+    <div class="search-box"><input type="text" id="drug-search" placeholder="Search antibiotics..." oninput="filterList('drug')"></div>
+    <div id="drug-list"></div>
+  </div>
+  <div class="content" id="drug-content">
+    <div class="result-empty"><div class="icon">💉</div><div>Select an antibiotic from the left</div></div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// ANTIBIOTIC DATABASE
+// ═══════════════════════════════════════════════════════════
+const ANTIBIOTIC_DB = {
+  "Ampicillin": {
+    "class": "Aminopenicillin",
+    "dose": "2g IV q4–6h",
+    "renal": "Dose-reduce if CrCl <30",
+    "adr": ["Maculopapular rash (esp. in EBV/mono — not a true IgE-mediated allergy)", "Diarrhea / C. difficile (low risk)", "IgE-mediated anaphylaxis (uncommon)"],
+    "ci": [["Penicillin allergy — immediate hypersensitivity / anaphylaxis", "HIGH"], ["Prior ampicillin rash during mononucleosis (EBV)", "LOW — not true allergy; use clinical judgment"]],
+    "alt_if_ci": "Listeria: TMP-SMX or meropenem. Enterococcal endocarditis: daptomycin or linezolid (ID consult)."
+  },
+  "Ampicillin-sulbactam": {
+    "class": "Aminopenicillin + beta-lactamase inhibitor",
+    "dose": "3g IV q6h",
+    "renal": "Dose-reduce if CrCl <30",
+    "adr": ["Diarrhea / C. difficile", "Rash / urticaria", "Anaphylaxis", "Elevated LFTs"],
+    "ci": [["Penicillin allergy", "HIGH"]],
+    "alt_if_ci": "Aspiration: clindamycin + ciprofloxacin. Intra-abdominal: piperacillin-tazobactam (if no PCN allergy)."
+  },
+  "Nafcillin": {
+    "class": "Antistaphylococcal penicillin",
+    "dose": "2g IV q4h",
+    "renal": "No renal adjustment (hepatic elimination)",
+    "adr": ["Interstitial nephritis", "Phlebitis — requires central access for prolonged courses", "Neutropenia (prolonged use)", "Hepatotoxicity (LFT elevation)"],
+    "ci": [["Penicillin allergy — anaphylaxis", "HIGH"]],
+    "alt_if_ci": "Cefazolin if non-anaphylactic PCN allergy; vancomycin if anaphylaxis (inferior for MSSA — last resort)."
+  },
+  "Piperacillin-tazobactam": {
+    "class": "Antipseudomonal penicillin + beta-lactamase inhibitor",
+    "dose": "4.5g IV q6–8h (extended infusion: 3.375g q8h over 4h for better PK/PD)",
+    "renal": "Dose-reduce if CrCl <40",
+    "adr": ["AKI — markedly increased when combined with vancomycin", "Electrolyte disturbances: hypokalemia, hyponatremia", "C. difficile (moderate risk)", "Neurotoxicity / encephalopathy (renal failure — rare)"],
+    "ci": [["Penicillin allergy", "HIGH"], ["Concurrent vancomycin use in patient with elevated baseline creatinine or AKI risk", "MODERATE — monitor Cr q24h; strongly consider cefepime instead"]],
+    "alt_if_ci": "Cefepime + metronidazole; meropenem (PCN allergy or MDR risk)."
+  },
+  "Amoxicillin": {
+    "class": "Aminopenicillin (oral)",
+    "dose": "500mg–1g PO q8h (or 875mg PO q12h)",
+    "renal": "Dose-reduce if CrCl <30",
+    "adr": ["Maculopapular rash (esp. in EBV/mono)", "Diarrhea / C. difficile (low risk)", "IgE-mediated anaphylaxis (uncommon)", "GI upset: nausea, vomiting"],
+    "ci": [["Penicillin allergy — immediate hypersensitivity / anaphylaxis", "HIGH"]],
+    "alt_if_ci": "Cephalexin (mild SSTI — non-anaphylactic PCN allergy); azithromycin (atypicals); TMP-SMX (UTI)."
+  },
+  "Amoxicillin-clavulanate": {
+    "class": "Aminopenicillin + beta-lactamase inhibitor (oral) — Augmentin",
+    "dose": "875/125mg PO q12h or 500/125mg PO q8h",
+    "renal": "Dose-reduce if CrCl 10–30; avoid extended-release if CrCl <30",
+    "adr": ["Diarrhea — most common ADE (clavulanate)", "Nausea / vomiting", "Rash / urticaria", "Cholestatic hepatitis (rare)", "C. difficile (low risk)"],
+    "ci": [["Penicillin allergy", "HIGH"], ["Prior amoxicillin-clavulanate-associated cholestatic jaundice", "HIGH"], ["CrCl <30 with extended-release formulation", "HIGH"]],
+    "alt_if_ci": "Cephalexin (mild SSTI); clindamycin (oral anaerobic coverage); levofloxacin (respiratory infections)."
+  },
+  "Oxacillin": {
+    "class": "Antistaphylococcal penicillin (IV)",
+    "dose": "2g IV q4h",
+    "renal": "No renal adjustment (hepatic elimination)",
+    "adr": ["Interstitial nephritis", "Phlebitis — requires central access", "Neutropenia (prolonged use)", "Hepatotoxicity (LFT elevation — more than nafcillin)"],
+    "ci": [["Penicillin allergy — anaphylaxis", "HIGH"]],
+    "alt_if_ci": "Cefazolin if non-anaphylactic PCN allergy; vancomycin if anaphylaxis (inferior for MSSA — last resort)."
+  },
+  "Penicillin G": {
+    "class": "Natural penicillin (IV/IM)",
+    "dose": "2–4 million units IV q4–6h (meningitis/endocarditis: 4 million units IV q4h); Benzathine PCN G: 1.2–2.4 million units IM q1–4 weeks",
+    "renal": "Dose-reduce if CrCl <30 — neurotoxicity/seizures at high IV doses with renal failure",
+    "adr": ["IgE-mediated anaphylaxis (0.01–0.05% per course)", "Maculopapular rash (3–5%)", "Neurotoxicity / seizures at very high doses in renal failure", "Hyperkalemia — potassium penicillin G contains 1.7 mEq K+ per million units", "Hemolytic anemia (prolonged high-dose therapy — rare)"],
+    "ci": [["Penicillin allergy — immediate hypersensitivity / anaphylaxis", "HIGH"], ["Renal failure with high-dose IV regimen (seizure/neurotoxicity risk)", "MODERATE"]],
+    "alt_if_ci": "Ceftriaxone (streptococcal/meningococcal infections); vancomycin (PCN-anaphylaxis + gram-positive infection); meropenem (meningitis with PCN allergy)."
+  },
+  "Cephalexin": {
+    "class": "1st-generation cephalosporin (oral)",
+    "dose": "500mg PO q6h",
+    "renal": "Dose-reduce if CrCl <30",
+    "adr": ["GI upset / diarrhea", "Rash", "Cross-reactivity with PCN anaphylaxis (~1–2%)"],
+    "ci": [["Cephalosporin allergy", "HIGH"], ["History of anaphylaxis to penicillin", "MODERATE — ~1–2% cross-reactivity"]],
+    "alt_if_ci": "Clindamycin or doxycycline for non-purulent SSTI."
+  },
+  "Cefazolin": {
+    "class": "1st-generation cephalosporin (IV)",
+    "dose": "1–2g IV q8h",
+    "renal": "Dose-reduce if CrCl <35",
+    "adr": ["Injection site reactions / phlebitis", "Rash", "C. difficile (low risk)"],
+    "ci": [["Cephalosporin allergy", "HIGH"], ["Severe immediate penicillin allergy — anaphylaxis", "MODERATE — low cross-reactivity but avoid if true anaphylaxis"]],
+    "alt_if_ci": "Vancomycin for MSSA if truly beta-lactam intolerant (inferior — use reluctantly)."
+  },
+  "Cefotetan": {
+    "class": "2nd-generation cephalosporin — anaerobic and gram-negative coverage (IV)",
+    "dose": "1–2g IV q12h",
+    "renal": "Dose-reduce if CrCl <30",
+    "adr": ["Disulfiram-like reaction with alcohol (MTT side chain)", "Hypoprothrombinemia / bleeding risk", "C. difficile (moderate risk)", "Rash", "Hemolytic anemia (rare)"],
+    "ci": [["Cephalosporin allergy", "HIGH"], ["Active alcohol use — disulfiram-like reaction risk", "MODERATE"], ["Concurrent warfarin / anticoagulation", "MODERATE"]],
+    "alt_if_ci": "Cefoxitin (similar coverage, no MTT side chain); metronidazole + ceftriaxone; ampicillin-sulbactam."
+  },
+  "Cefoxitin": {
+    "class": "2nd-generation cephalosporin — anaerobic and gram-negative coverage (IV)",
+    "dose": "1–2g IV q6–8h",
+    "renal": "Dose-reduce if CrCl <30",
+    "adr": ["C. difficile (moderate risk)", "Rash / urticaria", "Elevated LFTs", "Phlebitis (peripheral IV)"],
+    "ci": [["Cephalosporin allergy", "HIGH"]],
+    "alt_if_ci": "Ampicillin-sulbactam; piperacillin-tazobactam; cefotetan (if q12h dosing preferred)."
+  },
+  "Ceftriaxone": {
+    "class": "3rd-generation cephalosporin",
+    "dose": "1–2g IV q24h (meningitis/endocarditis: 2g IV q12h)",
+    "renal": "No renal adjustment needed",
+    "adr": ["Biliary sludge / pseudolithiasis (prolonged use)", "C. difficile", "Rash"],
+    "ci": [["Cephalosporin allergy", "HIGH"]],
+    "alt_if_ci": "Levofloxacin or aztreonam (gram-negative); moxifloxacin (CAP monotherapy)."
+  },
+  "Ceftazidime": {
+    "class": "3rd-generation cephalosporin — antipseudomonal (IV)",
+    "dose": "2g IV q8h",
+    "renal": "Dose-reduce if CrCl <50 — encephalopathy risk if not adjusted",
+    "adr": ["C. difficile (moderate risk)", "Rash / urticaria", "Elevated LFTs", "Neurotoxicity / encephalopathy (high doses in renal failure)"],
+    "ci": [["Cephalosporin allergy", "HIGH"], ["Aztreonam allergy — shared R1 side chain cross-reactivity", "HIGH"], ["Renal failure without dose adjustment", "HIGH"]],
+    "alt_if_ci": "Cefepime (broader gram-positive coverage); piperacillin-tazobactam; meropenem (MDR/severe)."
+  },
+  "Cefepime": {
+    "class": "4th-generation cephalosporin — antipseudomonal",
+    "dose": "2g IV q8–12h",
+    "renal": "CRITICAL — dose-reduce if CrCl <50; neurotoxicity if not adjusted",
+    "adr": ["Neurotoxicity / encephalopathy / nonconvulsive seizures — especially in renal failure without dose adjustment", "C. difficile (moderate risk)", "Rash"],
+    "ci": [["Cephalosporin allergy", "HIGH"], ["Renal failure without dose adjustment", "HIGH — neurotoxicity and seizure risk"]],
+    "alt_if_ci": "Piperacillin-tazobactam; aztreonam + metronidazole (PCN/ceph allergy with gram-negative need)."
+  },
+  "Cefotaxime": {
+    "class": "3rd-generation cephalosporin",
+    "dose": "2g IV q4–8h (meningitis: 2g q4–6h)",
+    "renal": "Dose-reduce if CrCl <20",
+    "adr": ["Rash", "C. difficile", "Elevated LFTs"],
+    "ci": [["Cephalosporin allergy", "HIGH"]],
+    "alt_if_ci": "Ceftriaxone preferred in most settings; meropenem for CNS infections."
+  },
+  "Ceftaroline": {
+    "class": "5th-generation cephalosporin — MRSA-active",
+    "dose": "600mg IV q12h",
+    "renal": "Dose-reduce if CrCl <50",
+    "adr": ["Diarrhea / C. difficile", "Rash", "Positive Coombs test", "Hypokalemia"],
+    "ci": [["Cephalosporin allergy", "HIGH"]],
+    "alt_if_ci": "Vancomycin; linezolid."
+  },
+  "Meropenem": {
+    "class": "Carbapenem — antipseudomonal",
+    "dose": "1–2g IV q8h (meningitis: 2g q8h)",
+    "renal": "Dose-reduce if CrCl <50",
+    "adr": ["Seizures (lowest risk among carbapenems)", "C. difficile (broad spectrum — high risk)", "Diarrhea"],
+    "ci": [["Carbapenem allergy", "HIGH"], ["Active seizure disorder", "MODERATE — lowest seizure risk carbapenem but still caution"]],
+    "alt_if_ci": "Aztreonam + vancomycin (PCN/beta-lactam allergy for gram-negative coverage); polymyxins (pan-resistant)."
+  },
+  "Ertapenem": {
+    "class": "Carbapenem — NO Pseudomonas activity",
+    "dose": "1g IV q24h",
+    "renal": "Dose-reduce if CrCl <30",
+    "adr": ["Seizures", "C. difficile", "Diarrhea", "Infusion site reactions"],
+    "ci": [["Carbapenem allergy", "HIGH"], ["Pseudomonas coverage is needed", "ABSOLUTE — ertapenem has zero antipseudomonal activity"]],
+    "alt_if_ci": "Meropenem or piperacillin-tazobactam when Pseudomonas must be covered."
+  },
+  "Imipenem-cilastatin": {
+    "class": "Carbapenem",
+    "dose": "500mg IV q6h",
+    "renal": "Dose-reduce if CrCl <70",
+    "adr": ["Seizures — HIGHEST seizure risk among carbapenems (5–33% in CNS infections)", "C. difficile", "Nausea / vomiting"],
+    "ci": [["Carbapenem allergy", "HIGH"], ["CNS infection or history of seizure disorder", "HIGH — avoid entirely; use meropenem"]],
+    "alt_if_ci": "Meropenem (preferred carbapenem for all CNS indications)."
+  },
+  "Ciprofloxacin": {
+    "class": "Fluoroquinolone — gram-negative coverage (no atypical/streptococcal coverage)",
+    "dose": "400mg IV q8–12h / 500mg PO q12h",
+    "renal": "Dose-reduce if CrCl <30",
+    "adr": ["QTc prolongation — torsades de pointes risk", "Tendinopathy / tendon rupture (Achilles)", "Peripheral neuropathy — may be irreversible", "Aortic aneurysm / dissection (FDA black box)", "C. difficile (moderate risk)", "CNS effects: insomnia, agitation, confusion (elderly)", "Photosensitivity"],
+    "ci": [["QTc >500ms or documented QTc prolongation", "HIGH"], ["Concurrent QTc-prolonging drugs: haloperidol, amiodarone, ondansetron, azithromycin, methadone", "HIGH"], ["Known or suspected aortic aneurysm", "HIGH — FDA black box warning"], ["Myasthenia gravis", "HIGH — worsens neuromuscular blockade"], ["Pregnancy / breastfeeding", "HIGH"], ["Age <18 (cartilage toxicity)", "HIGH"], ["History of tendon rupture or on corticosteroids in patient >60", "MODERATE"]],
+    "alt_if_ci": "Ceftriaxone or aztreonam (gram-negative); TMP-SMX (UTI)."
+  },
+  "Levofloxacin": {
+    "class": "Respiratory fluoroquinolone — gram-positive, gram-negative, atypical coverage",
+    "dose": "750mg IV/PO q24h",
+    "renal": "Dose-reduce if CrCl <50",
+    "adr": ["QTc prolongation", "Tendinopathy / tendon rupture", "Peripheral neuropathy — may be irreversible", "Aortic aneurysm / dissection", "C. difficile", "Photosensitivity", "Seizures (rare)"],
+    "ci": [["QTc >500ms or QTc prolongation", "HIGH"], ["Concurrent QTc-prolonging drugs", "HIGH"], ["Known or suspected aortic aneurysm", "HIGH"], ["Myasthenia gravis", "HIGH"], ["Pregnancy / breastfeeding", "HIGH"], ["Age <18", "HIGH"]],
+    "alt_if_ci": "Azithromycin + ceftriaxone (CAP); doxycycline (atypicals)."
+  },
+  "Moxifloxacin": {
+    "class": "Respiratory fluoroquinolone — gram-positive, gram-negative, atypical; NO urinary activity",
+    "dose": "400mg PO/IV q24h",
+    "renal": "No renal dose adjustment needed",
+    "adr": ["QTc prolongation — highest QTc effect among all fluoroquinolones", "Tendinopathy / tendon rupture", "Peripheral neuropathy — may be irreversible", "Aortic aneurysm / dissection (FDA black box)", "Hepatotoxicity — FDA black box", "C. difficile", "Photosensitivity"],
+    "ci": [["QTc >500ms or documented QTc prolongation", "HIGH — highest QTc risk among fluoroquinolones"], ["Concurrent QTc-prolonging drugs", "HIGH"], ["Known or suspected aortic aneurysm", "HIGH — FDA black box warning"], ["Myasthenia gravis", "HIGH"], ["Pregnancy / breastfeeding", "HIGH"], ["Age <18", "HIGH"], ["Urinary tract infection", "ABSOLUTE — inadequate urinary concentration"], ["Severe hepatic impairment", "HIGH"]],
+    "alt_if_ci": "Levofloxacin (CAP — less QTc risk); doxycycline + ceftriaxone (CAP combo)."
+  },
+  "Azithromycin": {
+    "class": "Macrolide — atypical, gram-positive coverage",
+    "dose": "500mg IV/PO q24h",
+    "renal": "No dose adjustment needed",
+    "adr": ["QTc prolongation (dose-dependent)", "GI upset: nausea, vomiting, diarrhea", "Hepatotoxicity (rare; prolonged use)", "Sensorineural hearing loss (high dose / prolonged)"],
+    "ci": [["QTc >500ms", "HIGH"], ["Concurrent QTc-prolonging drugs (levofloxacin, haloperidol, ondansetron)", "HIGH"], ["Severe hepatic impairment", "MODERATE"], ["Prior cholestatic jaundice with macrolide use", "HIGH"]],
+    "alt_if_ci": "Doxycycline (atypical CAP coverage); levofloxacin monotherapy."
+  },
+  "Vancomycin": {
+    "class": "Glycopeptide — MRSA, gram-positive coverage",
+    "dose": "AUC-guided (target AUC/MIC 400–600); typically 15–20 mg/kg IV q8–12h with pharmacy dosing",
+    "renal": "CRITICAL — dose and interval must be adjusted per CrCl; pharmacy-guided",
+    "adr": ["Nephrotoxicity (AKI) — dramatically increased with concurrent piperacillin-tazobactam", "Red man syndrome (infusion-rate-dependent histamine release — NOT allergy; slow infusion)", "Ototoxicity (high trough levels — rare with AUC-based dosing)", "Thrombophlebitis (peripheral IV)"],
+    "ci": [["True vancomycin allergy — IgE mediated (rare)", "HIGH"], ["Concurrent piperacillin-tazobactam use in patient with AKI risk or elevated baseline Cr", "MODERATE — use cefepime instead"]],
+    "alt_if_ci": "Daptomycin (MRSA bacteremia/endocarditis — NOT pneumonia); linezolid (MRSA pneumonia/soft tissue); ceftaroline (MRSA CAP)."
+  },
+  "Vancomycin (oral)": {
+    "class": "Glycopeptide oral — NOT systemically absorbed; C. diff treatment ONLY",
+    "dose": "125mg PO q6h x10 days (fulminant CDI: 500mg PO q6h)",
+    "renal": "No adjustment needed — not absorbed",
+    "adr": ["GI upset", "Bitter taste", "No systemic ADEs"],
+    "ci": [["True vancomycin allergy", "HIGH"]],
+    "alt_if_ci": "Fidaxomicin 200mg PO q12h x10 days (preferred)."
+  },
+  "Linezolid": {
+    "class": "Oxazolidinone — MRSA, VRE; 100% oral bioavailability",
+    "dose": "600mg IV/PO q12h",
+    "renal": "No dose adjustment needed",
+    "adr": ["Serotonin syndrome — especially with SSRIs, SNRIs, MAOIs, meperidine, fentanyl", "Thrombocytopenia — check CBC weekly on prolonged courses", "Peripheral and optic neuropathy (courses >2 weeks)", "Lactic acidosis (prolonged use — rare)", "Myelosuppression: anemia, leukopenia"],
+    "ci": [["Concurrent SSRI / SNRI / MAOI — serotonin syndrome", "HIGH — FDA black box warning"], ["Concurrent serotonergic agents: tramadol, meperidine, fentanyl, triptans", "HIGH"], ["Pre-existing myelosuppression / thrombocytopenia", "MODERATE"], ["Phenylketonuria (oral tablets contain phenylalanine)", "MODERATE"]],
+    "alt_if_ci": "Vancomycin; daptomycin (non-pulmonary MRSA); TMP-SMX (mild MRSA SSTI only)."
+  },
+  "Daptomycin": {
+    "class": "Cyclic lipopeptide — MRSA/VRE bacteremia and endocarditis; NOT for pneumonia",
+    "dose": "6 mg/kg IV q24h (endocarditis/bacteremia: 6–10 mg/kg q24h)",
+    "renal": "Dose-reduce or extend interval if CrCl <30",
+    "adr": ["Myopathy / rhabdomyolysis — check CK at baseline and weekly", "Eosinophilic pneumonia (rare but serious)", "Peripheral neuropathy"],
+    "ci": [["Pneumonia or pulmonary source of infection", "ABSOLUTE — inactivated by pulmonary surfactant"], ["Concurrent statin therapy", "MODERATE — increased myopathy risk; hold statin if possible"], ["Pre-existing myopathy or elevated CK (>5× ULN)", "MODERATE"]],
+    "alt_if_ci": "Vancomycin; linezolid (MRSA pneumonia when daptomycin is contraindicated)."
+  },
+  "Doxycycline": {
+    "class": "Tetracycline — atypicals, MRSA SSTI, Rickettsia, Lyme",
+    "dose": "100mg PO/IV q12h",
+    "renal": "No renal dose adjustment needed",
+    "adr": ["Photosensitivity — counsel sun protection", "Esophageal ulceration — take with full glass of water; remain upright 30 min", "GI upset: nausea, vomiting", "Tooth discoloration in children <8", "Pseudotumor cerebri (rare)"],
+    "ci": [["Pregnancy (2nd/3rd trimester — fetal tooth and bone toxicity)", "HIGH"], ["Children <8 years — permanent tooth discoloration", "HIGH"], ["Esophageal stricture or severe dysmotility", "MODERATE"], ["Concurrent antacids / calcium / iron (chelation — reduces absorption by 50–90%)", "LOW — separate doses by ≥2 hours"]],
+    "alt_if_ci": "Azithromycin (atypicals in CAP); TMP-SMX or clindamycin (MRSA SSTI)."
+  },
+  "TMP-SMX": {
+    "class": "Folate synthesis inhibitor — gram-positive MRSA SSTI, gram-negative UTI, PCP prophylaxis/treatment",
+    "dose": "1–2 DS tabs PO q12h (UTI: 1 DS tab q12h x3d); PCP treatment: 15–20 mg/kg/day TMP in 3–4 divided doses",
+    "renal": "Dose-reduce if CrCl 15–30; avoid if CrCl <15",
+    "adr": ["Stevens-Johnson syndrome / toxic epidermal necrolysis (rare but life-threatening)", "Bone marrow suppression: leukopenia, thrombocytopenia, megaloblastic anemia", "Hyperkalemia — blocks renal K+ excretion", "Nephrotoxicity — blocks creatinine tubular secretion (may falsely elevate Cr)", "Potentiates warfarin (INR elevation)", "Hemolytic anemia in G6PD deficiency", "Photosensitivity"],
+    "ci": [["Sulfa allergy", "HIGH"], ["G6PD deficiency", "HIGH — hemolytic anemia"], ["Pregnancy near term / breastfeeding premature infant — kernicterus risk", "HIGH"], ["Severe renal failure (CrCl <15)", "HIGH"], ["Concurrent warfarin therapy", "MODERATE — monitor INR closely"], ["Concurrent ACE inhibitor / ARB / potassium-sparing diuretic", "MODERATE — hyperkalemia risk"]],
+    "alt_if_ci": "Nitrofurantoin or fosfomycin (UTI); doxycycline or clindamycin (MRSA SSTI); atovaquone (PCP in sulfa allergy)."
+  },
+  "Nitrofurantoin": {
+    "class": "Nitrofuran — urinary tract infections ONLY (no systemic tissue penetration)",
+    "dose": "100mg PO q12h (macrocrystal — Macrobid) x5 days",
+    "renal": "CONTRAINDICATED if CrCl <30 — inadequate urinary drug concentration + toxic metabolite accumulation",
+    "adr": ["Pulmonary toxicity: acute hypersensitivity pneumonitis or chronic pulmonary fibrosis (long-term use)", "Peripheral neuropathy (renal failure or prolonged use)", "Hemolytic anemia (G6PD deficiency)", "Hepatotoxicity (rare)", "GI upset — take with food"],
+    "ci": [["CrCl <30 mL/min", "ABSOLUTE — inadequate concentration + metabolite toxicity"], ["G6PD deficiency", "HIGH"], ["Pregnancy at term (38–42 weeks)", "HIGH"], ["Infants <1 month", "HIGH"]],
+    "alt_if_ci": "Fosfomycin single dose; TMP-SMX x3 days (if CrCl allows); cephalexin."
+  },
+  "Metronidazole": {
+    "class": "Nitroimidazole — anaerobes, C. diff (adjunct), Trichomonas, H. pylori",
+    "dose": "500mg IV/PO q8h; C. diff adjunct (fulminant): 500mg IV q8h",
+    "renal": "No renal dose adjustment needed",
+    "adr": ["Metallic taste (common — counsel patients)", "Disulfiram-like reaction with alcohol — avoid ETOH during and 48h after course", "Peripheral neuropathy (prolonged courses >6 weeks)", "Neurotoxicity / encephalopathy (high doses or hepatic failure)", "GI upset: nausea, vomiting, abdominal cramping"],
+    "ci": [["Alcohol consumption within 48 hours (disulfiram-like reaction)", "HIGH — counsel strictly"], ["First trimester pregnancy (relative)", "MODERATE"], ["Concurrent lithium therapy", "MODERATE — may increase lithium levels"]],
+    "alt_if_ci": "Clindamycin (anaerobes — higher C. diff risk); oral vancomycin or fidaxomicin (C. diff)."
+  },
+  "Fosfomycin": {
+    "class": "Phosphonic acid — uncomplicated UTI only (poor systemic/tissue penetration)",
+    "dose": "3g PO x1 dose (single sachet dissolved in water)",
+    "renal": "Use with caution if CrCl <10; generally safe in mild-moderate CKD",
+    "adr": ["Diarrhea", "Nausea", "Headache", "Minimal systemic ADEs"],
+    "ci": [["Fosfomycin allergy", "HIGH"], ["Upper UTI / pyelonephritis / systemic infection", "ABSOLUTE — no adequate tissue penetration"]],
+    "alt_if_ci": "Nitrofurantoin; TMP-SMX; cephalexin."
+  },
+  "Clindamycin": {
+    "class": "Lincosamide — gram-positive, anaerobes; toxin suppression in Group A Strep / necrotizing infections",
+    "dose": "600–900mg IV q8h / 300–450mg PO q8h",
+    "renal": "No renal dose adjustment needed",
+    "adr": ["C. difficile — among the highest risk of ALL antibiotics", "Diarrhea (very common)", "Hepatotoxicity (rare)", "Neuromuscular blockade (high doses — rare)"],
+    "ci": [["History of C. difficile infection", "HIGH — dramatically increases recurrence risk"], ["Active inflammatory bowel disease (IBD)", "MODERATE"]],
+    "alt_if_ci": "TMP-SMX or doxycycline (MRSA SSTI); cephalexin (non-MRSA SSTI); ampicillin-sulbactam (anaerobes)."
+  },
+  "Fidaxomicin": {
+    "class": "Macrocyclic antibiotic — C. difficile infection only (minimal gut absorption)",
+    "dose": "200mg PO q12h x10 days",
+    "renal": "No dose adjustment needed",
+    "adr": ["Nausea", "Vomiting", "Abdominal pain", "GI bleeding (rare)"],
+    "ci": [["Fidaxomicin / macrolide allergy", "HIGH"]],
+    "alt_if_ci": "Oral vancomycin 125mg PO q6h x10 days."
+  },
+  "Aztreonam": {
+    "class": "Monobactam — gram-negative coverage ONLY (no gram-positive, no anaerobic activity)",
+    "dose": "2g IV q8h",
+    "renal": "Dose-reduce if CrCl <30",
+    "adr": ["Rash / urticaria", "GI upset", "Elevated LFTs"],
+    "ci": [["Aztreonam allergy", "HIGH"], ["Ceftazidime allergy — shared R1 side chain cross-reactivity", "HIGH"], ["Gram-positive or anaerobic infection without additional coverage", "ABSOLUTE — must combine with vancomycin ± metronidazole"]],
+    "alt_if_ci": "Aminoglycosides for gram-negative coverage in true beta-lactam/penicillin allergy."
+  },
+  "Gentamicin": {
+    "class": "Aminoglycoside — gram-negative synergy; adjunct for Enterococcal endocarditis",
+    "dose": "5–7 mg/kg IV q24h (extended-interval); 1 mg/kg q8h (synergy dosing)",
+    "renal": "CRITICAL — extend interval per CrCl; avoid if CrCl <30 if alternative available",
+    "adr": ["Nephrotoxicity (AKI) — compounded by vancomycin, NSAIDs, contrast", "Ototoxicity: sensorineural hearing loss + vestibular toxicity — may be irreversible", "Neuromuscular blockade (rare)"],
+    "ci": [["Pre-existing renal failure (CrCl <30)", "HIGH — accumulation + nephrotoxicity"], ["Pre-existing sensorineural hearing loss", "HIGH — irreversible worsening"], ["Myasthenia gravis", "HIGH — worsens neuromuscular blockade"], ["Concurrent nephrotoxins (vancomycin, contrast, NSAIDs)", "MODERATE"]],
+    "alt_if_ci": "Aztreonam (gram-negative coverage); cefepime; ampicillin + ceftriaxone double-beta-lactam (Enterococcal endocarditis)."
+  },
+  "Tobramycin": {
+    "class": "Aminoglycoside — gram-negative, enhanced Pseudomonas activity (IV/Inhaled)",
+    "dose": "5–7 mg/kg IV q24h (extended-interval; pharmacy-guided); inhaled: 300mg nebulized q12h (CF/bronchiectasis only)",
+    "renal": "CRITICAL — extend interval per CrCl; avoid if CrCl <30 if alternative available",
+    "adr": ["Nephrotoxicity (AKI)", "Ototoxicity: cochlear (hearing loss) and vestibular toxicity — may be irreversible", "Neuromuscular blockade (rare)"],
+    "ci": [["Pre-existing renal failure (CrCl <30)", "HIGH"], ["Pre-existing sensorineural hearing loss", "HIGH"], ["Myasthenia gravis", "HIGH"], ["Concurrent nephrotoxins", "MODERATE"]],
+    "alt_if_ci": "Aztreonam or cefepime (gram-negative coverage)."
+  },
+  "Amikacin": {
+    "class": "Aminoglycoside — broadest gram-negative coverage including many MDR organisms (IV)",
+    "dose": "15–20 mg/kg IV q24h (extended-interval; pharmacy-guided)",
+    "renal": "CRITICAL — extend interval per CrCl; pharmacy-guided AUC monitoring",
+    "adr": ["Nephrotoxicity (AKI)", "Ototoxicity: predominantly cochlear (hearing loss > vestibular) — may be irreversible", "Neuromuscular blockade (rare)"],
+    "ci": [["Pre-existing renal failure (CrCl <30)", "HIGH"], ["Pre-existing sensorineural hearing loss", "HIGH"], ["Myasthenia gravis", "HIGH"], ["Concurrent nephrotoxins", "MODERATE"]],
+    "alt_if_ci": "Aztreonam or cefepime (gram-negative); ceftazidime-avibactam (MDR gram-negative — ID consult required)."
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// INFECTION DATABASE
+// ═══════════════════════════════════════════════════════════
+const INFECTION_DB = {
+  "cap_nonicu": {
+    "display": "Community-Acquired Pneumonia (CAP) — Non-ICU Inpatient",
+    "organisms": ["Streptococcus pneumoniae", "Haemophilus influenzae", "Mycoplasma pneumoniae", "Chlamydia pneumoniae", "Legionella spp."],
+    "regimens": [
+      {"label": "First-line", "drugs": ["Ceftriaxone", "Azithromycin"], "combo": true, "duration": "Minimum 5 days; continue until afebrile ≥48h and clinically stable", "notes": "Combination covers typical and atypical organisms. Standard of care for hospitalized CAP.", "source": "ATS/IDSA CAP Guidelines 2019 [AJRCCM 200:e45]"},
+      {"label": "Alternative (monotherapy)", "drugs": ["Levofloxacin"], "combo": false, "duration": "5 days", "notes": "Use if macrolide intolerance. Avoid if recent fluoroquinolone exposure or QTc prolonged.", "source": "ATS/IDSA CAP Guidelines 2019"}
+    ]
+  },
+  "cap_icu": {
+    "display": "Community-Acquired Pneumonia (CAP) — ICU",
+    "organisms": ["Streptococcus pneumoniae", "Legionella spp.", "MRSA (risk-based)", "Pseudomonas (risk-based)"],
+    "regimens": [
+      {"label": "First-line (base regimen)", "drugs": ["Ceftriaxone", "Azithromycin"], "combo": true, "duration": "5–7 days", "notes": "All ICU CAP patients need both beta-lactam AND atypical coverage.", "source": "ATS/IDSA CAP Guidelines 2019"},
+      {"label": "Add if MRSA risk", "drugs": ["Vancomycin"], "combo": false, "duration": "5–7 days", "notes": "MRSA risk factors: prior MRSA colonization, post-influenza, necrotizing/cavitary pneumonia, IV drug use. De-escalate if nasal MRSA PCR negative.", "source": "ATS/IDSA CAP Guidelines 2019"},
+      {"label": "If Pseudomonas risk — replace ceftriaxone with", "drugs": ["Cefepime"], "combo": false, "duration": "5–7 days", "notes": "Pseudomonas risk: structural lung disease (bronchiectasis, CF), recent broad-spectrum antibiotics, prolonged ICU stay.", "source": "ATS/IDSA CAP Guidelines 2019"}
+    ]
+  },
+  "hap_vap": {
+    "display": "Hospital-Acquired Pneumonia (HAP) / Ventilator-Associated Pneumonia (VAP)",
+    "organisms": ["Pseudomonas aeruginosa", "MRSA", "Klebsiella pneumoniae", "Acinetobacter spp.", "Enterobacter spp."],
+    "regimens": [
+      {"label": "First-line (low MDR risk)", "drugs": ["Cefepime"], "combo": false, "duration": "7 days", "notes": "Or piperacillin-tazobactam. Add vancomycin only if MRSA risk factors present.", "source": "IDSA/ATS HAP/VAP Guidelines 2016 [CID 63:e61]"},
+      {"label": "First-line with MRSA risk", "drugs": ["Cefepime", "Vancomycin"], "combo": true, "duration": "7 days", "notes": "MRSA risk: prior MRSA culture, ICU with >20% MRSA prevalence, hemodynamic instability, IV drug use.", "source": "IDSA/ATS HAP/VAP Guidelines 2016"},
+      {"label": "High MDR risk / septic shock", "drugs": ["Meropenem", "Vancomycin"], "combo": true, "duration": "7 days", "notes": "De-escalate within 48–72h based on culture/sensitivity data. Reassess duration daily.", "source": "IDSA/ATS HAP/VAP Guidelines 2016"}
+    ]
+  },
+  "aspiration": {
+    "display": "Aspiration Pneumonia",
+    "organisms": ["Oral anaerobes", "Streptococci (viridans group)", "Enteric gram negatives (healthcare-associated aspiration)"],
+    "regimens": [
+      {"label": "First-line (community-associated, non-severe)", "drugs": ["Ampicillin-sulbactam"], "combo": false, "duration": "5–7 days", "notes": "Routine anaerobic coverage NOT required for simple aspiration events per IDSA. Reserve anaerobic coverage for lung abscess or empyema.", "source": "ATS/IDSA CAP Guidelines 2019"},
+      {"label": "Severe / healthcare-associated", "drugs": ["Piperacillin-tazobactam"], "combo": false, "duration": "7 days", "notes": "Use if hemodynamically unstable, healthcare-associated, or gram-negative risk.", "source": "IDSA guidelines"}
+    ]
+  },
+  "uti_uncomplicated": {
+    "display": "Uncomplicated Urinary Tract Infection (Acute Cystitis)",
+    "organisms": ["Escherichia coli (80–85%)", "Klebsiella spp.", "Proteus mirabilis", "Staphylococcus saprophyticus (young women)"],
+    "regimens": [
+      {"label": "First-line (preferred — lowest resistance)", "drugs": ["Nitrofurantoin"], "combo": false, "duration": "5 days (macrocrystal formulation)", "notes": "IDSA preferred agent — low resistance, minimal collateral damage. Avoid if CrCl <30.", "source": "IDSA Uncomplicated Cystitis/Pyelonephritis Guidelines 2010 [CID 52:e103]"},
+      {"label": "First-line (single-dose option)", "drugs": ["Fosfomycin"], "combo": false, "duration": "Single 3g dose", "notes": "High compliance. Good for patients where adherence is a concern. Not for pyelonephritis.", "source": "IDSA Uncomplicated Cystitis Guidelines 2010"},
+      {"label": "Second-line (if local resistance <20%)", "drugs": ["TMP-SMX"], "combo": false, "duration": "3 days", "notes": "Check local antibiogram. Resistance >20% in many US regions — do not use empirically if resistance unknown.", "source": "IDSA Uncomplicated Cystitis Guidelines 2010"}
+    ]
+  },
+  "pyelonephritis": {
+    "display": "Pyelonephritis",
+    "organisms": ["Escherichia coli", "Klebsiella spp.", "Proteus mirabilis", "Enterococcus faecalis (less common)"],
+    "regimens": [
+      {"label": "First-line (inpatient — IV then oral step-down)", "drugs": ["Ceftriaxone"], "combo": false, "duration": "5–7 days total (FQ oral step-down) OR 10–14 days total (beta-lactam oral step-down).", "notes": "Step down to oral fluoroquinolone or cephalosporin per culture sensitivities. Get urine culture before antibiotics.", "source": "IDSA Pyelonephritis Guidelines 2010"},
+      {"label": "ESBL-producing organism (or prior ESBL)", "drugs": ["Ertapenem"], "combo": false, "duration": "7–14 days total IV", "notes": "Ertapenem covers ESBL but has NO Pseudomonas activity. Confirm no Pseudomonas risk before using.", "source": "IDSA guidelines"},
+      {"label": "Severe / Pseudomonas risk / septic shock", "drugs": ["Piperacillin-tazobactam"], "combo": false, "duration": "7–14 days total", "notes": "Use if structural urologic disease, recurrent UTI, prior Pseudomonas, or MDR risk.", "source": "IDSA guidelines"}
+    ]
+  },
+  "cauti": {
+    "display": "Catheter-Associated UTI (CAUTI)",
+    "organisms": ["Escherichia coli", "Klebsiella spp.", "Pseudomonas aeruginosa", "Candida spp. (prolonged catheter — treat with fluconazole if symptomatic)"],
+    "regimens": [
+      {"label": "First-line (mild-moderate)", "drugs": ["Ceftriaxone"], "combo": false, "duration": "7 days total (prompt clinical response); 10–14 days total (delayed response or concurrent bacteremia).", "notes": "Remove or replace catheter when possible — critical step. Treat asymptomatic bacteriuria only in pregnancy or pre-urologic procedure.", "source": "IDSA CAUTI Guidelines 2019"},
+      {"label": "MDR risk / prior resistant organism", "drugs": ["Cefepime"], "combo": false, "duration": "7–10 days", "notes": "Use if healthcare-associated, prior ESBL, Pseudomonas history, or immunocompromised.", "source": "IDSA CAUTI Guidelines 2019"}
+    ]
+  },
+  "cellulitis_nonpurulent": {
+    "display": "Nonpurulent Cellulitis (No Purulence / No Abscess)",
+    "organisms": ["Streptococcus pyogenes (Group A Strep) — most common", "MSSA (less common)"],
+    "regimens": [
+      {"label": "First-line (mild — outpatient)", "drugs": ["Cephalexin"], "combo": false, "duration": "5 days (extend if not improving at 72h)", "notes": "MRSA coverage NOT needed for nonpurulent cellulitis. Mark borders at presentation to track progression.", "source": "IDSA SSTI Guidelines 2014 [CID 59:e10]"},
+      {"label": "First-line (moderate — inpatient)", "drugs": ["Cefazolin"], "combo": false, "duration": "5–7 days total (IV until improving, then oral step-down).", "notes": "IV therapy for failed outpatient treatment, rapidly spreading, systemic signs, or immunocompromised.", "source": "IDSA SSTI Guidelines 2014"}
+    ]
+  },
+  "cellulitis_purulent": {
+    "display": "Purulent Cellulitis / Skin Abscess — MRSA Coverage Required",
+    "organisms": ["MRSA (majority of purulent SSTIs in US)", "MSSA"],
+    "regimens": [
+      {"label": "First-line (mild-moderate — outpatient)", "drugs": ["TMP-SMX"], "combo": false, "duration": "5–7 days", "notes": "Incision and drainage (I&D) is primary therapy for abscess — antibiotics adjunctive.", "source": "IDSA SSTI Guidelines 2014"},
+      {"label": "Alternative outpatient", "drugs": ["Doxycycline"], "combo": false, "duration": "5–7 days", "notes": "Non-inferior to TMP-SMX in some studies. Good alternative if sulfa allergy or hyperkalemia risk.", "source": "IDSA SSTI Guidelines 2014"},
+      {"label": "Severe / inpatient / systemic infection", "drugs": ["Vancomycin"], "combo": false, "duration": "7–14 days total", "notes": "IV vancomycin for systemic infection, failed oral therapy, immunocompromised, or inability to take PO.", "source": "IDSA SSTI Guidelines 2014"}
+    ]
+  },
+  "nec_fasc": {
+    "display": "Necrotizing Fasciitis — SURGICAL EMERGENCY",
+    "organisms": ["Group A Streptococcus (Type II monomicrobial)", "Mixed anaerobes + gram negatives (Type I polymicrobial)", "MRSA", "Clostridium spp."],
+    "regimens": [
+      {"label": "Empiric broad-spectrum + toxin suppression", "drugs": ["Vancomycin", "Piperacillin-tazobactam", "Clindamycin"], "combo": true, "duration": "No fixed total — continue IV until surgical source control achieved + patient clinically improving, then narrow per cultures.", "notes": "⚠ IMMEDIATE SURGICAL DEBRIDEMENT is primary treatment — do not delay for antibiotics. Clindamycin added specifically for toxin production suppression in Group A Strep / Clostridium. Add IVIG if streptococcal toxic shock.", "source": "IDSA SSTI Guidelines 2014"}
+    ]
+  },
+  "sepsis_undifferentiated": {
+    "display": "Sepsis / Septic Shock — Unknown Source",
+    "organisms": ["Gram negatives (most common in community-acquired sepsis)", "MRSA / Streptococci", "Anaerobes (if abdominal source suspected)"],
+    "regimens": [
+      {"label": "First-line (undifferentiated sepsis)", "drugs": ["Vancomycin", "Cefepime"], "combo": true, "duration": "7 days total; de-escalate at 48–72h per cultures.", "notes": "2× blood cultures BEFORE antibiotics. SSC 2021: antibiotics within 1 hour of recognition of septic shock. Target 3h for sepsis without shock.", "source": "Surviving Sepsis Campaign 2021 [ICM 47:1181]"},
+      {"label": "Suspected abdominal source", "drugs": ["Vancomycin", "Piperacillin-tazobactam"], "combo": true, "duration": "4–7 days total after source control", "notes": "Monitor creatinine q24h — pip-tazo + vancomycin combination increases AKI risk. Consider switching pip-tazo to cefepime if baseline Cr elevated.", "source": "Surviving Sepsis Campaign 2021"},
+      {"label": "Septic shock with MDR risk factors", "drugs": ["Meropenem", "Vancomycin"], "combo": true, "duration": "7 days total; de-escalate to narrowest effective agent within 48–72h.", "notes": "MDR risk: recent broad-spectrum antibiotics, healthcare-associated, known MDR colonization, ICU patient with prior resistance.", "source": "Surviving Sepsis Campaign 2021"}
+    ]
+  },
+  "neutropenic_fever": {
+    "display": "Febrile Neutropenia",
+    "organisms": ["Gram negatives including Pseudomonas aeruginosa (high mortality if missed)", "Gram positives: Strep, Staph (catheter-related)", "MRSA (if high-risk features)"],
+    "regimens": [
+      {"label": "First-line (most patients — monotherapy preferred)", "drugs": ["Cefepime"], "combo": false, "duration": "Until ANC >500 cells/µL AND afebrile for ≥48h", "notes": "IDSA 2010: antipseudomonal beta-lactam monotherapy is standard. Add vancomycin ONLY if MRSA risk, catheter infection, or skin/soft tissue source.", "source": "IDSA Febrile Neutropenia Guidelines 2010 [CID 52:e56]"},
+      {"label": "Septic shock / prior MDR / high-risk center", "drugs": ["Meropenem"], "combo": false, "duration": "Until ANC recovery", "notes": "Add vancomycin only if gram-positive source or MRSA risk.", "source": "IDSA Febrile Neutropenia Guidelines 2010"}
+    ]
+  },
+  "ie_empiric": {
+    "display": "Infective Endocarditis — Empiric (Native Valve, Pending Cultures)",
+    "organisms": ["Staphylococcus aureus (most common, most lethal)", "Viridans streptococci", "Enterococcus faecalis", "Coagulase-negative Staphylococci (prosthetic valve)"],
+    "regimens": [
+      {"label": "Empiric (blood cultures pending — narrow ASAP)", "drugs": ["Vancomycin", "Cefepime"], "combo": true, "duration": "Bridge only — narrow within 24–48h. Definitive duration per organism: MSSA/MRSA NVE = 6 weeks; streptococcal NVE = 4–6 weeks. ID consult mandatory.", "notes": "Blood cultures ×3 from separate sites before any antibiotics. TTE → TEE for diagnosis. ID consult mandatory for all endocarditis.", "source": "AHA Endocarditis Guidelines 2015 [Circulation 132:1435]"}
+    ]
+  },
+  "ie_mssa": {
+    "display": "Infective Endocarditis — MSSA (Confirmed)",
+    "organisms": ["MSSA"],
+    "regimens": [
+      {"label": "First-line", "drugs": ["Cefazolin"], "combo": false, "duration": "6 weeks IV (4 weeks for uncomplicated right-sided endocarditis)", "notes": "Cefazolin is non-inferior to nafcillin with better tolerability. DE-ESCALATE from vancomycin to beta-lactam the moment MSSA confirmed — vancomycin is inferior.", "source": "AHA Endocarditis Guidelines 2015"},
+      {"label": "Alternative", "drugs": ["Nafcillin"], "combo": false, "duration": "6 weeks", "notes": "Requires central access. More phlebitis and interstitial nephritis than cefazolin.", "source": "AHA Endocarditis Guidelines 2015"}
+    ]
+  },
+  "ie_mrsa": {
+    "display": "Infective Endocarditis — MRSA (Confirmed)",
+    "organisms": ["MRSA"],
+    "regimens": [
+      {"label": "First-line", "drugs": ["Vancomycin"], "combo": false, "duration": "6 weeks (4 weeks uncomplicated right-sided in IVDU)", "notes": "AUC-guided dosing; target AUC/MIC 400–600. ID consult mandatory. Surgical consult early — many require valve surgery.", "source": "AHA Endocarditis Guidelines 2015"},
+      {"label": "Alternative — right-sided / IVDU", "drugs": ["Daptomycin"], "combo": false, "duration": "6 weeks", "notes": "Daptomycin 6–10 mg/kg q24h. NOT for left-sided with pulmonary involvement (inactivated by surfactant). Check CK weekly.", "source": "AHA Endocarditis Guidelines 2015"}
+    ]
+  },
+  "ie_enterococcal": {
+    "display": "Infective Endocarditis — Enterococcal (E. faecalis)",
+    "organisms": ["Enterococcus faecalis"],
+    "regimens": [
+      {"label": "First-line (double beta-lactam — preferred)", "drugs": ["Ampicillin", "Ceftriaxone"], "combo": true, "duration": "6 weeks", "notes": "Ampicillin 2g q4h + ceftriaxone 2g q12h. Double beta-lactam synergy — equal efficacy to ampicillin + gentamicin with less nephrotoxicity. Recommended by AHA 2015.", "source": "AHA Endocarditis Guidelines 2015"}
+    ]
+  },
+  "meningitis_adult": {
+    "display": "Bacterial Meningitis — Adults 18–50",
+    "organisms": ["Streptococcus pneumoniae (most common)", "Neisseria meningitidis"],
+    "regimens": [
+      {"label": "Empiric", "drugs": ["Vancomycin", "Ceftriaxone"], "combo": true, "duration": "N. meningitidis: 7 days | S. pneumoniae: 10–14 days", "notes": "Dexamethasone 0.15 mg/kg IV q6h x4 days — give BEFORE or WITH first antibiotic dose. LP before antibiotics ONLY if safe; do not delay antibiotics for CT if LP must wait.", "source": "IDSA Bacterial Meningitis Guidelines 2004 [CID 39:1267]"}
+    ]
+  },
+  "meningitis_elderly": {
+    "display": "Bacterial Meningitis — Elderly (>50) or Immunocompromised",
+    "organisms": ["Streptococcus pneumoniae", "Listeria monocytogenes", "Gram-negative bacilli"],
+    "regimens": [
+      {"label": "Empiric — add Listeria coverage", "drugs": ["Vancomycin", "Ceftriaxone", "Ampicillin"], "combo": true, "duration": "S. pneumoniae: 10–14 days | Listeria: ≥21 days", "notes": "Ampicillin added for Listeria (age >50, immunocompromised, alcoholism, pregnancy). Cephalosporins have NO activity against Listeria. Dexamethasone before or with first dose.", "source": "IDSA Bacterial Meningitis Guidelines 2004"}
+    ]
+  },
+  "osteomyelitis": {
+    "display": "Osteomyelitis",
+    "organisms": ["Staphylococcus aureus (most common)", "MRSA", "Pseudomonas aeruginosa (diabetic foot)", "Gram negatives (healthcare-associated)"],
+    "regimens": [
+      {"label": "Empiric (pending bone biopsy cultures)", "drugs": ["Vancomycin", "Cefepime"], "combo": true, "duration": "6 weeks total; narrow at 48–72h per bone biopsy cultures.", "notes": "Bone biopsy for culture before antibiotics is CRITICAL. Orthopedics + ID co-management. Surgical debridement of necrotic bone mandatory.", "source": "IDSA Osteomyelitis Guidelines"},
+      {"label": "MSSA confirmed", "drugs": ["Cefazolin"], "combo": false, "duration": "6 weeks IV (or OPAT)", "notes": "Nafcillin or cefazolin for MSSA. Do not use vancomycin for MSSA osteomyelitis — inferior outcomes.", "source": "IDSA Osteomyelitis Guidelines"}
+    ]
+  },
+  "sbp": {
+    "display": "Spontaneous Bacterial Peritonitis (SBP)",
+    "organisms": ["Escherichia coli", "Klebsiella pneumoniae", "Streptococci (S. pneumoniae, viridans)"],
+    "regimens": [
+      {"label": "First-line", "drugs": ["Ceftriaxone"], "combo": false, "duration": "5 days (confirm PMN count <250 cells/mm³ on day 2 paracentesis)", "notes": "Add IV albumin 1.5 g/kg on day 1 AND 1 g/kg on day 3 — reduces hepatorenal syndrome risk and 30-day mortality (Sort trial, NEJM 1999). SBP prophylaxis with norfloxacin or TMP-SMX after first episode.", "source": "AASLD Cirrhosis Practice Guidance 2021"}
+    ]
+  },
+  "cholecystitis": {
+    "display": "Acute Cholecystitis / Cholangitis",
+    "organisms": ["Escherichia coli", "Klebsiella spp.", "Enterococcus", "Anaerobes (especially cholangitis)"],
+    "regimens": [
+      {"label": "First-line (mild-moderate)", "drugs": ["Ceftriaxone", "Metronidazole"], "combo": true, "duration": "4–7 days (after source control — cholecystectomy or ERCP)", "notes": "Source control is definitive therapy. Antibiotics are adjunctive. Urgent ERCP for cholangitis with biliary obstruction.", "source": "IDSA Intra-abdominal Infection Guidelines 2010"},
+      {"label": "Severe / septic cholangitis", "drugs": ["Piperacillin-tazobactam"], "combo": false, "duration": "4–7 days after drainage", "notes": "Urgent biliary decompression via ERCP. Add vancomycin if MRSA or VRE concern (immunocompromised, transplant).", "source": "IDSA Intra-abdominal Infection Guidelines 2010"}
+    ]
+  },
+  "diverticulitis": {
+    "display": "Acute Diverticulitis",
+    "organisms": ["Enteric gram negatives", "Anaerobes"],
+    "regimens": [
+      {"label": "Mild uncomplicated — NO antibiotics", "drugs": [], "combo": false, "duration": "N/A", "notes": "⚠ Most uncomplicated diverticulitis does NOT require antibiotics (AVOD trial 2012, DIABOLO trial 2017). Bowel rest + analgesia. Antibiotics reserved for complicated disease.", "source": "AVOD Trial 2012; DIABOLO Trial 2017"},
+      {"label": "Complicated / inpatient (abscess, perforation, sepsis)", "drugs": ["Ceftriaxone", "Metronidazole"], "combo": true, "duration": "4–7 days after source control", "notes": "Complicated = abscess, fistula, obstruction, perforation. IR drainage for pericolic abscess ≥4cm.", "source": "IDSA Intra-abdominal Infection Guidelines"},
+      {"label": "Severe sepsis", "drugs": ["Piperacillin-tazobactam"], "combo": false, "duration": "4–7 days after source control", "notes": "Hemodynamically unstable — use broad empiric coverage.", "source": "IDSA Intra-abdominal Infection Guidelines"}
+    ]
+  },
+  "urosepsis": {
+    "display": "Urosepsis",
+    "organisms": ["Escherichia coli (most common)", "Klebsiella pneumoniae", "Proteus mirabilis", "Pseudomonas aeruginosa (MDR/healthcare-associated)", "ESBL-producing Enterobacterales (MDR)"],
+    "regimens": [
+      {"label": "Community-acquired urosepsis (no MDR risk)", "drugs": ["Ceftriaxone"], "combo": false, "duration": "7 days total (IV until afebrile + improving, then oral step-down)", "notes": "Urine + blood cultures BEFORE antibiotics. Monotherapy sufficient. Add vancomycin only if MRSA history, chronic catheter/instrumentation, or healthcare-associated.", "source": "IDSA Pyelonephritis Guidelines 2010; SSC 2021"},
+      {"label": "Severe sepsis / septic shock", "drugs": ["Cefepime"], "combo": false, "duration": "7 days total; de-escalate at 48–72h per culture/sensitivity.", "notes": "⚠ If adding vancomycin: prefer cefepime + vancomycin over pip/tazo + vancomycin — pip/tazo + vancomycin combination significantly increases AKI risk (ACORN trial, NEJM 2023).", "source": "IDSA Pyelonephritis Guidelines 2010; ACORN Trial 2023"},
+      {"label": "ESBL / MDR risk", "drugs": ["Meropenem"], "combo": false, "duration": "7–14 days total; de-escalate at 48–72h.", "notes": "ESBL risk: prior ESBL, recent hospitalization, travel to high-prevalence region, recurrent UTI on recent antibiotics. Ertapenem is an option if NO Pseudomonas risk.", "source": "IDSA guidelines"}
+    ],
+    "pearls": ["⚠ OBSTRUCTIVE UROSEPSIS (infected stone) = UROLOGIC EMERGENCY — requires urgent source control via ureteral stent OR percutaneous nephrostomy.", "Pip/tazo + vancomycin → higher AKI risk than cefepime + vancomycin. Prefer cefepime as the gram-negative backbone when vancomycin is needed [ACORN 2023]."]
+  },
+  "c_diff": {
+    "display": "Clostridioides difficile Infection (CDI)",
+    "organisms": ["Clostridioides difficile"],
+    "regimens": [
+      {"label": "First-line — initial nonfulminant episode", "drugs": ["Fidaxomicin"], "combo": false, "duration": "10 days", "notes": "IDSA/SHEA 2021: fidaxomicin preferred over vancomycin — lower recurrence rate. Stop offending antibiotic if at all possible. Avoid anti-motility agents.", "source": "IDSA/SHEA CDI Guidelines 2021"},
+      {"label": "Alternative — if fidaxomicin unavailable", "drugs": ["Vancomycin (oral)"], "combo": false, "duration": "10 days", "notes": "125mg PO q6h. Acceptable alternative — not superior to fidaxomicin for recurrence prevention.", "source": "IDSA/SHEA CDI Guidelines 2021"},
+      {"label": "Fulminant CDI (hypotension, ileus, megacolon, WBC >30k)", "drugs": ["Vancomycin (oral)", "Metronidazole"], "combo": true, "duration": "≥10 days; surgical consult if megacolon or peritonitis", "notes": "Vancomycin 500mg PO/NGT q6h + IV metronidazole 500mg q8h. Add vancomycin enema if ileus. Urgent surgery for peritonitis or toxic megacolon.", "source": "IDSA/SHEA CDI Guidelines 2021"}
+    ]
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// ORGANISM DATABASE
+// ═══════════════════════════════════════════════════════════
+const ORGANISM_DB = {
+  "mrsa": {
+    "display": "MRSA — Methicillin-Resistant Staphylococcus aureus",
+    "infections": ["Bacteremia / endocarditis", "Pneumonia (HAP/CAP)", "SSTI", "Osteomyelitis / septic arthritis"],
+    "first_line": {"Bacteremia / endocarditis": "Vancomycin (AUC-guided) or Daptomycin 6–10 mg/kg q24h", "Pneumonia": "Vancomycin or Linezolid 600mg q12h (NOT daptomycin — inactivated by surfactant)", "SSTI mild (outpatient)": "TMP-SMX DS PO q12h or Doxycycline 100mg PO q12h", "SSTI severe (inpatient)": "Vancomycin IV (AUC-guided)", "Osteomyelitis": "Vancomycin empirically; tailor per susceptibilities"},
+    "second_line": ["Linezolid", "Daptomycin (non-pulmonary)", "Ceftaroline", "TMP-SMX (SSTI only)"],
+    "key_pearl": "ID consult mandatory for MRSA bacteremia. Always obtain source control (remove lines, drain collections). NEVER use daptomycin for pulmonary MRSA."
+  },
+  "mssa": {
+    "display": "MSSA — Methicillin-Susceptible Staphylococcus aureus",
+    "infections": ["Bacteremia / endocarditis", "Pneumonia", "SSTI", "Osteomyelitis"],
+    "first_line": {"Bacteremia / endocarditis": "Nafcillin 2g IV q4h OR Cefazolin 2g IV q8h", "Pneumonia": "Nafcillin or Cefazolin", "SSTI mild": "Cephalexin 500mg PO q6h", "SSTI moderate / inpatient": "Cefazolin 1–2g IV q8h", "Osteomyelitis": "Nafcillin or Cefazolin x6 weeks"},
+    "second_line": ["Vancomycin — INFERIOR for MSSA; use only if true beta-lactam allergy (anaphylaxis)"],
+    "key_pearl": "⚠ CRITICAL: Vancomycin is significantly INFERIOR to beta-lactams for MSSA infections. DE-ESCALATE from vancomycin to nafcillin or cefazolin the MOMENT MSSA is confirmed on cultures."
+  },
+  "pseudomonas": {
+    "display": "Pseudomonas aeruginosa",
+    "infections": ["HAP/VAP", "UTI", "Bacteremia / sepsis", "Osteomyelitis (diabetic foot)", "Skin/wound infections"],
+    "first_line": {"HAP/VAP": "Cefepime 2g IV q8h OR Piperacillin-tazobactam 4.5g IV q6h", "UTI": "Ciprofloxacin (if susceptible) OR Cefepime", "Bacteremia / sepsis": "Piperacillin-tazobactam or Cefepime; Meropenem if MDR", "Severe / carbapenem-resistant (CRPA)": "Ceftolozane-tazobactam or Ceftazidime-avibactam (ID consult)"},
+    "second_line": ["Meropenem (if not carbapenem-resistant)", "Aztreonam", "Ciprofloxacin (adjunct, susceptibility-guided)"],
+    "key_pearl": "⚠ Ertapenem has ZERO Pseudomonas activity — critical pitfall. Anti-pseudomonal agents: cefepime, pip-tazo, meropenem, ciprofloxacin, aztreonam, ceftolozane-tazobactam."
+  },
+  "strep_pneumo": {
+    "display": "Streptococcus pneumoniae",
+    "infections": ["CAP", "Meningitis", "Bacteremia", "Sinusitis"],
+    "first_line": {"CAP (hospitalized)": "Ceftriaxone 1–2g IV q24h (± azithromycin for atypical coverage)", "Meningitis (empiric)": "Vancomycin + Ceftriaxone — empiric until susceptibility known", "Bacteremia": "Ceftriaxone or Penicillin G (if MIC ≤0.06 µg/mL)"},
+    "second_line": ["Levofloxacin (CAP)", "Meropenem (penicillin-resistant meningitis)"],
+    "key_pearl": "Add vancomycin empirically in ALL meningitis — penicillin and cephalosporin resistance varies by region. De-escalate once susceptibilities known."
+  },
+  "e_coli": {
+    "display": "Escherichia coli",
+    "infections": ["UTI / pyelonephritis", "Bacteremia / sepsis", "Intra-abdominal infection", "SBP"],
+    "first_line": {"UTI uncomplicated": "Nitrofurantoin, Fosfomycin, or TMP-SMX (if resistance <20% locally)", "Pyelonephritis": "Ceftriaxone IV → oral FQ or cephalosporin per sensitivities", "Bacteremia / sepsis": "Ceftriaxone (if susceptible); Ertapenem or Meropenem (if ESBL)", "ESBL E. coli": "Ertapenem (no Pseudomonas risk) or Meropenem"},
+    "second_line": ["Ciprofloxacin (if susceptible — check local resistance; often >30%)", "Cefepime"],
+    "key_pearl": "E. coli fluoroquinolone resistance is high in many US regions — do not use empirically for pyelonephritis without susceptibility data. ESBL = carbapenem."
+  },
+  "klebsiella": {
+    "display": "Klebsiella pneumoniae",
+    "infections": ["UTI", "Pneumonia", "Bacteremia", "Liver abscess (K. pneumoniae hypermucoviscous)"],
+    "first_line": {"UTI (susceptible)": "Ceftriaxone or TMP-SMX (if susceptible)", "Pneumonia / bacteremia": "Ceftriaxone (susceptible); Cefepime or Pip-tazo (moderate severity)", "ESBL Klebsiella": "Meropenem or Ertapenem", "Carbapenem-resistant (CRKP)": "Ceftazidime-avibactam (ID consult mandatory)"},
+    "second_line": ["Ciprofloxacin (if susceptible)", "Cefepime"],
+    "key_pearl": "CRKP (KPC-producing): ID consult mandatory. Options include ceftazidime-avibactam, meropenem-vaborbactam. Mortality very high."
+  },
+  "enterococcus": {
+    "display": "Enterococcus faecalis / faecium",
+    "infections": ["UTI", "Bacteremia", "Endocarditis", "Intra-abdominal infection"],
+    "first_line": {"UTI (E. faecalis)": "Ampicillin 500mg PO q6h or Amoxicillin", "Bacteremia (E. faecalis)": "Ampicillin 2g IV q4h", "Endocarditis (E. faecalis)": "Ampicillin + Ceftriaxone (double beta-lactam — AHA 2015)", "VRE (E. faecium)": "Linezolid or Daptomycin (ID consult mandatory)"},
+    "second_line": ["Vancomycin (only if ampicillin-resistant, non-VRE)", "Linezolid (VRE)", "Daptomycin (VRE bacteremia)"],
+    "key_pearl": "⚠ Cephalosporins have ZERO enterococcal activity — intrinsic resistance. E. faecalis usually ampicillin-susceptible. E. faecium is frequently ampicillin-resistant and more likely VRE."
+  },
+  "listeria": {
+    "display": "Listeria monocytogenes",
+    "infections": ["Meningitis (elderly, immunocompromised, pregnant)", "Bacteremia", "Neonatal sepsis"],
+    "first_line": {"Meningitis / bacteremia": "Ampicillin 2g IV q4h (± Gentamicin for synergy in severe disease)"},
+    "second_line": ["TMP-SMX (penicillin-allergic)", "Meropenem"],
+    "key_pearl": "⚠ Cephalosporins have NO activity against Listeria — this is why ampicillin must be added to empiric meningitis therapy in patients >50, immunocompromised, or pregnant."
+  },
+  "c_diff_bug": {
+    "display": "Clostridioides difficile",
+    "infections": ["CDI — diarrhea, pseudomembranous colitis, fulminant colitis / toxic megacolon"],
+    "first_line": {"Initial nonfulminant": "Fidaxomicin 200mg PO q12h x10 days", "Initial (alternative)": "Vancomycin 125mg PO q6h x10 days", "Fulminant CDI": "Vancomycin 500mg PO/NGT q6h + Metronidazole IV 500mg q8h"},
+    "second_line": ["Bezlotoxumab (monoclonal Ab — adjunct for recurrence prevention in high-risk patients)", "Fecal microbiota transplant (FMT) for ≥2nd recurrence"],
+    "key_pearl": "Stop the offending antibiotic. Avoid anti-motility agents. FMT is highly effective for recurrent CDI (>90% cure rate)."
+  },
+  "n_meningitidis": {
+    "display": "Neisseria meningitidis",
+    "infections": ["Bacterial meningitis", "Meningococcemia"],
+    "first_line": {"Meningitis / bacteremia": "Penicillin G 4 million units IV q4h OR Ceftriaxone 2g IV q12h"},
+    "second_line": ["Meropenem", "Chloramphenicol (PCN allergy — not routinely available in US)"],
+    "key_pearl": "Most N. meningitidis remains penicillin-susceptible. Droplet precautions until 24h after antibiotic initiation. Close contacts need chemoprophylaxis: ciprofloxacin 500mg PO ×1 or rifampin 600mg PO q12h ×2 days."
+  },
+  "anaerobes": {
+    "display": "Mixed Anaerobes (intra-abdominal / aspiration / necrotizing)",
+    "infections": ["Aspiration pneumonia", "Intra-abdominal infection", "Necrotizing infections", "Dental / orofacial"],
+    "first_line": {"Intra-abdominal": "Metronidazole + gram-negative active agent (ceftriaxone or cefepime)", "Aspiration pneumonia": "Ampicillin-sulbactam OR Piperacillin-tazobactam", "Monotherapy (covers anaerobes)": "Piperacillin-tazobactam or Meropenem"},
+    "second_line": ["Clindamycin (avoid — highest C. diff risk of any antibiotic; reserve for toxin suppression in necrotizing infections)"],
+    "key_pearl": "⚠ Avoid double anaerobic coverage (e.g., piperacillin-tazobactam + metronidazole together — redundant and increases toxicity). Pip-tazo and meropenem already include anaerobic coverage."
+  },
+  "proteus_mirabilis": {
+    "display": "Proteus mirabilis",
+    "infections": ["UTI / pyelonephritis", "Bacteremia", "Wound infections"],
+    "first_line": {"UTI uncomplicated": "TMP-SMX (if susceptible) or check local resistance", "Pyelonephritis": "Ceftriaxone IV → oral step-down per culture sensitivities", "Bacteremia / sepsis": "Ceftriaxone (susceptible); Cefepime or Pip-tazo (moderate); Carbapenem (ESBL)"},
+    "second_line": ["Cefepime", "Ciprofloxacin (if susceptible)", "TMP-SMX (if susceptible)"],
+    "key_pearl": "Proteus mirabilis is intrinsically resistant to tetracyclines and nitrofurantoin. Urease-producing — causes struvite stones; treat aggressively in urolithiasis patients. ESBL production requires carbapenem therapy."
+  },
+  "escappm": {
+    "display": "ESCAPPM Organisms (Enterobacter, Serratia, Citrobacter, Aeromonas, Proteus spp., Providencia, Morganella)",
+    "infections": ["HAP/VAP", "UTI / pyelonephritis", "Bacteremia / sepsis", "Wound and intra-abdominal infections"],
+    "first_line": {"Empiric (non-severe)": "Cefepime 2g IV q8h — avoid 3rd-gen cephalosporins (inducible AmpC resistance)", "Severe / ICU": "Meropenem or Imipenem-cilastatin", "UTI (susceptible, outpatient)": "Ciprofloxacin or TMP-SMX per susceptibility"},
+    "second_line": ["Piperacillin-tazobactam (variable; AmpC can be induced)", "Aztreonam", "Ciprofloxacin (susceptibility-guided)"],
+    "key_pearl": "⚠ CRITICAL: ESCAPPM organisms carry inducible AmpC beta-lactamases — 3rd-gen cephalosporins (ceftriaxone, cefotaxime) may SELECT for resistance during treatment ('breakthrough AmpC'). Always use cefepime (4th-gen) or a carbapenem for serious ESCAPPM infections. Do NOT use ceftriaxone for Enterobacter bacteremia."
+  },
+  "n_gonorrhoeae": {
+    "display": "Neisseria gonorrhoeae",
+    "infections": ["Urethritis / cervicitis / PID", "Disseminated gonococcal infection (DGI)", "Septic arthritis"],
+    "first_line": {"Uncomplicated urogenital / rectal / pharyngeal": "Ceftriaxone 500mg IM ×1 (≥150kg: 1g IM ×1) [CDC STI Guidelines 2021]", "Disseminated / bacteremia / septic arthritis": "Ceftriaxone 1g IV q24h x7–14 days", "PID (outpatient, mild)": "Ceftriaxone 500mg IM ×1 + Doxycycline 100mg PO q12h + Metronidazole 500mg PO q12h x14d"},
+    "second_line": ["Gentamicin 240mg IM ×1 + azithromycin 2g PO ×1 (if ceftriaxone truly unavailable)"],
+    "key_pearl": "⚠ Fluoroquinolone-resistant N. gonorrhoeae is widespread — do NOT use ciprofloxacin/levofloxacin empirically. Always treat presumptively for concurrent Chlamydia (co-infection rate ~20–40%)."
+  },
+  "atypicals": {
+    "display": "Atypical Organisms (Mycoplasma pneumoniae, Chlamydia pneumoniae, Legionella pneumophila)",
+    "infections": ["CAP", "Atypical / 'walking' pneumonia", "Legionnaires' disease"],
+    "first_line": {"CAP atypical coverage (in combination)": "Azithromycin 500mg IV/PO q24h (add to beta-lactam for hospitalized CAP)", "CAP monotherapy (mild, outpatient)": "Azithromycin 500mg PO ×1, then 250mg PO q24h ×4d", "Legionella (preferred)": "Levofloxacin 750mg IV/PO q24h ×5–8 days", "Legionella (alternative)": "Azithromycin 500mg IV/PO q24h ×5–8 days"},
+    "second_line": ["Doxycycline 100mg PO/IV q12h (all three atypicals)"],
+    "key_pearl": "Atypicals lack cell walls — beta-lactams have ZERO activity against Mycoplasma, Chlamydia, and Legionella. Hospitalized CAP ALWAYS requires a beta-lactam + atypical combination. Levofloxacin is preferred over azithromycin for severe Legionella pneumonia."
+  }
+};
+
+// ═══════════════════════════════════════════════════════════
+// CONTRAINDICATION SCREENER
+// ═══════════════════════════════════════════════════════════
+const CI_SCREENER_OPTIONS = [
+  {key: "pcn_allergy", label: "Penicillin allergy (immediate hypersensitivity / anaphylaxis)", drugCIs: {
+    "Ampicillin": "HIGH", "Ampicillin-sulbactam": "HIGH", "Nafcillin": "HIGH", "Piperacillin-tazobactam": "HIGH",
+    "Amoxicillin": "HIGH", "Amoxicillin-clavulanate": "HIGH", "Oxacillin": "HIGH", "Penicillin G": "HIGH"
+  }},
+  {key: "ceph_allergy", label: "Cephalosporin allergy", drugCIs: {
+    "Cephalexin": "HIGH", "Cefazolin": "HIGH", "Cefotetan": "HIGH", "Cefoxitin": "HIGH",
+    "Ceftriaxone": "HIGH", "Ceftazidime": "HIGH", "Cefepime": "HIGH", "Cefotaxime": "HIGH", "Ceftaroline": "HIGH"
+  }},
+  {key: "qtc", label: "QTc prolongation (QTc >500ms or concurrent QTc-prolonging drugs)", drugCIs: {
+    "Ciprofloxacin": "HIGH", "Levofloxacin": "HIGH", "Moxifloxacin": "HIGH — highest QTc risk", "Azithromycin": "HIGH"
+  }},
+  {key: "renal", label: "Renal failure (CrCl <30 mL/min)", drugCIs: {
+    "Nitrofurantoin": "ABSOLUTE — contraindicated", "Cefepime": "HIGH — neurotoxicity without dose adjustment",
+    "Ceftazidime": "HIGH — encephalopathy risk", "Gentamicin": "HIGH — accumulation + nephrotoxicity",
+    "Tobramycin": "HIGH — accumulation + nephrotoxicity", "Amikacin": "HIGH — accumulation + nephrotoxicity"
+  }},
+  {key: "hepatic", label: "Severe hepatic impairment", drugCIs: {
+    "Azithromycin": "MODERATE", "Moxifloxacin": "HIGH — hepatotoxicity black box"
+  }},
+  {key: "pregnancy", label: "Pregnancy or breastfeeding", drugCIs: {
+    "Ciprofloxacin": "HIGH", "Levofloxacin": "HIGH", "Moxifloxacin": "HIGH",
+    "Doxycycline": "HIGH (2nd/3rd trimester)", "Nitrofurantoin": "HIGH (at term)"
+  }},
+  {key: "myasthenia", label: "Myasthenia gravis", drugCIs: {
+    "Ciprofloxacin": "HIGH", "Levofloxacin": "HIGH", "Moxifloxacin": "HIGH",
+    "Gentamicin": "HIGH", "Tobramycin": "HIGH", "Amikacin": "HIGH"
+  }},
+  {key: "ssri", label: "Concurrent SSRI / SNRI / MAOI or serotonergic agents", drugCIs: {
+    "Linezolid": "HIGH — FDA black box: serotonin syndrome"
+  }},
+  {key: "daptomycin_lung", label: "Pulmonary source of infection / pneumonia", drugCIs: {
+    "Daptomycin": "ABSOLUTE — inactivated by pulmonary surfactant"
+  }},
+  {key: "cdiff_hx", label: "History of C. difficile infection", drugCIs: {
+    "Clindamycin": "HIGH — dramatically increases recurrence risk"
+  }}
+];
+
+// ═══════════════════════════════════════════════════════════
+// UI State
+// ═══════════════════════════════════════════════════════════
+let activeInfection = null;
+let activeOrganism = null;
+let activeDrug = null;
+let currentPanel = 'infection';
+
+function switchTab(name) {
+  currentPanel = name;
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', ['infection','organism','drug'][i] === name);
+  });
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+// ── Build sidebar lists ──
+function buildLists() {
+  // Infection list
+  const infList = document.getElementById('inf-list');
+  Object.entries(INFECTION_DB).forEach(([key, inf]) => {
+    const el = document.createElement('div');
+    el.className = 'list-item';
+    el.dataset.key = key;
+    el.dataset.search = inf.display.toLowerCase();
+    el.innerHTML = `${inf.display}`;
+    el.onclick = () => showInfection(key);
+    infList.appendChild(el);
+  });
+
+  // Organism list
+  const orgList = document.getElementById('org-list');
+  Object.entries(ORGANISM_DB).forEach(([key, org]) => {
+    const el = document.createElement('div');
+    el.className = 'list-item';
+    el.dataset.key = key;
+    el.dataset.search = org.display.toLowerCase();
+    el.innerHTML = `${org.display}`;
+    el.onclick = () => showOrganism(key);
+    orgList.appendChild(el);
+  });
+
+  // Drug list
+  const drugList = document.getElementById('drug-list');
+  Object.keys(ANTIBIOTIC_DB).sort().forEach(name => {
+    const drug = ANTIBIOTIC_DB[name];
+    const el = document.createElement('div');
+    el.className = 'list-item';
+    el.dataset.key = name;
+    el.dataset.search = (name + ' ' + drug.class).toLowerCase();
+    el.innerHTML = `${name}<span class="tag">${drug.class.split(' — ')[0]}</span>`;
+    el.onclick = () => showDrug(name);
+    drugList.appendChild(el);
+  });
+}
+
+function filterList(type) {
+  const searchId = {inf: 'inf-search', org: 'org-search', drug: 'drug-search'}[type];
+  const listId = {inf: 'inf-list', org: 'org-list', drug: 'drug-list'}[type];
+  const q = document.getElementById(searchId).value.toLowerCase();
+  document.querySelectorAll('#' + listId + ' .list-item').forEach(el => {
+    el.style.display = el.dataset.search.includes(q) ? '' : 'none';
+  });
+}
+
+function setActive(type, key) {
+  const listId = {infection: 'inf-list', organism: 'org-list', drug: 'drug-list'}[type];
+  document.querySelectorAll('#' + listId + ' .list-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.key === key);
+  });
+}
+
+// ── Infection display ──
+function regimenLabelClass(label) {
+  label = label.toLowerCase();
+  if (label.includes('first')) return 'first';
+  if (label.includes('second') || label.includes('alternative')) return 'second';
+  if (label.includes('add if') || label.includes('add for') || label.includes('replace')) return 'add';
+  return 'alt';
+}
+
+function showInfection(key) {
+  activeInfection = key;
+  setActive('infection', key);
+  const inf = INFECTION_DB[key];
+  const content = document.getElementById('inf-content');
+
+  let regimensHtml = inf.regimens.map(r => {
+    const labelCls = regimenLabelClass(r.label);
+    let drugsHtml = '';
+    if (r.drugs.length === 0) {
+      drugsHtml = '<span style="color:var(--yellow);font-weight:600;">NO ANTIBIOTICS REQUIRED</span>';
+    } else if (r.combo) {
+      drugsHtml = r.drugs.map(d => `<span class="drug-pill" onclick="switchTab('drug');showDrug('${d}')" title="Click to view ${d}">${d}</span>`).join('<span class="combo-sep">+</span>');
+    } else {
+      drugsHtml = r.drugs.map(d => `<span class="drug-pill" onclick="switchTab('drug');showDrug('${d}')" title="Click to view ${d}">${d}</span>`).join('');
+    }
+    return `<div class="regimen-card">
+      <div class="regimen-label ${labelCls}">${r.label}</div>
+      <div style="margin-bottom:8px;display:flex;flex-wrap:wrap;align-items:center;gap:2px;">${drugsHtml}</div>
+      <div class="duration-badge">⏱ ${r.duration}</div>
+      ${r.notes ? `<div class="notes-text">📌 ${r.notes}</div>` : ''}
+      <div class="source-cite">${r.source}</div>
+    </div>`;
+  }).join('');
+
+  let pearlsHtml = '';
+  if (inf.pearls && inf.pearls.length > 0) {
+    pearlsHtml = inf.pearls.map(p => `<div class="pearl-box">${p}</div>`).join('');
+  }
+
+  const regimenDrugs = [...new Set(inf.regimens.flatMap(r => r.drugs))].filter(d => ANTIBIOTIC_DB[d]);
+
+  let screenerHtml = buildScreener(regimenDrugs);
+
+  content.innerHTML = `
+    <div class="drug-name" style="font-size:20px;">${inf.display}</div>
+    <div class="org-tags" style="margin:10px 0 16px;">
+      <span style="font-size:11px;color:var(--text-muted);margin-right:4px;">COMMON BUGS:</span>
+      ${inf.organisms.map(o => `<span class="org-tag">${o}</span>`).join('')}
+    </div>
+    ${pearlsHtml}
+    <div class="section-heading">Treatment Regimens</div>
+    ${regimensHtml}
+    ${screenerHtml}
+  `;
+}
+
+// ── Organism display ──
+function showOrganism(key) {
+  activeOrganism = key;
+  setActive('organism', key);
+  const org = ORGANISM_DB[key];
+  const content = document.getElementById('org-content');
+
+  const firstLineRows = Object.entries(org.first_line).map(([site, drug]) =>
+    `<div class="site-row"><div class="site-label">${site}</div><div class="site-val">${drug}</div></div>`
+  ).join('');
+
+  const secondLineHtml = org.second_line.map(d => `<div class="adr-item">${d}</div>`).join('');
+
+  content.innerHTML = `
+    <div class="drug-name" style="font-size:20px;">${org.display}</div>
+    <div class="org-tags" style="margin:10px 0 16px;">
+      ${org.infections.map(i => `<span class="org-tag">${i}</span>`).join('')}
+    </div>
+    ${org.key_pearl ? `<div class="pearl-box" style="margin-bottom:16px;">⚠ <strong>Key Pearl:</strong> ${org.key_pearl}</div>` : ''}
+    <div class="card">
+      <div class="card-header"><span class="card-title">First-Line Treatment by Site</span></div>
+      <div class="card-body">${firstLineRows}</div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">Second-Line / Alternatives</span></div>
+      <div class="card-body">${secondLineHtml}</div>
+    </div>
+  `;
+}
+
+// ── Drug display ──
+function showDrug(name) {
+  activeDrug = name;
+  setActive('drug', name);
+  const drug = ANTIBIOTIC_DB[name];
+  if (!drug) { switchTab('drug'); return; }
+  const content = document.getElementById('drug-content');
+
+  const isRenal = drug.renal.toUpperCase().includes('CRITICAL') || drug.renal.toUpperCase().includes('CONTRAINDICATED');
+  const renalClass = isRenal ? 'crit' : 'warn';
+
+  const adrHtml = drug.adr.map(a => `<div class="adr-item">${a}</div>`).join('');
+
+  const ciHtml = drug.ci.map(([desc, sev]) => {
+    const sevLower = sev.toLowerCase();
+    const cls = sevLower.startsWith('high') || sevLower.startsWith('absolute') ? 'high' : sevLower.startsWith('moderate') ? 'moderate' : 'low';
+    return `<div class="ci-item">
+      <span class="ci-badge ${cls}">${sevLower.startsWith('absolute') ? '🚫 ABSOLUTE' : sevLower.startsWith('high') ? '⛔ HIGH' : sevLower.startsWith('moderate') ? '⚠ MODERATE' : '⚡ LOW'}</span>
+      <div class="ci-desc">${desc}</div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">${sev}</div>
+    </div>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="drug-name">${name}</div>
+    <div class="drug-class">${drug.class}</div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="info-row"><span class="info-label">DOSE</span><span class="info-val">${drug.dose}</span></div>
+        <div class="renal-alert ${renalClass}">
+          <span>🫘</span>
+          <span><strong>Renal:</strong> ${drug.renal}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Adverse Effects</span></div>
+      <div class="card-body">${adrHtml}</div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><span class="card-title">Contraindications</span></div>
+      <div class="card-body">
+        ${ciHtml}
+        <div class="alt-box"><span class="alt-label">If Contraindicated — Use Instead:</span>${drug.alt_if_ci}</div>
+      </div>
+    </div>
+
+    ${buildScreener([name])}
+  `;
+}
+
+// ── Screener builder ──
+function buildScreener(drugs) {
+  const relevant = CI_SCREENER_OPTIONS.filter(opt => drugs.some(d => opt.drugCIs[d]));
+  if (relevant.length === 0) return '';
+
+  const checks = relevant.map(opt =>
+    `<div class="ci-check">
+      <input type="checkbox" id="ci-${opt.key}" onchange="runScreener(${JSON.stringify(drugs)})">
+      <label for="ci-${opt.key}">${opt.label}</label>
+    </div>`
+  ).join('');
+
+  return `
+    <div class="screener">
+      <h3>Contraindication Screener</h3>
+      <p style="font-size:11px;color:var(--text-muted);margin-bottom:10px;">Check all that apply for this patient — flagged drugs will be highlighted.</p>
+      ${checks}
+      <div class="screener-result" id="screener-result"></div>
+    </div>`;
+}
+
+function runScreener(drugs) {
+  const resultEl = document.getElementById('screener-result');
+  if (!resultEl) return;
+  const flags = {};
+  CI_SCREENER_OPTIONS.forEach(opt => {
+    const el = document.getElementById('ci-' + opt.key);
+    if (el && el.checked) {
+      drugs.forEach(d => {
+        if (opt.drugCIs[d]) {
+          if (!flags[d]) flags[d] = [];
+          flags[d].push({ci: opt.label, sev: opt.drugCIs[d]});
+        }
+      });
+    }
+  });
+
+  resultEl.style.display = 'block';
+  if (Object.keys(flags).length === 0) {
+    resultEl.innerHTML = '<div class="ci-ok">✓ No flagged contraindications for selected conditions</div>';
+    return;
+  }
+
+  let html = '';
+  Object.entries(flags).forEach(([drug, issues]) => {
+    issues.forEach(issue => {
+      html += `<div class="ci-flag">
+        <div class="drug-label">⛔ ${drug}</div>
+        <div class="ci-reason">${issue.ci}</div>
+        <div class="ci-sev">Severity: ${issue.sev}</div>
+        ${ANTIBIOTIC_DB[drug] ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px;">Alternative: ${ANTIBIOTIC_DB[drug].alt_if_ci}</div>` : ''}
+      </div>`;
+    });
+  });
+  resultEl.innerHTML = html;
+}
+
+// ── Initialize ──
+buildLists();
+</script>
+</body>
+</html>
