@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hyponatremia Etiology Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0a1628;
+    --surface:   #0f1e35;
+    --surface2:  #162840;
+    --surface3:  #1c3252;
+    --border:    #1e3a5f;
+    --teal:      #00b4d8;
+    --teal-dim:  #0096b4;
+    --teal-glow: rgba(0,180,216,0.12);
+    --text:      #ccd6f6;
+    --text-dim:  #8892b0;
+    --green:     #64ffda;
+    --yellow:    #ffd166;
+    --red:       #ff6b6b;
+    --red-bg:    rgba(255,107,107,0.12);
+    --orange:    #ffb347;
+    --purple:    #c792ea;
+    --step-teal: rgba(0,180,216,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+  header {
+    background: linear-gradient(135deg, #081220 0%, #0f1e35 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  header .icon { font-size: 26px; }
+  header h1 { font-size: 18px; font-weight: 700; color: var(--teal); letter-spacing: 0.02em; }
+  header .subtitle { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .badge-group { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+  .badge {
+    background: var(--teal-glow);
+    border: 1px solid var(--teal);
+    color: var(--teal);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.06em;
+  }
+  .layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 0;
+    max-width: 1500px;
+    margin: 0 auto;
+    min-height: calc(100vh - 74px);
+  }
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 16px;
+    overflow-y: auto;
+    position: sticky;
+    top: 0;
+    max-height: calc(100vh - 74px);
+  }
+  .main { padding: 20px 24px; }
+  /* Form elements */
+  .form-section {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--teal);
+    text-transform: uppercase;
+    margin: 18px 0 8px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .form-section:first-child { margin-top: 0; }
+  label.field-label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    margin: 10px 0 3px;
+  }
+  label.field-label .req { color: var(--red); }
+  input[type="number"], input[type="text"], select {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    padding: 7px 9px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus, select:focus { border-color: var(--teal); box-shadow: 0 0 0 2px var(--teal-glow); }
+  select option { background: var(--surface2); color: var(--text); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cb-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
+  .cb-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 5px 7px;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    font-size: 11px;
+    color: var(--text);
+  }
+  .cb-item:hover { border-color: var(--teal-dim); }
+  .cb-item input[type="checkbox"] { width: 13px; height: 13px; accent-color: var(--teal); flex-shrink: 0; }
+  .cb-item.checked { border-color: var(--teal); background: var(--teal-glow); }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 8px 10px;
+    margin-top: 6px;
+  }
+  .toggle-row label { font-size: 12px; color: var(--text); margin: 0; font-weight: 500; }
+  .toggle-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--teal); }
+  .toggle-row.checked { border-color: var(--teal); background: var(--teal-glow); }
+  .btn-run {
+    width: 100%;
+    margin-top: 18px;
+    background: var(--teal);
+    color: #0a1628;
+    border: none;
+    border-radius: 7px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 11px;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: background 0.2s;
+  }
+  .btn-run:hover { background: #00ccf5; }
+  .btn-clear {
+    width: 100%;
+    margin-top: 6px;
+    background: transparent;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    padding: 7px;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+  }
+  .btn-clear:hover { border-color: var(--teal); color: var(--teal); }
+  /* Output */
+  .placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+    color: var(--text-dim);
+    text-align: center;
+    gap: 14px;
+  }
+  .placeholder .icon { font-size: 52px; opacity: 0.3; }
+  /* Step cards */
+  .step-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .step-card.emergency { border-color: var(--red); box-shadow: 0 0 24px rgba(255,107,107,0.18); }
+  .step-card.warn { border-color: var(--yellow); }
+  .step-card.ok { border-color: rgba(100,255,218,0.3); }
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 16px;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+  .step-num {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--teal-glow);
+    border: 1px solid var(--teal);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--teal);
+    flex-shrink: 0;
+  }
+  .step-num.red { background: var(--red-bg); border-color: var(--red); color: var(--red); }
+  .step-num.yellow { background: rgba(255,209,102,0.1); border-color: var(--yellow); color: var(--yellow); }
+  .step-num.green { background: rgba(100,255,218,0.1); border-color: var(--green); color: var(--green); }
+  .step-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); }
+  .step-title.red { color: var(--red); }
+  .step-title.yellow { color: var(--yellow); }
+  .step-title.green { color: var(--green); }
+  .step-body { padding: 14px 16px; }
+  .kv { display: flex; gap: 10px; margin-bottom: 7px; align-items: flex-start; }
+  .kv-lbl { font-size: 11px; font-weight: 600; color: var(--text-dim); min-width: 180px; flex-shrink: 0; letter-spacing: 0.03em; margin-top: 1px; }
+  .kv-val { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); }
+  .kv-val.teal { color: var(--teal); font-weight: 600; }
+  .kv-val.red   { color: var(--red); font-weight: 700; }
+  .kv-val.green { color: var(--green); font-weight: 600; }
+  .kv-val.yellow { color: var(--yellow); font-weight: 600; }
+  .kv-val.purple { color: var(--purple); }
+  .infobox {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 11px 14px;
+    font-size: 12px;
+    color: var(--text);
+    margin-top: 10px;
+    line-height: 1.7;
+  }
+  .infobox.red { border-color: var(--red); background: var(--red-bg); color: var(--red); }
+  .infobox.green { border-color: rgba(100,255,218,0.4); background: rgba(100,255,218,0.06); color: var(--green); }
+  .infobox.yellow { border-color: rgba(255,209,102,0.4); background: rgba(255,209,102,0.06); color: var(--yellow); }
+  .infobox.warn { border-color: var(--orange); background: rgba(255,179,71,0.07); color: var(--orange); }
+  .emergency-banner {
+    background: var(--red-bg);
+    border: 2px solid var(--red);
+    border-radius: 9px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    color: var(--red);
+    font-weight: 700;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: 0.02em;
+  }
+  ul.blist { list-style: none; padding: 0; }
+  ul.blist li {
+    padding: 5px 0 5px 16px;
+    border-bottom: 1px solid rgba(30,58,95,0.6);
+    font-size: 12px;
+    position: relative;
+    color: var(--text);
+  }
+  ul.blist li:last-child { border-bottom: none; }
+  ul.blist li::before { content: '›'; position: absolute; left: 2px; color: var(--teal); }
+  ul.blist li.flagged { color: var(--red); }
+  ul.blist li.flagged::before { content: '!'; color: var(--red); font-weight: 700; }
+  ul.blist li.warn { color: var(--yellow); }
+  ul.blist li.warn::before { content: '⚠'; color: var(--yellow); font-size: 10px; }
+  /* SIADH criteria */
+  .siadh-crit {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 7px 10px;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    font-size: 12px;
+  }
+  .siadh-crit.met { background: rgba(100,255,218,0.07); }
+  .siadh-crit.unmet { background: rgba(255,107,107,0.07); }
+  .siadh-crit.unknown { background: rgba(255,209,102,0.07); }
+  .siadh-marker { font-weight: 700; font-family: 'JetBrains Mono', monospace; min-width: 30px; flex-shrink: 0; }
+  .siadh-label { font-weight: 600; min-width: 210px; flex-shrink: 0; }
+  .siadh-note { color: var(--text-dim); font-size: 11px; }
+  /* Med cards */
+  .med-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--red);
+    border-radius: 7px;
+    padding: 11px 14px;
+    margin-bottom: 8px;
+  }
+  .med-card:last-child { margin-bottom: 0; }
+  .med-header { display: flex; align-items: baseline; gap: 10px; margin-bottom: 6px; }
+  .med-name-tag { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; color: var(--red); }
+  .med-class { font-size: 11px; color: var(--text-dim); }
+  .med-row { font-size: 12px; color: var(--text); margin-bottom: 3px; }
+  .med-action { font-size: 12px; color: var(--yellow); font-weight: 600; margin-top: 4px; }
+  /* Furst */
+  .furst-box {
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .furst-box.safe { background: rgba(100,255,218,0.08); border: 1px solid rgba(100,255,218,0.4); color: var(--green); }
+  .furst-box.unsafe { background: var(--red-bg); border: 1px solid var(--red); color: var(--red); }
+  /* ODS */
+  .ods-block {
+    border-radius: 7px;
+    padding: 11px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .ods-block.high { background: var(--red-bg); border: 1px solid var(--red); color: var(--red); }
+  .ods-block.std  { background: rgba(100,255,218,0.06); border: 1px solid rgba(100,255,218,0.4); color: var(--green); }
+  /* Danger flags */
+  .danger-flag {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    background: var(--red-bg);
+    border: 1px solid var(--red);
+    border-radius: 7px;
+    padding: 10px 14px;
+    margin-bottom: 8px;
+    color: var(--red);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  /* Treatment */
+  .tx-group {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+  .tx-group-title {
+    padding: 8px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--teal);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface3);
+  }
+  .tx-group-body { padding: 10px 14px; }
+  .tx-item { font-size: 12px; color: var(--text); padding: 4px 0; border-bottom: 1px solid rgba(30,58,95,0.5); }
+  .tx-item:last-child { border-bottom: none; }
+  .tx-item.emph { color: var(--yellow); font-weight: 600; }
+  .tx-item.danger { color: var(--red); font-weight: 700; }
+  /* AM calculator */
+  .am-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+  .am-table th { background: var(--surface3); color: var(--teal); font-weight: 600; padding: 7px 10px; text-align: left; border: 1px solid var(--border); font-size: 11px; }
+  .am-table td { padding: 6px 10px; border: 1px solid var(--border); color: var(--text); font-family: 'JetBrains Mono', monospace; }
+  .am-table tr:hover td { background: var(--teal-glow); }
+  .am-table td.raise { color: var(--green); }
+  .am-table td.lower { color: var(--red); }
+  /* Stop-here banner */
+  .stop-banner {
+    background: rgba(255,209,102,0.1);
+    border: 1px solid var(--yellow);
+    border-radius: 8px;
+    padding: 14px 18px;
+    color: var(--yellow);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .tag-chip {
+    display: inline-block;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-size: 11px;
+    padding: 2px 7px;
+    margin: 2px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .source-footer {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 14px;
+    padding: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    line-height: 1.7;
+  }
+  @media (max-width: 960px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar { position: relative; max-height: none; }
+    .cb-grid { grid-template-columns: 1fr; }
+    .grid2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div style="height:3px;background:linear-gradient(90deg,#0d9488,#38bdf8,#a78bfa,#0d9488);background-size:300% 100%;animation:im-shimmer 6s linear infinite;"></div>
+<style>@keyframes im-shimmer{0%{background-position:0% 0%}100%{background-position:300% 0%}}.im-home-btn{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--teal);background:rgba(0,180,216,0.08);border:1px solid rgba(0,180,216,0.25);padding:4px 12px;border-radius:99px;text-decoration:none;letter-spacing:0.04em;transition:background 0.2s;white-space:nowrap;margin-left:auto}.im-home-btn:hover{background:rgba(0,180,216,0.18)}</style>
+
+<header>
+  <div class="icon">🔬</div>
+  <div>
+    <h1>Hyponatremia Etiology Analyzer</h1>
+    <div class="subtitle">11-Step diagnostic workup with etiology tree, SIADH criteria, Furst formula, ODS risk, &amp; treatment module</div>
+  </div>
+  <div class="badge-group">
+    <div class="badge">COMPREHENSIVE</div>
+    <div class="badge">IM WORKFLOW</div>
+  </div>
+  <a class="im-home-btn" href="index.html">← Toolkit</a>
+</header>
+
+<div class="layout">
+  <!-- ══ SIDEBAR ═══════════════════════════════════════════════════ -->
+  <div class="sidebar">
+
+    <div class="form-section">Serum Labs — Required</div>
+    <label class="field-label">Serum Na (mEq/L) <span class="req">*</span></label>
+    <input type="number" id="serum_na" placeholder="e.g. 116" step="0.1">
+
+    <div class="form-section">Serum Labs — Optional</div>
+    <div class="grid2">
+      <div>
+        <label class="field-label">Serum Osm (mOsm/kg)</label>
+        <input type="number" id="serum_osm" placeholder="240" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">BUN (mg/dL)</label>
+        <input type="number" id="serum_bun" placeholder="10" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">Glucose (mg/dL)</label>
+        <input type="number" id="glucose" placeholder="95" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">Serum K (mEq/L)</label>
+        <input type="number" id="serum_k" placeholder="3.8" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">HCO3 (mEq/L)</label>
+        <input type="number" id="serum_hco3" placeholder="24" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">Creatinine (mg/dL)</label>
+        <input type="number" id="serum_cr" placeholder="1.0" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">Ethanol (mg/dL)</label>
+        <input type="number" id="serum_ethanol" placeholder="—" step="0.1">
+      </div>
+    </div>
+
+    <div class="form-section">Urine Studies</div>
+    <div class="grid2">
+      <div>
+        <label class="field-label">Urine Osm (mOsm/kg)</label>
+        <input type="number" id="urine_osm" placeholder="620" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">Urine Na (mEq/L)</label>
+        <input type="number" id="urine_na" placeholder="65" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">Urine K (mEq/L)</label>
+        <input type="number" id="urine_k" placeholder="35" step="0.1">
+      </div>
+    </div>
+
+    <div class="form-section">Clinical Context</div>
+    <label class="field-label">Volume Status</label>
+    <select id="volume_status">
+      <option value="">-- Select --</option>
+      <option value="hypovolemic">Hypovolemic</option>
+      <option value="euvolemic">Euvolemic</option>
+      <option value="hypervolemic">Hypervolemic</option>
+    </select>
+
+    <label class="field-label">Symptoms (check all present)</label>
+    <div class="cb-grid">
+      <label class="cb-item"><input type="checkbox" name="symptom" value="seizure"> Seizure</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="coma"> Coma</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="obtundation"> Obtundation</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="unresponsive"> Unresponsive</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="herniation"> Herniation</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="respiratory arrest"> Resp Arrest</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="severe confusion"> Severe Confusion</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="headache"> Headache</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="nausea"> Nausea</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="vomiting"> Vomiting</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="confusion"> Confusion</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="lethargy"> Lethargy</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="altered mental status"> Altered MS</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="gait instability"> Gait Unstable</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="falls"> Falls</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="somnolence"> Somnolence</label>
+      <label class="cb-item"><input type="checkbox" name="symptom" value="cognitive slowing"> Cognitive Slow</label>
+    </div>
+
+    <label class="field-label">Medications (comma-separated)</label>
+    <input type="text" id="medications" placeholder="e.g. sertraline, hydrochlorothiazide">
+
+    <div class="form-section">Patient Parameters (Adrogue-Madias)</div>
+    <div class="grid2">
+      <div>
+        <label class="field-label">Weight (kg)</label>
+        <input type="number" id="weight_kg" placeholder="70" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">Sex</label>
+        <select id="sex">
+          <option value="">--</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div>
+        <label class="field-label">Age</label>
+        <input type="number" id="age" placeholder="55" step="1">
+      </div>
+    </div>
+
+    <div class="form-section">ODS Risk Factors</div>
+    <div class="cb-grid">
+      <label class="cb-item"><input type="checkbox" id="alcohol_use_disorder"> Alcohol Use D/O</label>
+      <label class="cb-item"><input type="checkbox" id="malnutrition"> Malnutrition</label>
+      <label class="cb-item"><input type="checkbox" id="advanced_liver_disease"> Adv. Liver Dz</label>
+      <label class="cb-item"><input type="checkbox" id="thiazide_use"> Thiazide Use</label>
+      <label class="cb-item"><input type="checkbox" id="low_solute_intake"> Low Solute Intake</label>
+    </div>
+
+    <div class="form-section">Correction Tracking</div>
+    <div class="grid2">
+      <div>
+        <label class="field-label">Prior Na (mEq/L)</label>
+        <input type="number" id="prior_na" placeholder="109" step="0.1">
+      </div>
+      <div>
+        <label class="field-label">Hours ago</label>
+        <input type="number" id="hours_since_prior" placeholder="24" step="0.5">
+      </div>
+      <div>
+        <label class="field-label">Duration (hours)</label>
+        <input type="number" id="duration_hours" placeholder="72" step="1">
+      </div>
+    </div>
+
+    <div class="form-section">Workup Status</div>
+    <label class="field-label">TSH</label>
+    <select id="tsh_normal">
+      <option value="notdone">Not done</option>
+      <option value="normal">Normal</option>
+      <option value="abnormal">Abnormal</option>
+    </select>
+    <label class="field-label">AM Cortisol</label>
+    <select id="cortisol_normal">
+      <option value="notdone">Not done</option>
+      <option value="normal">Normal</option>
+      <option value="abnormal">Abnormal</option>
+    </select>
+
+    <div class="form-section">Flags</div>
+    <div class="toggle-row" id="cns-toggle">
+      <label for="cns_injury">CNS Injury (SAH/TBI/neurosurgery)</label>
+      <input type="checkbox" id="cns_injury">
+    </div>
+    <div class="toggle-row" id="tx-toggle">
+      <label for="include_treatment">Include Treatment Module</label>
+      <input type="checkbox" id="include_treatment" checked>
+    </div>
+
+    <button class="btn-run" onclick="runAnalysis()">&#9654; Run Full Analysis</button>
+    <button class="btn-clear" onclick="clearAll()">Clear All</button>
+  </div>
+
+  <!-- ══ MAIN OUTPUT ══════════════════════════════════════════════ -->
+  <div class="main" id="output-area">
+    <div class="placeholder">
+      <div class="icon">🧪</div>
+      <p>Enter patient data and click <strong>Run Full Analysis</strong></p>
+      <p style="font-size:11px;color:var(--text-dim)">Serum Na required. All other fields improve diagnostic precision.<br>11 analytical steps · full etiology tree · SIADH Schwartz-Bartter · Furst formula · ODS risk · treatment module</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Checkbox styling ─────────────────────────────────────────────
+document.querySelectorAll('.cb-item input[type="checkbox"]').forEach(cb => {
+  cb.addEventListener('change', function() {
+    this.closest('.cb-item').classList.toggle('checked', this.checked);
+  });
+});
+['cns-toggle','tx-toggle'].forEach(id => {
+  const wrap = document.getElementById(id);
+  if (wrap) wrap.querySelector('input').addEventListener('change', function() {
+    wrap.classList.toggle('checked', this.checked);
+  });
+});
+document.getElementById('include_treatment').dispatchEvent(new Event('change'));
+
+// ── Medication database (full HYPONATREMIA_MEDICATIONS from Python) ────────────
+const HYPO_MEDS = {
+  "hydrochlorothiazide": { class: "Thiazide diuretic", mechanism: "Blocks NaCl reabsorption in DCT → impairs diluting capacity → water retention.", effect: "Thiazide-induced hyponatremia (especially elderly women).", action: "Stop thiazide. Na may auto-correct rapidly after cessation — monitor q4–6h." },
+  "chlorthalidone":      { class: "Thiazide-like diuretic", mechanism: "Same as HCTZ but longer half-life → prolonged risk.", effect: "Thiazide-like hyponatremia.", action: "Stop agent. Monitor Na closely after discontinuation." },
+  "metolazone":          { class: "Thiazide-like diuretic", mechanism: "Blocks DCT NaCl reabsorption.", effect: "Hyponatremia risk; potent when combined with loop diuretics.", action: "Reassess indication. Stop if contributing." },
+  "sertraline":          { class: "SSRI", mechanism: "Enhances ADH secretion or potentiates ADH effect at collecting duct → SIADH.", effect: "Drug-induced SIADH.", action: "Consider discontinuation or switch to non-SSRI antidepressant." },
+  "fluoxetine":          { class: "SSRI", mechanism: "SSRI-induced SIADH.", effect: "Drug-induced SIADH.", action: "Consider discontinuation." },
+  "escitalopram":        { class: "SSRI", mechanism: "SSRI-induced SIADH.", effect: "Drug-induced SIADH.", action: "Consider discontinuation." },
+  "paroxetine":          { class: "SSRI", mechanism: "SSRI-induced SIADH. Paroxetine has highest SIADH risk among SSRIs.", effect: "Drug-induced SIADH.", action: "Consider discontinuation or switch." },
+  "venlafaxine":         { class: "SNRI", mechanism: "SNRI — SIADH via serotonergic ADH potentiation.", effect: "Drug-induced SIADH.", action: "Consider discontinuation." },
+  "duloxetine":          { class: "SNRI", mechanism: "SNRI — SIADH risk similar to SSRIs.", effect: "Drug-induced SIADH.", action: "Consider discontinuation." },
+  "carbamazepine":       { class: "Antiepileptic", mechanism: "Directly stimulates ADH release; potentiates renal ADH response.", effect: "SIADH-like hyponatremia. Very common cause.", action: "Reduce dose or switch to alternative AED. Oxcarbazepine has even higher risk." },
+  "oxcarbazepine":       { class: "Antiepileptic", mechanism: "Higher hyponatremia risk than carbamazepine. Direct ADH potentiation.", effect: "SIADH — highest AED risk for hyponatremia.", action: "Switch AED if clinically feasible. Frequent Na monitoring on this drug." },
+  "desmopressin":        { class: "Vasopressin analog", mechanism: "Direct V2 agonist → maximal water retention in collecting duct.", effect: "Potentially severe hyponatremia, especially with high water intake.", action: "Hold desmopressin. Restrict free water. Monitor Na closely." },
+  "cyclophosphamide":    { class: "Alkylating chemotherapy", mechanism: "Direct ADH-like effect on collecting duct → water retention.", effect: "SIADH-like hyponatremia during IV administration.", action: "Restrict hypotonic fluid during infusion. Monitor Na." },
+  "vincristine":         { class: "Vinca alkaloid", mechanism: "Neurotoxic effect on hypothalamus → inappropriate ADH secretion.", effect: "SIADH.", action: "Fluid restriction. Monitor Na. Oncology input." },
+  "nsaid":               { class: "NSAID", mechanism: "Prostaglandin inhibition → potentiates ADH effect in collecting duct → impaired water excretion.", effect: "Potentiates hyponatremia, especially with concurrent SIADH.", action: "Discontinue if possible. Avoid in hyponatremia." },
+  "ibuprofen":           { class: "NSAID", mechanism: "Same as NSAID class.", effect: "SIADH potentiation.", action: "Discontinue." },
+  "naproxen":            { class: "NSAID", mechanism: "Same as NSAID class.", effect: "SIADH potentiation.", action: "Discontinue." },
+  "antipsychotic":       { class: "Antipsychotic", mechanism: "Central dopamine blockade → altered thirst regulation; psychogenic polydipsia association.", effect: "Hyponatremia via polydipsia or SIADH-like mechanism.", action: "Fluid restriction. Review psychiatric medication plan." },
+  "haloperidol":         { class: "Antipsychotic (typical)", mechanism: "Dopamine blockade → polydipsia risk.", effect: "Hyponatremia in psychiatric patients.", action: "Fluid restriction. Monitor Na." },
+  "risperidone":         { class: "Antipsychotic (atypical)", mechanism: "SIADH association.", effect: "Drug-induced SIADH.", action: "Consider dose reduction or switch." },
+  "mdma":                { class: "Recreational drug / stimulant", mechanism: "SIADH (serotonin-mediated ADH release) + excessive hypotonic fluid ingestion.", effect: "Potentially severe acute hyponatremia. High mortality risk.", action: "Treat as acute symptomatic hyponatremia if Na <125. Hypertonic saline if neurologic symptoms." },
+  "amitriptyline":       { class: "Tricyclic antidepressant (TCA)", mechanism: "SIADH — anticholinergic and serotonergic ADH potentiation.", effect: "Drug-induced SIADH.", action: "Consider substitution." },
+  "morphine":            { class: "Opioid", mechanism: "Non-osmotic ADH stimulation.", effect: "Contributes to SIADH, especially postoperatively.", action: "Minimize opioid use if possible. Monitor Na in postoperative period." },
+  "oxycodone":           { class: "Opioid", mechanism: "Non-osmotic ADH stimulation.", effect: "SIADH contribution.", action: "Monitor Na." },
+  "proton pump inhibitor": { class: "PPI", mechanism: "Weak SIADH association.", effect: "Mild hyponatremia association.", action: "Consider as contributing factor if no other cause identified." },
+  "omeprazole":          { class: "PPI", mechanism: "Weak SIADH association.", effect: "Mild hyponatremia association.", action: "Monitor." },
+  "tolvaptan":           { class: "Vasopressin V2 antagonist (vaptan)", mechanism: "Blocks V2 receptor → aquaresis. Can cause RAPID Na rise → ODS risk.", effect: "Overcorrection risk if not monitored carefully.", action: "Do NOT restrict fluids during tolvaptan. Monitor Na q6–8h. Contraindicated in hypovolemia and adrenal insufficiency. Limit <30 days in cirrhosis (hepatotoxicity FDA warning)." }
+};
+
+function screenMedications(medsStr) {
+  const meds = medsStr.split(',').map(m => m.toLowerCase().trim()).filter(Boolean);
+  const found = [];
+  for (const med of meds) {
+    for (const [key, info] of Object.entries(HYPO_MEDS)) {
+      if (med.includes(key)) {
+        found.push({ medication: med, ...info });
+        break;
+      }
+    }
+  }
+  return found;
+}
+
+// ── Step 1: Osmolality calculations ──────────────────────────────
+function calcOsmolality(d) {
+  const na  = d.serum_na;
+  const glu = d.glucose || 90;
+  const bun = d.serum_bun || 14;
+  const calcOsm = Math.round((2 * na + glu / 18 + bun / 2.8) * 10) / 10;
+  const effOsm  = Math.round((2 * na + glu / 18) * 10) / 10;
+  let osmGap = null, osmGapFlag = false, osmGapNote = "Measured osmolality not provided — osmolar gap cannot be calculated.";
+  if (d.serum_osm != null) {
+    osmGap = Math.round((d.serum_osm - calcOsm) * 10) / 10;
+    if (osmGap > 10) {
+      const etohCorr = d.serum_ethanol ? Math.round(d.serum_ethanol / 4.6 * 10) / 10 : 0;
+      const adjGap = Math.round((osmGap - etohCorr) * 10) / 10;
+      osmGapFlag = adjGap > 10;
+      osmGapNote = `Osmolar gap = ${osmGap} (normal <10). `;
+      if (d.serum_ethanol) osmGapNote += `Ethanol accounts for ~${etohCorr} mOsm/kg; adjusted gap = ${adjGap}. `;
+      osmGapNote += adjGap > 10 ? "ELEVATED — consider methanol, ethylene glycol, isopropanol, mannitol, propylene glycol." : "Explained by ethanol.";
+    } else {
+      osmGapNote = `Osmolar gap = ${osmGap} (normal). No toxic alcohol pattern.`;
+    }
+  }
+  return { calcOsm, effOsm, glu, bun, osmGap, osmGapFlag, osmGapNote };
+}
+
+// ── Step 2: Corrected Na for glucose ─────────────────────────────
+function correctedNaGlucose(d) {
+  if (d.glucose == null || d.glucose <= 100) return null;
+  return Math.round((d.serum_na + 2.4 * ((d.glucose - 100) / 100)) * 10) / 10;
+}
+
+// ── Step 3: Severity + symptoms ──────────────────────────────────
+const SEVERE_SYM = new Set(["seizure","coma","obtundation","unresponsive","herniation","respiratory arrest","severe confusion","locked-in"]);
+const MOD_SYM    = new Set(["headache","nausea","vomiting","confusion","lethargy","altered mental status","gait instability","falls","cognitive slowing","somnolence"]);
+
+function classifySeverity(d) {
+  const na = d.serum_na;
+  const symsL = new Set(d.symptoms.map(s => s.toLowerCase().trim()));
+  let naClass;
+  if (na >= 135)     naClass = "No hyponatremia (Na ≥135)";
+  else if (na >= 130) naClass = "Mild (130–134 mEq/L)";
+  else if (na >= 125) naClass = "Moderate (125–129 mEq/L)";
+  else               naClass = "Severe (<125 mEq/L)";
+  const hasSev = [...symsL].some(s => SEVERE_SYM.has(s));
+  const hasMod = [...symsL].some(s => MOD_SYM.has(s));
+  if (hasSev) return { naClass, symClass: "Severe symptomatic", emergency: true,
+    symNote: "EMERGENCY: active cerebral edema/herniation risk. Treat immediately with 3% NaCl bolus regardless of etiology." };
+  if (hasMod) return { naClass, symClass: "Moderately symptomatic", emergency: false,
+    symNote: "Symptoms may reflect cerebral edema. Urgent workup and etiology-directed treatment." };
+  return { naClass, symClass: "Asymptomatic / minimally symptomatic", emergency: false,
+    symNote: "Proceed with stepwise diagnostic algorithm. Avoid rapid correction." };
+}
+
+// ── Step 4: Tonicity ─────────────────────────────────────────────
+function classifyTonicity(d, osmData) {
+  const refOsm = d.serum_osm != null ? d.serum_osm : osmData.calcOsm;
+  const source  = d.serum_osm != null ? "measured" : "calculated (measured not provided)";
+  if (refOsm < 275)
+    return { refOsm, source, category: "Hypotonic (true hyponatremia)", proceed: true,
+      note: "True hypotonic hyponatremia confirmed. Proceed to Step 5 (urine Osm)." };
+  if (refOsm <= 295)
+    return { refOsm, source, category: "Isotonic — pseudohyponatremia possible", proceed: false,
+      note: "Serum Osm is isotonic despite low Na. Consider: hyperlipidemia (hypertriglyceridemia), hyperproteinemia (myeloma, IVIG), or lab artifact. True Na is normal — no treatment needed for hyponatremia per se." };
+  const corNa = correctedNaGlucose(d);
+  let note = "Elevated serum Osm with low measured Na suggests an effective osmole pulling water into vasculature. Most common: hyperglycemia. Others: mannitol, sucrose, glycine (post-TURP), IVIG. ";
+  if (corNa != null) {
+    note += `Corrected Na (glucose) = ${corNa} mEq/L. `;
+    note += corNa >= 135 ? "Corrected Na is normal — purely translocational. Treat hyperglycemia." : "Corrected Na still low — concurrent hypotonic process may coexist.";
+  }
+  return { refOsm, source, category: "Hypertonic — translocational hyponatremia", proceed: false, note };
+}
+
+// ── Step 5: Urine Osm ────────────────────────────────────────────
+function interpretUrineOsm(d) {
+  if (d.urine_osm == null)
+    return { category: "Not available", adhActive: null,
+      note: "Urine osmolality required to continue etiology workup. Order spot or random urine Osm." };
+  if (d.urine_osm < 100)
+    return { category: "ADH suppressed (Uosm <100 mOsm/kg)", adhActive: false,
+      note: "Maximally dilute urine — ADH appropriately suppressed. Etiologies: (1) Primary polydipsia / psychogenic — excess water intake. (2) Beer potomania — high water + minimal solute. (3) Low-solute diet ('tea and toast'). Key risk: these patients can auto-correct rapidly when eating resumes — monitor Na q4–6h." };
+  if (d.urine_osm <= 300)
+    return { category: "ADH partially active (Uosm 100–300 mOsm/kg)", adhActive: true,
+      note: "Urine not maximally dilute — ADH is active to some degree. Proceed to volume status + urine Na. Consider early/partial SIADH, reset osmostat, or mixed picture." };
+  return { category: "ADH fully active (Uosm >300 mOsm/kg)", adhActive: true,
+    note: "Concentrated urine with ADH fully active. Proceed to volume status + urine Na to distinguish: SIADH vs. volume depletion vs. hypervolemic (CHF/cirrhosis) vs. hypothyroid/adrenal." };
+}
+
+// ── SIADH criteria ────────────────────────────────────────────────
+function checkSiadhCriteria(d) {
+  const criteria = [];
+  let met = 0;
+  const add = (label, status, note) => { criteria.push({ label, status, note }); if (status === true) met++; };
+
+  add("Na <135 mEq/L", d.serum_na < 135, `Na = ${d.serum_na}`);
+  if (d.serum_osm != null) add("Serum Osm <275 mOsm/kg", d.serum_osm < 275, `Serum Osm = ${d.serum_osm}`);
+  else add("Serum Osm <275 mOsm/kg", null, "Not measured — order serum Osm.");
+  if (d.urine_osm != null) add("Urine Osm >100 mOsm/kg", d.urine_osm > 100, `Urine Osm = ${d.urine_osm}`);
+  else add("Urine Osm >100 mOsm/kg", null, "Not measured — order urine Osm.");
+  if (d.urine_na != null) add("Urine Na >40 mEq/L", d.urine_na > 40, `Urine Na = ${d.urine_na}`);
+  else add("Urine Na >40 mEq/L", null, "Not measured — order urine Na.");
+  add("Clinical euvolemia", d.volume_status === "euvolemic", `Volume status = ${d.volume_status || "not provided"}`);
+  const tshNorm = d.tsh_normal, cortNorm = d.cortisol_normal;
+  if (tshNorm == null || cortNorm == null) {
+    const tshStr = tshNorm == null ? "TSH not done" : (tshNorm ? "normal" : "ABNORMAL");
+    const corStr = cortNorm == null ? "cortisol not done" : (cortNorm ? "normal" : "ABNORMAL");
+    add("Normal TSH + AM cortisol", null, `${tshStr}; ${corStr} — must complete before SIADH diagnosis.`);
+  } else {
+    const ok = tshNorm && cortNorm;
+    const tshStr = tshNorm ? "TSH normal" : "TSH ABNORMAL";
+    const corStr = cortNorm ? "cortisol normal" : "cortisol ABNORMAL";
+    add("Normal TSH + AM cortisol", ok, `${tshStr}; ${corStr}`);
+  }
+  return { criteria, met, total: 6, allMet: met === 6 };
+}
+
+// ── Step 6: Etiology tree ─────────────────────────────────────────
+function classifyEtiology(d) {
+  const vs   = (d.volume_status || "").toLowerCase().trim();
+  const una  = d.urine_na;
+  const uosm = d.urine_osm;
+
+  if (uosm != null && uosm < 100) {
+    return {
+      branch: "ADH suppressed", etiology: "Primary polydipsia / beer potomania / low-solute intake",
+      detail: [
+        "Urine Osm <100 = kidney maximally diluting — not a renal concentrating problem.",
+        "Primary polydipsia: compulsive water drinking (>10–15 L/day). Common in schizophrenia.",
+        "Beer potomania: high water intake + minimal dietary protein/NaCl → insufficient solute to excrete water.",
+        "Low-solute diet ('tea and toast'): elderly patients with very low Na + protein intake.",
+        "Exercise-associated hyponatremia: endurance athletes drinking excessive hypotonic fluid + non-osmotic ADH.",
+      ], cswFlag: false,
+      caveats: [
+        "Rapid auto-correction risk when eating resumes or water intake stops.",
+        "Antipsychotic medications can drive psychogenic polydipsia — review med list.",
+      ]
+    };
+  }
+  if (!vs || vs === "unknown") {
+    return { branch: "Volume status required", etiology: "Cannot classify without volume status",
+      detail: ["Assess: orthostatic vitals, mucous membranes, skin turgor, JVP, edema, weight trend, I/O."],
+      cswFlag: false, caveats: [] };
+  }
+  if (una == null) {
+    return { branch: `Volume status: ${vs} (urine Na not available)`, etiology: "Urine Na required to refine etiology",
+      detail: ["Order spot urine Na (urine electrolytes panel)."], cswFlag: false, caveats: [] };
+  }
+
+  if (vs === "hypovolemic") {
+    if (una < 20) {
+      return {
+        branch: "Hypovolemic — extrarenal Na loss (UNa <20)", etiology: "GI loss / third spacing / insensible loss",
+        detail: [
+          "Kidney appropriately conserving sodium (UNa <20).",
+          "GI: vomiting, diarrhea, NG suction, fistula, ostomy",
+          "Third spacing: pancreatitis, ileus, burns, peritonitis",
+          "Insensible: fever, sweating without adequate Na replacement",
+          "Poor oral Na/water intake",
+          "ADH activated by low effective arterial volume → water retention → hyponatremia.",
+        ], cswFlag: false,
+        caveats: [
+          "Vomiting: UNa may be low, but urine Cl <20 mEq/L is the more reliable marker (Na lost as NaHCO3).",
+          "After volume repletion, ADH falls → rapid auto-correction. Monitor Na q4–6h."
+        ]
+      };
+    } else {
+      const cswFlag = d.cns_injury;
+      const etiologies = [
+        "Kidney wasting sodium despite volume depletion (UNa ≥20).",
+        "Thiazide/thiazide-like diuretics (most common renal cause)",
+        "Adrenal insufficiency (primary → aldosterone deficiency + Na wasting; secondary → cortisol deficit + ADH release)",
+        "Salt-wasting nephropathy (CKD, tubulointerstitial disease)",
+        "Renal tubular acidosis (bicarbonaturia obligates Na loss)",
+      ];
+      const caveats = [
+        "Check AM cortisol — adrenal insufficiency can mimic SIADH but requires different treatment (hydrocortisone, NOT fluid restriction).",
+        "Thiazide use invalidates urine Na for SIADH diagnosis for 48–72h after stopping.",
+      ];
+      if (cswFlag) {
+        etiologies.push("Cerebral salt wasting (CSW): natriuretic peptides from CNS injury → renal Na wasting.");
+        caveats.push("CSW FLAG: CNS injury present (SAH/TBI/neurosurgery). CSW is HYPOVOLEMIC with high UNa — CRITICAL DISTINCTION from SIADH. Fluid restriction is CONTRAINDICATED in CSW; it worsens ischemia. Treat with NS or hypertonic saline + volume.");
+      }
+      return { branch: "Hypovolemic — renal Na loss (UNa ≥20)", etiology: "Diuretic / adrenal insufficiency / CSW / salt-wasting nephropathy",
+        detail: etiologies, cswFlag, caveats };
+    }
+  }
+
+  if (vs === "euvolemic") {
+    if (una < 20) {
+      return {
+        branch: "Euvolemic — UNa <20", etiology: "Reset osmostat (likely) or early/mild volume depletion",
+        detail: [
+          "Euvolemic with UNa <20 is an atypical SIADH pattern.",
+          "Reset osmostat: hypothalamic osmostat reset to a lower Na set point.",
+          "Na remains stable at new lower set point (e.g., consistently 125–130).",
+          "Common in pregnancy, chronic disease, malnutrition, psychiatric illness.",
+          "No treatment needed for the Na itself — address underlying condition.",
+          "Consider: subclinical volume depletion not apparent clinically.",
+        ], cswFlag: false,
+        caveats: [
+          "If UNa <20 but SIADH is suspected, reassess volume status — may be subtle volume depletion.",
+          "Reset osmostat: Na will correct to the new set point but not to 135+ without treating underlying cause.",
+        ]
+      };
+    } else {
+      const siadhCheck = checkSiadhCriteria(d);
+      const primary = una >= 40 ? "SIADH (most likely)" : "Euvolemic hyponatremia, SIADH possible (UNa 20–39)";
+      const branchNote = una >= 40
+        ? "Classic SIADH pattern: euvolemic + UNa >40 + ADH-active urine."
+        : "UNa 20–39 is borderline. SIADH possible but also consider early volume depletion, reset osmostat, or thiazide effect.";
+      return {
+        branch: `Euvolemic — UNa ≥20 (${primary})`, etiology: primary,
+        detail: [
+          branchNote,
+          "SIADH differential — most common etiologies in hospital:",
+          "DRUGS (#1 inpatient cause): SSRIs, SNRIs, carbamazepine, oxcarbazepine, cyclophosphamide, vincristine, desmopressin, NSAIDs, antipsychotics, TCAs, opioids.",
+          "CNS: Meningitis, encephalitis, SAH, stroke, TBI, brain tumor, Guillain-Barré.",
+          "PULMONARY: Pneumonia, empyema, TB, lung abscess, mechanical ventilation (PEEP).",
+          "MALIGNANCY: Small cell lung cancer (#1), pancreatic, thymoma, lymphoma.",
+          "POSTOPERATIVE: Pain/nausea → non-osmotic ADH release + hypotonic maintenance fluids. Common 24–48h post-op.",
+          "MUST EXCLUDE before diagnosing SIADH: Hypothyroidism (TSH) | Adrenal insufficiency (AM cortisol)",
+        ],
+        cswFlag: false,
+        caveats: [
+          "Thiazide use within 48–72h invalidates UNa — do not diagnose SIADH on active thiazide.",
+          "Adrenal insufficiency can present as euvolemic hyponatremia with high UNa — always check cortisol.",
+          "Normal saline worsens SIADH when (UNa + UK) / serum Na > 1.0 (Furst formula).",
+        ],
+        siadhCheck
+      };
+    }
+  }
+
+  if (vs === "hypervolemic") {
+    if (una < 20) {
+      return {
+        branch: "Hypervolemic — UNa <20 (avid Na retention)", etiology: "CHF / cirrhosis / nephrotic syndrome",
+        detail: [
+          "Low effective arterial volume (EABV) despite total body Na overload → ADH activation.",
+          "Kidney senses 'underfill' → avid Na conservation (UNa <20) + water retention → dilutional hyponatremia.",
+          "Congestive heart failure (poor cardiac output → low EABV).",
+          "Cirrhosis (splanchnic vasodilation → low EABV; hepatic Na excretion impaired).",
+          "Nephrotic syndrome (oncotic pressure loss → third spacing → low EABV).",
+          "In all three: treating the underlying pump/liver/kidney is the only durable fix.",
+        ], cswFlag: false,
+        caveats: [
+          "Na correction alone is insufficient — must treat underlying cause.",
+          "Tolvaptan: approved for CHF/cirrhosis but FDA warning for hepatotoxicity in cirrhosis (limit to <30 days).",
+          "Avoid normal saline — will not correct dilutional hyponatremia and worsens volume overload.",
+        ]
+      };
+    } else {
+      return {
+        branch: "Hypervolemic — UNa ≥20 (impaired Na excretion or diuretic effect)", etiology: "AKI / CKD / loop diuretic use in CHF or cirrhosis",
+        detail: [
+          "High UNa in volume-overloaded patient suggests impaired tubular Na reabsorption.",
+          "AKI or advanced CKD: tubular dysfunction → cannot reabsorb Na appropriately.",
+          "Loop diuretic use (furosemide, bumetanide) → natriuresis raises UNa.",
+          "Diuretic-modified CHF or cirrhosis (underlying state still hypervolemic).",
+        ], cswFlag: false,
+        caveats: [
+          "AKI/CKD: may require dialysis if refractory hyponatremia with fluid overload.",
+          "Diuretic use confounds UNa interpretation — check pre-diuretic UNa if available.",
+        ]
+      };
+    }
+  }
+
+  return { branch: "Unknown volume status", etiology: "Cannot classify",
+    detail: ["Provide volume status: hypovolemic, euvolemic, or hypervolemic."], cswFlag: false, caveats: [] };
+}
+
+// ── Furst formula ─────────────────────────────────────────────────
+function furstFormula(d) {
+  if (d.urine_na == null || d.urine_k == null)
+    return { available: false, note: "Furst formula requires urine Na AND urine K. Order urine electrolytes panel." };
+  const ratio = Math.round(((d.urine_na + d.urine_k) / d.serum_na) * 100) / 100;
+  const nsSafe = ratio <= 1.0;
+  const interpretation = nsSafe
+    ? `Furst ratio = ${ratio} (≤1.0) — Normal saline tolerable; fluid restriction likely effective. Urine is less concentrated than NS, so Na will not fall paradoxically.`
+    : `Furst ratio = ${ratio} (>1.0) — WARNING: normal saline will paradoxically WORSEN hyponatremia. The kidney will excrete the Na in urine concentrated beyond what was given, resulting in net free water retention. Fluid restriction alone also likely insufficient. Use: 3% NaCl, oral urea, or tolvaptan instead.`;
+  return { available: true, ratio, nsSafe, interpretation };
+}
+
+// ── ODS risk ──────────────────────────────────────────────────────
+function assessOdsRisk(d) {
+  const factors = [];
+  if (d.serum_na <= 120) factors.push("Na ≤120 mEq/L");
+  if (d.duration_hours != null && d.duration_hours >= 48) factors.push("Chronic hyponatremia (≥48h)");
+  else if (d.duration_hours == null) factors.push("Duration unknown (treat as chronic — conservative correction)");
+  if (d.alcohol_use_disorder) factors.push("Alcohol use disorder / malnutrition");
+  if (d.malnutrition && !d.alcohol_use_disorder) factors.push("Malnutrition");
+  if (d.advanced_liver_disease) factors.push("Advanced liver disease / cirrhosis");
+  if (d.serum_k != null && d.serum_k < 3.5) factors.push(`Hypokalemia (K = ${d.serum_k} mEq/L) — K correction will raise Na further`);
+  if (d.thiazide_use) factors.push("Thiazide-induced hyponatremia");
+  if (d.low_solute_intake) factors.push("Low solute intake / beer potomania (rapid auto-correction risk)");
+  if (d.sex && d.sex.toLowerCase() === "female" && (d.age == null || d.age < 50))
+    factors.push("Premenopausal female (hormonal protection against Na-adaptive brain extrusion)");
+  const high = factors.length > 0;
+  return {
+    level: high ? "HIGH ODS RISK" : "Standard ODS risk",
+    factors, high,
+    cap: high ? "≤6–8 mEq/L in first 24h" : "≤8–10 mEq/L in first 24h",
+    note: "Monitor Na q2h during active 3% NaCl infusion. If Na rises >10 mEq/L in 24h OR >18 mEq/L in 48h → RELOWER immediately (D5W + DDAVP)."
+  };
+}
+
+// ── Correction rate tracking ──────────────────────────────────────
+function checkCorrectionRate(d) {
+  if (d.prior_na == null || d.hours_since_prior == null || d.hours_since_prior === 0) return null;
+  const delta = Math.round((d.serum_na - d.prior_na) * 10) / 10;
+  const rate  = Math.round((delta / d.hours_since_prior) * 100) / 100;
+  const proj24 = Math.round(rate * 24 * 10) / 10;
+  const overcorrected = proj24 > 10;
+  return { delta, hours: d.hours_since_prior, ratePerHr: rate, proj24, overcorrected,
+    note: overcorrected
+      ? `OVERCORRECTION WARNING: Na rising too fast. Stop hypertonic saline. Give D5W 3 mL/kg/hr IV + DDAVP 2–4 mcg IV/SC q6–8h. Recheck Na q2h until stable within cap.`
+      : `Correction rate on target: ${proj24} mEq/L projected over 24h.`
+  };
+}
+
+// ── Danger flags ──────────────────────────────────────────────────
+function generateDangerFlags(d, etiology, ods, correction) {
+  const flags = [];
+  const symsL = new Set(d.symptoms.map(s => s.toLowerCase()));
+  if (d.serum_na < 120 && ["seizure","coma","confusion","obtundation"].some(s => symsL.has(s)))
+    flags.push("EMERGENT: Na <120 + neurologic symptoms → ICU, 3% NaCl bolus NOW, neurology/nephrology consult.");
+  if (d.serum_na < 125 && d.symptoms.length === 0)
+    flags.push("URGENT: Na <125 even if asymptomatic — admit, close monitoring, etiology workup before treatment.");
+  if (etiology.cswFlag)
+    flags.push("CSW ALERT: CNS injury + hypovolemic UNa ≥20 → do NOT fluid restrict. Treat with volume + Na replacement.");
+  const vs = (d.volume_status || "").toLowerCase();
+  if (vs === "euvolemic" && d.tsh_normal == null)
+    flags.push("TSH NOT DONE: Cannot diagnose SIADH without ruling out hypothyroidism. Order TSH.");
+  if (vs === "euvolemic" && d.cortisol_normal == null)
+    flags.push("CORTISOL NOT DONE: Cannot diagnose SIADH without ruling out adrenal insufficiency. Order AM cortisol.");
+  if (d.thiazide_use)
+    flags.push("THIAZIDE IN USE: Do not diagnose SIADH until 48–72h off thiazide. Urine Na is unreliable on active thiazide.");
+  const furst = furstFormula(d);
+  if (furst.available && !furst.nsSafe)
+    flags.push("FURST >1.0: Normal saline will paradoxically LOWER Na in this patient. Do not give NS for SIADH.");
+  if (correction && correction.overcorrected)
+    flags.push(`OVERCORRECTION: Na rose ${correction.proj24} mEq/L projected/24h (cap: ${ods.cap}). Stop treatment. D5W + DDAVP now.`);
+  if (d.low_solute_intake)
+    flags.push("BEER POTOMANIA / LOW SOLUTE: Extreme rapid auto-correction risk when eating resumes. Na q4h mandatory.");
+  if (d.serum_k != null && d.serum_k < 3.5)
+    flags.push(`HYPOKALEMIA (K=${d.serum_k}): Correcting K will raise serum Na — factor into 24h correction cap.`);
+  const medsL = d.medications_raw.split(',').map(m => m.toLowerCase().trim());
+  if (medsL.includes("tolvaptan") && vs === "hypovolemic")
+    flags.push("TOLVAPTAN + HYPOVOLEMIA: Tolvaptan is contraindicated in hypovolemic hyponatremia — will worsen volume depletion.");
+  if (medsL.includes("tolvaptan") && d.advanced_liver_disease)
+    flags.push("TOLVAPTAN + LIVER DISEASE: FDA hepatotoxicity warning. Limit to <30 days. Reassess indication.");
+  return flags;
+}
+
+// ── Adrogue-Madias ────────────────────────────────────────────────
+function calcAdrogue(d) {
+  if (d.weight_kg == null || !d.sex) return null;
+  const sex = d.sex.toLowerCase();
+  const age = d.age || 40;
+  const wt  = d.weight_kg;
+  const tbwF = sex === "male" ? (age >= 65 ? 0.5 : 0.6) : (age >= 65 ? 0.45 : 0.5);
+  const tbw  = Math.round(wt * tbwF * 10) / 10;
+  const infusates = [
+    { name: "3% NaCl (513 mEq/L)", na: 513 },
+    { name: "0.9% NS (154 mEq/L)", na: 154 },
+    { name: "0.45% NS (77 mEq/L)",  na: 77  },
+    { name: "D5W (0 mEq/L)",        na: 0   },
+  ];
+  const rows = infusates.map(inf => {
+    const deltaPL = Math.round(((inf.na - d.serum_na) / (tbw + 1)) * 100) / 100;
+    let rateNote = "—";
+    let dir = "neutral";
+    if (deltaPL > 0) { rateNote = `${Math.round(0.5 / deltaPL * 1000)} mL/hr`; dir = "raise"; }
+    else if (deltaPL < 0) { rateNote = "Will LOWER Na"; dir = "lower"; }
+    return { name: inf.name, deltaPL, rateNote, dir };
+  });
+  return { tbw, tbwF, sex, age, rows };
+}
+
+// ── Treatment module ──────────────────────────────────────────────
+function generateTreatment(d, etiology, ods, sev) {
+  const vs     = (d.volume_status || "").toLowerCase().trim();
+  const branch = etiology.branch || "";
+  const furst  = furstFormula(d);
+  const out    = {};
+
+  if (sev.emergency) {
+    out.emergency = [
+      "EMERGENCY PROTOCOL — 3% NaCl bolus (ESC 2014):",
+      "1. 100–150 mL 3% NaCl IV over 10–20 minutes.",
+      "2. Recheck Na after infusion.",
+      "3. Repeat bolus (up to 2 more times) if neurologic symptoms persist.",
+      "4. Target: raise Na 4–6 mEq/L acutely — enough to reverse herniation/seizure.",
+      "5. Once symptoms resolve or Na risen 4–6 mEq/L → STOP bolus, switch to maintenance rate.",
+      `6. Correction cap: ${ods.cap} total. Do not exceed.`,
+      "7. ICU admission. Na q2h. Continuous cardiac monitoring.",
+      "8. Nephrology consult.",
+    ];
+  }
+
+  if (branch.includes("polydipsia") || branch.toLowerCase().includes("low-solute") || branch.includes("ADH suppressed")) {
+    out.etiologyTx = [
+      "Primary polydipsia / beer potomania / low-solute intake treatment:",
+      "Fluid restriction (primary polydipsia — restrict to 1–1.5 L/day).",
+      "Dietary solute supplementation (salt tabs, protein).",
+      "Beer potomania: do NOT give food rapidly — Na will auto-correct fast. Monitor q4h.",
+      "Treat underlying psychiatric disease if psychogenic polydipsia.",
+      "No hypertonic saline unless severe symptoms.",
+    ];
+  } else if (vs === "hypovolemic") {
+    const cswLines = etiology.cswFlag ? [
+      "CSW (CNS injury present): NS or hypertonic saline + volume replacement. Do NOT fluid restrict.",
+      "Consider fludrocortisone 0.1–0.2 mg/day for CSW if persistent.",
+    ] : [];
+    out.etiologyTx = [
+      "Hypovolemic hyponatremia — volume replacement:",
+      "0.9% NS 1–2 mL/kg/hr initially. Titrate to clinical response.",
+      "Rationale: restore volume → suppress ADH → allow free water excretion.",
+      "Stop offending diuretics or medications.",
+      "Monitor Na q4–6h — rapid auto-correction common after volume restoration.",
+      "Have D5W + DDAVP ready if auto-correction exceeds cap.",
+      ...cswLines,
+    ];
+  } else if (vs === "euvolemic") {
+    const furstNote = furst.available ? `Effective when Furst ratio <1.0 (this patient: ${furst.ratio})` : "Order urine K to calculate Furst ratio";
+    const furstWarn = furst.available && !furst.nsSafe ? ["WARNING: Furst ratio >1.0 — skip NS; use hypertonic saline or urea directly."] : [];
+    out.etiologyTx = [
+      ...furstWarn,
+      "Euvolemic hyponatremia / SIADH — stepwise:",
+      `Step 1: Fluid restriction 800–1000 mL/day. ${furstNote}.`,
+      "Step 2: Oral sodium chloride tablets. 1–3 g NaCl PO TID with meals.",
+      "Step 3: Oral urea (ESC 2014 second-line). 15–30 g PO daily. Augments urine osmolar load → free water clearance.",
+      "Step 4: Vaptans (refractory SIADH) — Tolvaptan 15 mg PO daily; titrate to 30–60 mg. Conivaptan 20 mg IV load then 20 mg/24h x 4 days (inpatient).",
+      "CRITICAL: Do NOT restrict fluid during vaptan therapy — overcorrection risk.",
+      "Contraindicated: hypovolemia, urgent Na correction, adrenal insufficiency, hypothyroidism.",
+      "Tolvaptan in cirrhosis: limit to <30 days (FDA hepatotoxicity warning).",
+      "Treat the trigger: stop SSRI/carbamazepine/thiazide; treat pneumonia/meningitis/CNS/malignancy.",
+      "Hypothyroidism: levothyroxine → Na corrects over days-weeks.",
+      "Adrenal insufficiency: hydrocortisone → Na may correct RAPIDLY. Monitor closely.",
+    ];
+  } else if (vs === "hypervolemic") {
+    out.etiologyTx = [
+      "Hypervolemic hyponatremia — treat underlying condition:",
+      "CHF: Fluid restriction 1–1.5 L/day. Optimize HF therapy (ACEi/ARB, beta-blocker). Loop diuretics. Tolvaptan for short-term aquaresis.",
+      "Cirrhosis: Fluid restriction. Large-volume paracentesis, spironolactone, furosemide. Tolvaptan <30 days only. Definitive: liver transplant.",
+      "Nephrotic syndrome: Fluid restriction. Diuretics. Treat underlying glomerulopathy.",
+      "AKI/CKD: Fluid restriction. Dialysis if refractory severe hyponatremia + volume overload.",
+    ];
+  }
+
+  out.relowering = [
+    "OVERCORRECTION / RELOWERING PROTOCOL [Verbalis 2013, Sterns 2015]:",
+    `Trigger: Na rises >10 mEq/L in 24h (>6–8 if high ODS risk) OR >18 mEq/L in 48h.`,
+    "1. STOP all hypertonic saline and Na-raising therapy immediately.",
+    "2. DDAVP 2–4 mcg IV or SC q6–8h — clamp further free water excretion.",
+    "3. D5W 3 mL/kg/hr IV — deliver free water to lower serum Na.",
+    "4. Target: bring Na down 1–2 mEq/L toward the correction cap.",
+    "5. Recheck Na q2h until stable within goal.",
+    "6. Continue DDAVP q6–8h x 24h to prevent further drift.",
+    "ODS symptoms (dysarthria, dysphagia, flaccid paralysis, locked-in) appear 2–6 days after rapid correction. Prevention is the only treatment — there is no proven reversal.",
+  ];
+
+  return out;
+}
+
+// ── HTML helpers ──────────────────────────────────────────────────
+function stepCard(num, title, colorClass, bodyHtml, extraClass='') {
+  return `<div class="step-card ${extraClass}">
+    <div class="step-header">
+      <div class="step-num ${colorClass}">${num}</div>
+      <div class="step-title ${colorClass}">${title}</div>
+    </div>
+    <div class="step-body">${bodyHtml}</div>
+  </div>`;
+}
+
+function kv(label, val, cls='') {
+  return `<div class="kv"><span class="kv-lbl">${label}</span><span class="kv-val ${cls}">${val}</span></div>`;
+}
+
+function infobox(text, cls='') {
+  return `<div class="infobox ${cls}">${text}</div>`;
+}
+
+function blist(items, flagFn) {
+  return '<ul class="blist">' + items.map(i => {
+    const f = flagFn ? flagFn(i) : '';
+    return `<li class="${f}">${i}</li>`;
+  }).join('') + '</ul>';
+}
+
+// ── Main analysis ─────────────────────────────────────────────────
+function runAnalysis() {
+  const naRaw = document.getElementById('serum_na').value;
+  if (!naRaw) { alert('Serum Na is required.'); return; }
+
+  const g = id => { const v = document.getElementById(id).value; return v === '' ? null : parseFloat(v); };
+  const s = id => document.getElementById(id).value || null;
+  const b = id => document.getElementById(id).checked;
+  const syms = [...document.querySelectorAll('input[name="symptom"]:checked')].map(c => c.value);
+  const medsStr = document.getElementById('medications').value || '';
+
+  const tshRaw  = document.getElementById('tsh_normal').value;
+  const cortRaw = document.getElementById('cortisol_normal').value;
+  const tshNorm  = tshRaw  === 'notdone' ? null : tshRaw  === 'normal';
+  const cortNorm = cortRaw === 'notdone' ? null : cortRaw === 'normal';
+
+  const d = {
+    serum_na:   parseFloat(naRaw),
+    serum_osm:  g('serum_osm'), serum_bun: g('serum_bun'), glucose: g('glucose'),
+    serum_k:    g('serum_k'),   serum_hco3: g('serum_hco3'), serum_cr: g('serum_cr'),
+    serum_ethanol: g('serum_ethanol'),
+    urine_osm:  g('urine_osm'), urine_na: g('urine_na'), urine_k: g('urine_k'),
+    volume_status: s('volume_status'),
+    symptoms: syms,
+    medications_raw: medsStr,
+    weight_kg: g('weight_kg'), sex: s('sex'), age: g('age'),
+    alcohol_use_disorder: b('alcohol_use_disorder'), malnutrition: b('malnutrition'),
+    advanced_liver_disease: b('advanced_liver_disease'),
+    thiazide_use: b('thiazide_use'), low_solute_intake: b('low_solute_intake'),
+    duration_hours: g('duration_hours'), prior_na: g('prior_na'), hours_since_prior: g('hours_since_prior'),
+    tsh_normal: tshNorm, cortisol_normal: cortNorm, cns_injury: b('cns_injury'),
+  };
+  const includeTx = b('include_treatment');
+
+  // Compute
+  const osmData  = calcOsmolality(d);
+  const corNa    = correctedNaGlucose(d);
+  const sev      = classifySeverity(d);
+  const tonicity = classifyTonicity(d, osmData);
+  const uOsm     = interpretUrineOsm(d);
+  const etiology = classifyEtiology(d);
+  const furst    = furstFormula(d);
+  const ods      = assessOdsRisk(d);
+  const corr     = checkCorrectionRate(d);
+  const meds     = screenMedications(medsStr);
+  const flags    = generateDangerFlags(d, etiology, ods, corr);
+
+  let html = '';
+
+  // Emergency banner
+  if (sev.emergency) {
+    html += `<div class="emergency-banner">⚠ EMERGENCY — Severe Symptomatic Hyponatremia: 3% NaCl bolus NOW. ICU. Nephrology consult immediately.</div>`;
+  }
+
+  // Danger flags (if any, show at top too)
+  if (flags.length > 0 && !sev.emergency) {
+    html += flags.map(f => `<div class="danger-flag"><span>⚠</span><span>${f}</span></div>`).join('');
+  }
+
+  // ── STEP 1: Osmolality
+  let s1body = '';
+  s1body += kv("Calculated Osm", `${osmData.calcOsm} mOsm/kg  [2×Na + Gluc/18 + BUN/2.8]`, "teal");
+  s1body += kv("Effective Osm (tonicity)", `${osmData.effOsm} mOsm/kg  [2×Na + Gluc/18]`, "teal");
+  if (d.serum_osm != null) {
+    s1body += kv("Measured Osm", `${d.serum_osm} mOsm/kg`);
+    s1body += kv("Osmolar Gap", `${osmData.osmGap}`, osmData.osmGapFlag ? "red" : "green");
+    s1body += infobox(osmData.osmGapNote, osmData.osmGapFlag ? "red" : "");
+  } else {
+    s1body += infobox("Measured osmolality not provided. Calculated Osm used for tonicity assessment.", "warn");
+  }
+  s1body += `<div style="margin-top:10px;font-size:11px;color:var(--text-dim)">Glucose assumed 90 mg/dL; BUN assumed 14 mg/dL if not provided.</div>`;
+  html += stepCard("1", "Osmolality Calculations", "teal", s1body);
+
+  // ── STEP 2: Corrected Na + Severity
+  let s2body = '';
+  const naColorClass = d.serum_na < 125 ? "red" : d.serum_na < 130 ? "yellow" : "teal";
+  s2body += kv("Serum Na", `${d.serum_na} mEq/L`, naColorClass);
+  s2body += kv("Na Classification", sev.naClass, naColorClass);
+  if (corNa != null) {
+    const corrClass = corNa >= 135 ? "green" : "yellow";
+    s2body += kv("Corrected Na (Katz)", `${corNa} mEq/L — +2.4 per 100 mg/dL glucose above 100`, corrClass);
+    if (corNa >= 135) s2body += infobox("Corrected Na normalizes → translocational hyponatremia from hyperglycemia. Treat hyperglycemia.", "green");
+  }
+  s2body += `<div style="margin:12px 0 6px;font-weight:600;font-size:11px;color:var(--text-dim)">SYMPTOM SEVERITY</div>`;
+  s2body += kv("Symptom Class", sev.symClass, sev.emergency ? "red" : d.symptoms.length > 0 ? "yellow" : "green");
+  s2body += infobox(sev.symNote, sev.emergency ? "red" : "");
+  html += stepCard("2", "Severity + Symptom Classification", sev.emergency ? "red" : "teal", s2body,
+    sev.emergency ? "emergency" : "");
+
+  // ── STEP 3: Tonicity
+  let s3body = '';
+  const tonicClass = tonicity.category.includes("Hypotonic") ? "teal" : tonicity.category.includes("Isotonic") ? "yellow" : "red";
+  s3body += kv("Reference Osm", `${tonicity.refOsm} mOsm/kg (${tonicity.source})`, "teal");
+  s3body += kv("Tonicity", tonicity.category, tonicClass);
+  s3body += infobox(tonicity.note, !tonicity.proceed ? (tonicity.category.includes("Hypertonic") ? "red" : "yellow") : "");
+
+  if (!tonicity.proceed) {
+    html += stepCard("3", "Tonicity Classification", "yellow", s3body, "warn");
+    html += `<div class="stop-banner"><span>🛑</span><div><strong>Workflow stops here</strong> — not true hypotonic hyponatremia.<br>
+      Treat the underlying osmole (glucose, mannitol) or evaluate for pseudohyponatremia.
+    </div></div>`;
+    // Still show meds + flags
+    if (meds.length > 0) {
+      let mBody = meds.map(m => `<div class="med-card">
+        <div class="med-header"><span class="med-name-tag">${m.medication.toUpperCase()}</span><span class="med-class">[${m.class}]</span></div>
+        <div class="med-row"><strong>Mechanism:</strong> ${m.mechanism}</div>
+        <div class="med-row"><strong>Effect:</strong> ${m.effect}</div>
+        <div class="med-action">Action: ${m.action}</div>
+      </div>`).join('');
+      html += stepCard("Rx", "Medication Culprit Screen", "red", mBody);
+    }
+    if (flags.length > 0) {
+      html += stepCard("!", "Danger Flags", "red",
+        flags.map(f => `<div class="danger-flag"><span>⚠</span><span>${f}</span></div>`).join(''), "emergency");
+    }
+    document.getElementById('output-area').innerHTML = html + sourceFooter();
+    return;
+  }
+  html += stepCard("3", "Tonicity Classification", "teal", s3body);
+
+  // ── STEP 4: Urine Osm
+  let s4body = '';
+  const uOsmClass = uOsm.adhActive === false ? "yellow" : uOsm.adhActive === true ? "teal" : "";
+  s4body += kv("Urine Osm", d.urine_osm != null ? `${d.urine_osm} mOsm/kg` : "Not provided", "");
+  s4body += kv("ADH Status", uOsm.category, uOsmClass);
+  s4body += infobox(uOsm.note, uOsm.adhActive === false ? "yellow" : "");
+  html += stepCard("4", "Urine Osm — ADH Status", uOsmClass || "teal", s4body);
+
+  // ── STEP 5: Etiology tree
+  let s5body = '';
+  s5body += kv("Branch", etiology.branch, "teal");
+  s5body += kv("Leading Etiology", etiology.etiology, etiology.etiology.includes("Cannot") ? "red" : "teal");
+  if (etiology.detail.length > 0) {
+    s5body += `<div style="margin-top:10px">` + blist(etiology.detail, i => {
+      if (i.startsWith("MUST EXCLUDE") || i.startsWith("CSW")) return "flagged";
+      if (i.startsWith("  -") || i.startsWith("  ")) return "";
+      return "";
+    }) + `</div>`;
+  }
+  if (etiology.caveats && etiology.caveats.length > 0) {
+    s5body += `<div style="margin-top:12px;font-weight:700;font-size:11px;color:var(--yellow)">Caveats:</div>`;
+    s5body += blist(etiology.caveats, i => etiology.cswFlag && i.includes("CSW") ? "flagged" : "warn");
+  }
+
+  // SIADH criteria (if applicable)
+  if (etiology.siadhCheck) {
+    const sc = etiology.siadhCheck;
+    const scColor = sc.allMet ? "green" : "yellow";
+    s5body += `<div style="margin:16px 0 10px;padding:10px 12px;background:var(--surface3);border-radius:8px;border:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:${sc.allMet ? 'var(--green)' : 'var(--yellow)'};margin-bottom:10px">
+        SIADH Schwartz-Bartter Criteria (${sc.met}/${sc.total} met)
+      </div>`;
+    sc.criteria.forEach(c => {
+      const cls  = c.status === true ? "met" : c.status === false ? "unmet" : "unknown";
+      const mark = c.status === true ? '<span style="color:var(--green);font-weight:700">[✓]</span>'
+                 : c.status === false ? '<span style="color:var(--red);font-weight:700">[✗]</span>'
+                 : '<span style="color:var(--yellow);font-weight:700">[?]</span>';
+      s5body += `<div class="siadh-crit ${cls}">${mark}<span class="siadh-label">${c.label}</span><span class="siadh-note">${c.note}</span></div>`;
+    });
+    s5body += sc.allMet
+      ? `<div style="margin-top:8px;color:var(--green);font-size:12px;font-weight:600">All 6 criteria met — SIADH diagnosis supported.</div>`
+      : `<div style="margin-top:8px;color:var(--yellow);font-size:12px;font-weight:600">Not all criteria met — SIADH not confirmed. Complete outstanding items above.</div>`;
+    s5body += `</div>`;
+  }
+
+  html += stepCard("5", "Etiology Classification Tree", etiology.cswFlag ? "red" : "teal", s5body, etiology.cswFlag ? "emergency" : "");
+
+  // ── STEP 6: Furst formula
+  let s6body = '';
+  if (furst.available) {
+    const fClass = furst.nsSafe ? "safe" : "unsafe";
+    s6body += kv("Urine Na", d.urine_na != null ? `${d.urine_na} mEq/L` : "—", "");
+    s6body += kv("Urine K", d.urine_k != null ? `${d.urine_k} mEq/L` : "—", "");
+    s6body += kv("Serum Na", `${d.serum_na} mEq/L`, "");
+    s6body += `<div class="furst-box ${fClass}">Furst Ratio = (${d.urine_na} + ${d.urine_k}) / ${d.serum_na} = <strong>${furst.ratio}</strong> ${furst.nsSafe ? "≤1.0 — NS safe" : ">1.0 — NS PARADOX WARNING"}</div>`;
+    s6body += infobox(furst.interpretation, furst.nsSafe ? "green" : "red");
+  } else {
+    s6body += infobox(furst.note, "warn");
+  }
+  s6body += `<div style="margin-top:8px;font-size:11px;color:var(--text-dim)">Source: Furst et al., Am. J. Nephrol. 2000.</div>`;
+  html += stepCard("6", "Furst Formula — NS Paradox Predictor", furst.available && !furst.nsSafe ? "red" : "teal", s6body, furst.available && !furst.nsSafe ? "warn" : "");
+
+  // ── STEP 7: ODS risk + correction tracking
+  let s7body = '';
+  s7body += `<div class="ods-block ${ods.high ? 'high' : 'std'}">${ods.high ? '⚠ ' : '✓ '}${ods.level} — Cap: ${ods.cap}</div>`;
+  if (ods.factors.length > 0) {
+    s7body += `<div style="margin-bottom:8px">` + ods.factors.map(f => `<span class="tag-chip">${f}</span>`).join('') + `</div>`;
+  }
+  s7body += infobox(ods.note, ods.high ? "red" : "");
+
+  if (corr) {
+    s7body += `<div style="margin:14px 0 8px;font-weight:700;font-size:11px;color:var(--text-dim)">CORRECTION RATE TRACKING</div>`;
+    s7body += kv("Delta Na", `${corr.delta} mEq/L over ${corr.hours}h`, corr.overcorrected ? "red" : "green");
+    s7body += kv("Rate", `${corr.ratePerHr} mEq/L/hr`, "");
+    s7body += kv("Projected 24h", `${corr.proj24} mEq/L`, corr.overcorrected ? "red" : "green");
+    s7body += infobox(corr.note, corr.overcorrected ? "red" : "green");
+  }
+  html += stepCard("7", "ODS Risk + Correction Rate Cap", ods.high ? "red" : "green", s7body, ods.high ? "warn" : "ok");
+
+  // ── STEP 8: Medications
+  let s8body = '';
+  if (meds.length === 0) {
+    s8body += infobox("No medication culprits identified from provided list.<br>If SIADH suspected, review full medication list for SSRIs, thiazides, carbamazepine, desmopressin, antipsychotics, opioids.", "");
+  } else {
+    s8body = meds.map(m => `<div class="med-card">
+      <div class="med-header"><span class="med-name-tag">${m.medication.toUpperCase()}</span><span class="med-class">[${m.class}]</span></div>
+      <div class="med-row"><strong style="color:var(--text-dim)">Mechanism:</strong> ${m.mechanism}</div>
+      <div class="med-row"><strong style="color:var(--text-dim)">Effect:</strong> ${m.effect}</div>
+      <div class="med-action">→ Action: ${m.action}</div>
+    </div>`).join('');
+  }
+  html += stepCard("8", "Medication Culprit Screen", meds.length > 0 ? "red" : "teal", s8body);
+
+  // ── Danger flags
+  if (flags.length > 0) {
+    const flagHtml = flags.map(f => `<div class="danger-flag"><span>⚠</span><span>${f}</span></div>`).join('');
+    html += stepCard("!", "Danger Flags", "red", flagHtml, "emergency");
+  }
+
+  // ── Treatment module
+  if (includeTx) {
+    const tx = generateTreatment(d, etiology, ods, sev);
+    let txBody = '';
+
+    if (tx.emergency) {
+      txBody += `<div class="tx-group">
+        <div class="tx-group-title" style="color:var(--red)">Emergency Protocol</div>
+        <div class="tx-group-body">` + tx.emergency.map(l => `<div class="tx-item ${l.startsWith('EMERGENCY') ? 'danger' : l.match(/^\d/) ? 'emph' : ''}">${l}</div>`).join('') + `</div></div>`;
+    }
+
+    if (tx.etiologyTx) {
+      txBody += `<div class="tx-group">
+        <div class="tx-group-title">Etiology-Directed Treatment</div>
+        <div class="tx-group-body">` + tx.etiologyTx.map(l => `<div class="tx-item ${l.startsWith('WARNING') ? 'danger' : l.startsWith('CRITICAL') ? 'emph' : l.startsWith('Step') ? 'emph' : ''}">${l}</div>`).join('') + `</div></div>`;
+    }
+
+    // Adrogue-Madias
+    const am = calcAdrogue(d);
+    if (am) {
+      txBody += `<div class="tx-group">
+        <div class="tx-group-title">Adrogue-Madias Infusion Rate Calculator [Adrogue & Madias 2000]</div>
+        <div class="tx-group-body">
+          <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">
+            TBW = ${d.weight_kg} kg × ${am.tbwF} = ${am.tbw} L (${am.sex}, age ${am.age})<br>
+            Formula: ΔNa/L = (Na<sub>infusate</sub> − ${d.serum_na}) / (${am.tbw} + 1)
+          </div>
+          <table class="am-table">
+            <thead><tr><th>Infusate</th><th>ΔNa / L</th><th>Rate for 0.5 mEq/hr</th></tr></thead>
+            <tbody>` + am.rows.map(r =>
+              `<tr><td>${r.name}</td><td class="${r.dir}">${r.deltaPL > 0 ? '+' : ''}${r.deltaPL}</td><td class="${r.dir}">${r.rateNote}</td></tr>`
+            ).join('') + `</tbody>
+          </table>
+          <div style="margin-top:8px;font-size:11px;color:var(--text-dim)">Estimates only — Na changes are unpredictable. Check Na q2–4h during active infusion.</div>
+        </div></div>`;
+    }
+
+    txBody += `<div class="tx-group">
+      <div class="tx-group-title" style="color:var(--yellow)">Overcorrection / Relowering Protocol</div>
+      <div class="tx-group-body">` + tx.relowering.map(l => `<div class="tx-item ${l.startsWith('OVER') || l.startsWith('Trigger') ? 'danger' : l.match(/^\d/) ? 'emph' : ''}">${l}</div>`).join('') + `</div></div>`;
+
+    html += stepCard("Tx", "Treatment Module", sev.emergency ? "red" : "teal", txBody);
+  }
+
+  // Source footer
+  html += sourceFooter();
+
+  document.getElementById('output-area').innerHTML = html;
+  document.getElementById('output-area').scrollTop = 0;
+}
+
+function sourceFooter() {
+  return `<div class="source-footer">
+    <strong>Sources:</strong>
+    [1] Verbalis JG et al. Am J Med. 2013;126(suppl 1):S1–S42 &nbsp;|&nbsp;
+    [2] Spasovski G et al. Eur J Endocrinol. 2014;170:G1–G47 (ESC/ERA/ESE) &nbsp;|&nbsp;
+    [3] Sterns RH. N Engl J Med. 2015;372:55–65 &nbsp;|&nbsp;
+    [4] Hoorn EJ, Zietse R. J Am Soc Nephrol. 2017;28:1340–1349 &nbsp;|&nbsp;
+    [5] Adrogue HJ, Madias NE. N Engl J Med. 2000;342:1581–1589 &nbsp;|&nbsp;
+    [6] Furst H et al. Am J Nephrol. 2000;20:265–272<br>
+    <strong>Disclaimer:</strong> Educational decision support only — not a substitute for clinical judgment.
+    Na &lt;120 with neurologic symptoms requires immediate physician-level evaluation.
+  </div>`;
+}
+
+function clearAll() {
+  ['serum_na','serum_osm','serum_bun','glucose','serum_k','serum_hco3','serum_cr','serum_ethanol',
+   'urine_osm','urine_na','urine_k','medications','weight_kg','age','prior_na','hours_since_prior','duration_hours'
+  ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['volume_status','sex'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['tsh_normal','cortisol_normal'].forEach(id => { const el = document.getElementById(id); if (el) el.value = 'notdone'; });
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.checked = false;
+    cb.closest('.cb-item') && cb.closest('.cb-item').classList.remove('checked');
+  });
+  document.getElementById('include_treatment').checked = true;
+  document.getElementById('tx-toggle').classList.add('checked');
+  document.getElementById('output-area').innerHTML = `
+    <div class="placeholder">
+      <div class="icon">🧪</div>
+      <p>Enter patient data and click <strong>Run Full Analysis</strong></p>
+      <p style="font-size:11px;color:var(--text-dim)">Serum Na required. All other fields improve diagnostic precision.</p>
+    </div>`;
+}
+
+// Init tx toggle
+document.getElementById('include_treatment').checked = true;
+document.getElementById('tx-toggle').classList.add('checked');
+</script>
+</body>
+</html>

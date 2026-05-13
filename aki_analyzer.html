@@ -54,6 +54,12 @@
       line-height: 1.6;
     }
 
+    /* ── IM Toolkit nav ── */
+    .im-topbar { height:3px; background:linear-gradient(90deg,#0d9488,#38bdf8,#a78bfa,#0d9488); background-size:300% 100%; animation:im-shimmer 6s linear infinite; }
+    @keyframes im-shimmer { 0%{background-position:0%} 100%{background-position:300%} }
+    .im-home-btn { position:fixed; top:14px; right:16px; z-index:999; display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:var(--teal-300); background:rgba(45,212,212,0.08); border:1px solid rgba(45,212,212,0.25); padding:5px 13px; border-radius:99px; text-decoration:none; letter-spacing:0.04em; transition:background 0.2s; white-space:nowrap; backdrop-filter:blur(8px); }
+    .im-home-btn:hover { background:rgba(45,212,212,0.18); }
+
     /* ── Layout ── */
     .page-wrapper {
       max-width: 960px;
@@ -578,6 +584,8 @@
   </style>
 </head>
 <body>
+<div class="im-topbar"></div>
+<a class="im-home-btn" href="index.html">← Toolkit</a>
   <div class="page-wrapper">
 
     <!-- Header -->

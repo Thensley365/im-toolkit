@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IM Toolkit — Clinical Decision Support</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:        #07101f;
+      --navy-card:   #0d1b2e;
+      --navy-border: #1a3050;
+      --teal:        #0d9488;
+      --teal-light:  #14b8a6;
+      --teal-glow:   rgba(13,148,136,0.18);
+      --sky:         #38bdf8;
+      --white:       #f0f9ff;
+      --text-dim:    #94a3b8;
+      --muted:       #4e6680;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--navy);
+      color: var(--white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Ambient background glow ── */
+    .bg-glow {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 15% 10%, rgba(13,148,136,0.10) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 85% 85%, rgba(56,189,248,0.06) 0%, transparent 70%);
+    }
+
+    /* ── Animated top bar ── */
+    .top-bar {
+      position: relative;
+      z-index: 2;
+      height: 3px;
+      background: linear-gradient(90deg, #0d9488, #38bdf8, #a78bfa, #0d9488);
+      background-size: 300% 100%;
+      animation: shimmer 6s linear infinite;
+    }
+    @keyframes shimmer { 0% { background-position: 0% 0%; } 100% { background-position: 300% 0%; } }
+
+    /* ── Header ── */
+    header {
+      position: relative;
+      z-index: 1;
+      padding: 3.5rem 1.5rem 2.75rem;
+      text-align: center;
+      border-bottom: 1px solid var(--navy-border);
+      background: linear-gradient(180deg, rgba(13,148,136,0.05) 0%, transparent 100%);
+    }
+
+    .header-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(13,148,136,0.1);
+      border: 1px solid rgba(13,148,136,0.3);
+      color: var(--teal-light);
+      padding: 5px 14px;
+      border-radius: 99px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .pill-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--teal-light);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+    header h1 {
+      font-size: clamp(2rem, 5.5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 0.9rem;
+      background: linear-gradient(130deg, var(--teal-light) 0%, var(--sky) 55%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    header p {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      line-height: 1.65;
+      max-width: 480px;
+      margin: 0 auto 1.75rem;
+    }
+
+    .header-stats {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+    }
+    .stat-value { color: var(--teal-light); font-weight: 500; }
+    .stat-divider { color: var(--navy-border); }
+
+    /* ── Search bar ── */
+    .search-wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 420px;
+      margin: 1.75rem auto 0;
+    }
+    .search-wrap input {
+      width: 100%;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--navy-border);
+      border-radius: 10px;
+      padding: 10px 16px 10px 40px;
+      color: var(--white);
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .search-wrap input::placeholder { color: var(--muted); }
+    .search-wrap input:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(13,148,136,0.12);
+    }
+    .search-icon {
+      position: absolute;
+      left: 13px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      font-size: 15px;
+      pointer-events: none;
+    }
+
+    /* ── Main ── */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 5rem;
+    }
+
+    .section {
+      margin-bottom: 2.75rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 1.1rem;
+    }
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--navy-border);
+    }
+    .section-count {
+      font-size: 10px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+    }
+
+    /* ── Tool grid ── */
+    .tool-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1.1rem;
+    }
+
+    /* ── Tool card ── */
+    .tool-card {
+      position: relative;
+      background: var(--navy-card);
+      border: 1px solid var(--navy-border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      overflow: hidden;
+      transition: border-color 0.22s, transform 0.22s, box-shadow 0.22s;
+      cursor: pointer;
+    }
+
+    /* Card glow layer (follows mouse) */
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle 180px at var(--cx, 50%) var(--cy, 50%),
+        rgba(13,148,136,0.13) 0%,
+        transparent 100%
+      );
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+      border-radius: inherit;
+    }
+
+    .tool-card:hover {
+      border-color: rgba(13,148,136,0.55);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.4), 0 0 0 1px rgba(13,148,136,0.12), 0 4px 20px var(--teal-glow);
+    }
+    .tool-card:hover::before { opacity: 1; }
+
+    /* Card top row */
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .card-icon {
+      width: 46px; height: 46px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .card-badge {
+      font-size: 9.5px;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 3px 10px;
+      border-radius: 99px;
+      white-space: nowrap;
+    }
+    .b-electro  { background: rgba(56,189,248,0.10);  color: #38bdf8; border: 1px solid rgba(56,189,248,0.22); }
+    .b-renal    { background: rgba(167,139,250,0.10); color: #a78bfa; border: 1px solid rgba(167,139,250,0.22); }
+    .b-resp     { background: rgba(52,211,153,0.10);  color: #34d399; border: 1px solid rgba(52,211,153,0.22); }
+    .b-id       { background: rgba(251,191,36,0.10);  color: #fbbf24; border: 1px solid rgba(251,191,36,0.22); }
+    .b-clinical { background: rgba(248,113,113,0.10); color: #f87171; border: 1px solid rgba(248,113,113,0.22); }
+
+    .card-name {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.25;
+    }
+
+    .card-desc {
+      font-size: 0.79rem;
+      color: var(--text-dim);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    .card-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+
+    .card-tag {
+      font-size: 9.5px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.07);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .card-arrow {
+      position: absolute;
+      bottom: 1.25rem;
+      right: 1.35rem;
+      color: var(--teal-light);
+      font-size: 1rem;
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: all 0.2s ease;
+    }
+    .tool-card:hover .card-arrow { opacity: 1; transform: translateX(0); }
+
+    /* ── Footer ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--navy-border);
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 10.5px;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+    footer a { color: var(--teal-light); text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── Hidden (search filter) ── */
+    .tool-card.hidden { display: none; }
+    .no-results {
+      display: none;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.85rem;
+      padding: 2rem 0;
+    }
+    .no-results.visible { display: block; }
+
+    /* ── Mobile ── */
+    @media (max-width: 640px) {
+      header { padding: 2.5rem 1rem 2rem; }
+      main { padding: 2rem 1rem 4rem; }
+      .tool-grid { grid-template-columns: 1fr; }
+      .header-stats { gap: 1.25rem; flex-wrap: wrap; }
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-glow"></div>
+  <div class="top-bar"></div>
+
+  <header>
+    <div class="header-pill">
+      <div class="pill-dot"></div>
+      IM Clinical Toolkit
+    </div>
+    <h1>Internal Medicine<br>Decision Support</h1>
+    <p>Evidence-based bedside tools for inpatient internal medicine. Built for the wards, ICU, and ED.</p>
+    <div class="header-stats">
+      <div><span class="stat-value">7</span> tools</div>
+      <div class="stat-divider">·</div>
+      <div><span class="stat-value">offline</span> capable</div>
+      <div class="stat-divider">·</div>
+      <div><span class="stat-value">no PHI</span> stored</div>
+      <div class="stat-divider">·</div>
+      <div>v<span class="stat-value">1.0</span></div>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="search" id="search" placeholder="Search tools…" autocomplete="off" />
+    </div>
+  </header>
+
+  <main>
+    <!-- Electrolytes -->
+    <div class="section" data-section="electrolytes">
+      <div class="section-header">
+        <span class="section-label">Electrolyte Disorders</span>
+        <div class="section-line"></div>
+        <span class="section-count">3 tools</span>
+      </div>
+      <div class="tool-grid">
+
+        <a href="hyponatremia_analyzer.html" class="tool-card"
+           data-name="hyponatremia etiology analyzer"
+           data-tags="hyponatremia sodium siadh tonicity volume urine osmolality hoorn">
+          <div class="card-top">
+            <div class="card-icon">💧</div>
+            <span class="card-badge b-electro">Electrolytes</span>
+          </div>
+          <div class="card-name">Hyponatremia Etiology</div>
+          <div class="card-desc">Stepwise diagnostic workup — tonicity, volume status, urine osmolality, SIADH criteria, and medication culprits.</div>
+          <div class="card-tags">
+            <span class="card-tag">Hoorn 2017</span>
+            <span class="card-tag">SIADH</span>
+            <span class="card-tag">ODS risk</span>
+            <span class="card-tag">JASN</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </a>
+
+        <a href="hyponatremia_mgmt.html" class="tool-card"
+           data-name="hyponatremia management treatment"
+           data-tags="hyponatremia sodium treatment correction 3% nacl hypertonic saline ods">
+          <div class="card-top">
+            <div class="card-icon">🧪</div>
+            <span class="card-badge b-electro">Electrolytes</span>
+          </div>
+          <div class="card-name">Hyponatremia Management</div>
+          <div class="card-desc">Treatment algorithm — correction rate targets, hypertonic saline dosing, fluid restriction, and ODS prevention.</div>
+          <div class="card-tags">
+            <span class="card-tag">ESC/ERA 2014</span>
+            <span class="card-tag">Correction rate</span>
+            <span class="card-tag">3% NaCl</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </a>
+
+        <a href="hypokalemia_analyzer.html" class="tool-card"
+           data-name="hypokalemia analyzer potassium repletion"
+           data-tags="hypokalemia potassium repletion gi renal loss shift ekg arrhythmia">
+          <div class="card-top">
+            <div class="card-icon">⚡</div>
+            <span class="card-badge b-electro">Electrolytes</span>
+          </div>
+          <div class="card-name">Hypokalemia Analyzer</div>
+          <div class="card-desc">Etiology classification and repletion guidance — GI vs. renal losses, transcellular shift, IV and PO dosing, EKG risk.</div>
+          <div class="card-tags">
+            <span class="card-tag">TTKG</span>
+            <span class="card-tag">Repletion</span>
+            <span class="card-tag">EKG risk</span>
+            <span class="card-tag">IV / PO</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Renal -->
+    <div class="section" data-section="renal">
+      <div class="section-header">
+        <span class="section-label">Renal</span>
+        <div class="section-line"></div>
+        <span class="section-count">1 tool</span>
+      </div>
+      <div class="tool-grid">
+
+        <a href="aki_analyzer.html" class="tool-card"
+           data-name="aki acute kidney injury analyzer kdigo"
+           data-tags="aki kidney creatinine kdigo staging fena urine output nephrotoxin rrt dialysis">
+          <div class="card-top">
+            <div class="card-icon">🫘</div>
+            <span class="card-badge b-renal">Renal</span>
+          </div>
+          <div class="card-name">AKI Analyzer</div>
+          <div class="card-desc">KDIGO 2012 staging by creatinine and urine output — pre/intra/post-renal classification, nephrotoxin screening, and management triggers.</div>
+          <div class="card-tags">
+            <span class="card-tag">KDIGO 2012</span>
+            <span class="card-tag">FENa</span>
+            <span class="card-tag">Nephrotoxin check</span>
+            <span class="card-tag">RRT trigger</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Respiratory / Acid-Base -->
+    <div class="section" data-section="respiratory">
+      <div class="section-header">
+        <span class="section-label">Respiratory &amp; Acid-Base</span>
+        <div class="section-line"></div>
+        <span class="section-count">1 tool</span>
+      </div>
+      <div class="tool-grid">
+
+        <a href="acid_base_analyzer.html" class="tool-card"
+           data-name="acid base analyzer abg vbg interpreter"
+           data-tags="acid base abg vbg ph pco2 hco3 anion gap delta ratio winter osmolar gap lactate metabolic respiratory">
+          <div class="card-top">
+            <div class="card-icon">🫁</div>
+            <span class="card-badge b-resp">Respiratory</span>
+          </div>
+          <div class="card-name">Acid-Base Interpreter</div>
+          <div class="card-desc">Full 11-step ABG/VBG analysis — primary disorder, compensation check (Winter's formula), anion gap, delta ratio, osmolar gap, and lactate severity.</div>
+          <div class="card-tags">
+            <span class="card-tag">ABG / VBG</span>
+            <span class="card-tag">Winter's formula</span>
+            <span class="card-tag">Osmolar gap</span>
+            <span class="card-tag">Delta ratio</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Infectious Disease -->
+    <div class="section" data-section="id">
+      <div class="section-header">
+        <span class="section-label">Infectious Disease</span>
+        <div class="section-line"></div>
+        <span class="section-count">1 tool</span>
+      </div>
+      <div class="tool-grid">
+
+        <a href="antibiotic_advisor.html" class="tool-card"
+           data-name="antibiotic advisor idsa ats infectious disease"
+           data-tags="antibiotic infection bacteria cap hap uti bacteremia sepsis allergy renal dosing duration">
+          <div class="card-top">
+            <div class="card-icon">💊</div>
+            <span class="card-badge b-id">Inf. Disease</span>
+          </div>
+          <div class="card-name">Antibiotic Advisor</div>
+          <div class="card-desc">Evidence-based antibiotic selection by infection type or organism — dosing, renal adjustments, allergy screening, contraindications, and duration.</div>
+          <div class="card-tags">
+            <span class="card-tag">IDSA</span>
+            <span class="card-tag">ATS</span>
+            <span class="card-tag">SSC</span>
+            <span class="card-tag">AHA</span>
+            <span class="card-tag">Allergy check</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- Clinical Tools -->
+    <div class="section" data-section="clinical">
+      <div class="section-header">
+        <span class="section-label">Clinical Tools</span>
+        <div class="section-line"></div>
+        <span class="section-count">1 tool</span>
+      </div>
+      <div class="tool-grid">
+
+        <a href="admission_orders.html" class="tool-card"
+           data-name="admission orders checklist im internal medicine"
+           data-tags="admission orders checklist diet vitals dvt prophylaxis medications monitoring">
+          <div class="card-top">
+            <div class="card-icon">📋</div>
+            <span class="card-badge b-clinical">Clinical</span>
+          </div>
+          <div class="card-name">Admission Order Checker</div>
+          <div class="card-desc">IM admission order checklist — diet, activity, vitals frequency, DVT prophylaxis, medications, and monitoring for common presentations.</div>
+          <div class="card-tags">
+            <span class="card-tag">Admission</span>
+            <span class="card-tag">DVT prophylaxis</span>
+            <span class="card-tag">Orders</span>
+            <span class="card-tag">Checklist</span>
+          </div>
+          <div class="card-arrow">→</div>
+        </a>
+
+      </div>
+    </div>
+
+    <p class="no-results" id="no-results">No tools match "<span id="query-display"></span>"</p>
+  </main>
+
+  <footer>
+    No PHI stored &nbsp;·&nbsp; Offline-capable once saved &nbsp;·&nbsp; Evidence-based clinical logic<br>
+    Built for Internal Medicine residency &nbsp;·&nbsp;
+    <a href="https://github.com/thensleymed/im-toolkit" target="_blank">GitHub ↗</a>
+  </footer>
+
+  <script>
+    // ── Mouse-tracking glow on cards ──
+    document.querySelectorAll('.tool-card').forEach(card => {
+      card.addEventListener('mousemove', e => {
+        const r = card.getBoundingClientRect();
+        card.style.setProperty('--cx', ((e.clientX - r.left) / r.width  * 100).toFixed(1) + '%');
+        card.style.setProperty('--cy', ((e.clientY - r.top)  / r.height * 100).toFixed(1) + '%');
+      });
+    });
+
+    // ── Search ──
+    const searchEl   = document.getElementById('search');
+    const noResults  = document.getElementById('no-results');
+    const queryDisp  = document.getElementById('query-display');
+    const allCards   = document.querySelectorAll('.tool-card');
+
+    searchEl.addEventListener('input', () => {
+      const q = searchEl.value.toLowerCase().trim();
+      let visible = 0;
+
+      allCards.forEach(card => {
+        const haystack = [
+          card.dataset.name || '',
+          card.dataset.tags || '',
+          card.querySelector('.card-name')?.textContent || '',
+          card.querySelector('.card-desc')?.textContent || '',
+        ].join(' ').toLowerCase();
+
+        const match = !q || q.split(' ').every(word => haystack.includes(word));
+        card.classList.toggle('hidden', !match);
+        if (match) visible++;
+      });
+
+      queryDisp.textContent = q;
+      noResults.classList.toggle('visible', visible === 0 && q.length > 0);
+    });
+
+    // Clear search on Escape
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { searchEl.value = ''; searchEl.dispatchEvent(new Event('input')); }
+    });
+  </script>
+</body>
+</html>

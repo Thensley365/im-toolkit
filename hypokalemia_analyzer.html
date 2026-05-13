@@ -1,0 +1,1623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hypokalemia Etiology Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:       #0d1b2a;
+    --navy-mid:   #112233;
+    --navy-light: #1a3050;
+    --teal:       #0ea5a0;
+    --teal-light: #14c4be;
+    --teal-dim:   #0a7a76;
+    --card-bg:    #132034;
+    --card-border:#1e3a55;
+    --text:       #d4e6f1;
+    --text-dim:   #7a9ab5;
+    --text-muted: #4a6a85;
+    --red:        #ef4444;
+    --red-bg:     #2d1515;
+    --red-border: #7f1d1d;
+    --amber:      #f59e0b;
+    --amber-bg:   #2d1f05;
+    --amber-border:#78350f;
+    --green:      #22c55e;
+    --green-bg:   #0f2d1a;
+    --green-border:#14532d;
+    --label-color:#94a3b8;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0a1628 0%, #0d2540 50%, #0a1e38 100%);
+    border-bottom: 2px solid var(--teal-dim);
+    padding: 28px 32px 22px;
+  }
+
+  header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--teal-light);
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+  }
+
+  /* ---- Form Sections ---- */
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 720px) {
+    .form-grid { grid-template-columns: 1fr; }
+  }
+
+  .form-section {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+
+  .form-section.full-width {
+    grid-column: 1 / -1;
+  }
+
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--teal);
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+  }
+
+  .field-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 9px;
+    gap: 10px;
+  }
+
+  .field-row label {
+    font-size: 12px;
+    color: var(--label-color);
+    min-width: 170px;
+    flex-shrink: 0;
+  }
+
+  .field-row label span.req {
+    color: var(--red);
+    margin-left: 2px;
+  }
+
+  .field-row input[type="number"],
+  .field-row input[type="text"],
+  .field-row select {
+    background: var(--navy-mid);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    padding: 5px 10px;
+    width: 130px;
+    transition: border-color 0.2s;
+  }
+
+  .field-row input[type="text"].wide,
+  .field-row select.wide {
+    width: 200px;
+  }
+
+  .field-row input:focus,
+  .field-row select:focus {
+    outline: none;
+    border-color: var(--teal);
+  }
+
+  .field-row .unit {
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* Checkboxes */
+  .check-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 18px;
+    margin-top: 4px;
+  }
+
+  .check-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--label-color);
+    cursor: pointer;
+  }
+
+  .check-group input[type="checkbox"] {
+    accent-color: var(--teal);
+    width: 14px;
+    height: 14px;
+    cursor: pointer;
+  }
+
+  .sub-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  /* Run button */
+  .run-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(90deg, var(--teal-dim), var(--teal));
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    margin-bottom: 30px;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+
+  .run-btn:hover { opacity: 0.92; transform: translateY(-1px); }
+  .run-btn:active { transform: translateY(0); }
+
+  /* ---- Output Cards ---- */
+  #output { display: none; }
+
+  .out-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    padding: 18px 22px;
+    margin-bottom: 16px;
+  }
+
+  .out-card-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--teal);
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 8px;
+    margin-bottom: 14px;
+  }
+
+  .out-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 13px;
+  }
+
+  .out-label {
+    color: var(--text-dim);
+    min-width: 180px;
+    flex-shrink: 0;
+    font-size: 12px;
+  }
+
+  .out-val { color: var(--text); }
+
+  .tag {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .tag-critical { background: var(--red-bg); border: 1px solid var(--red); color: var(--red); }
+  .tag-severe   { background: var(--red-bg); border: 1px solid var(--red); color: var(--red); }
+  .tag-moderate { background: var(--amber-bg); border: 1px solid var(--amber); color: var(--amber); }
+  .tag-mild     { background: var(--green-bg); border: 1px solid var(--green); color: var(--green); }
+  .tag-normal   { background: var(--green-bg); border: 1px solid var(--green); color: var(--green); }
+
+  .badge-high { color: var(--red); font-weight: 600; }
+  .badge-moderate { color: var(--amber); font-weight: 600; }
+  .badge-low { color: var(--text-dim); font-weight: 500; }
+  .badge-contrib { color: var(--teal); font-weight: 500; }
+  .badge-unknown { color: var(--text-muted); font-weight: 500; }
+
+  .alert-banner {
+    background: var(--red-bg);
+    border: 2px solid var(--red);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    color: var(--red);
+    font-weight: 600;
+    font-size: 13px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .alert-banner .alert-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: -1px;
+  }
+
+  .warn-banner {
+    background: var(--amber-bg);
+    border: 1px solid var(--amber-border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    color: var(--amber);
+    font-size: 13px;
+  }
+
+  .info-block {
+    background: var(--navy-light);
+    border-left: 3px solid var(--teal-dim);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    color: var(--text-dim);
+    margin-top: 6px;
+    margin-bottom: 8px;
+    line-height: 1.65;
+  }
+
+  .etiology-item {
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: var(--navy-mid);
+  }
+
+  .etiology-item .etio-name {
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .etiology-item .etio-basis {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-top: 4px;
+  }
+
+  .med-item {
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+    background: var(--navy-mid);
+  }
+
+  .med-name {
+    font-weight: 600;
+    color: var(--amber);
+    font-size: 13px;
+    margin-bottom: 6px;
+    text-transform: capitalize;
+  }
+
+  .med-row {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 3px;
+  }
+
+  .med-row strong {
+    color: var(--label-color);
+  }
+
+  .mgmt-item {
+    background: var(--navy-mid);
+    border-left: 3px solid var(--teal-dim);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.65;
+  }
+
+  .danger-flag {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .danger-flag .df-icon {
+    color: var(--red);
+    font-weight: 700;
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .danger-flag .df-text {
+    color: #fca5a5;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .ref-list {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.8;
+  }
+
+  .text-red    { color: var(--red); }
+  .text-amber  { color: var(--amber); }
+  .text-green  { color: var(--green); }
+  .text-teal   { color: var(--teal-light); }
+  .text-dim    { color: var(--text-dim); }
+  .text-muted  { color: var(--text-muted); }
+  .bold        { font-weight: 600; }
+
+  footer {
+    background: var(--navy-mid);
+    border-top: 1px solid var(--card-border);
+    padding: 14px 20px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+  }
+
+  .shift-item {
+    background: var(--amber-bg);
+    border-left: 3px solid var(--amber-border);
+    border-radius: 0 6px 6px 0;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    color: #fde68a;
+    margin-bottom: 8px;
+    line-height: 1.65;
+  }
+
+  .osm-flag {
+    background: var(--red-bg);
+    border: 1px solid var(--red-border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #fca5a5;
+    font-size: 12.5px;
+    margin-top: 6px;
+  }
+
+  .osm-ok {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: #86efac;
+    font-size: 12.5px;
+    margin-top: 6px;
+  }
+
+  .mg-ok {
+    background: var(--green-bg);
+    border: 1px solid var(--green-border);
+    border-radius: 6px;
+    padding: 10px 14px;
+    color: #86efac;
+    font-size: 13px;
+  }
+
+  .mg-warn {
+    background: var(--red-bg);
+    border: 2px solid var(--red);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: #fca5a5;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .digoxin-banner {
+    background: var(--red-bg);
+    border: 2px solid var(--red);
+    border-radius: 10px;
+    padding: 16px 18px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    margin-top: 12px;
+  }
+
+  .digoxin-banner .dg-icon {
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  .digoxin-banner .dg-text {
+    color: #fca5a5;
+    font-size: 13.5px;
+    font-weight: 600;
+    line-height: 1.6;
+  }
+
+  .k-value-display {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    padding: 14px;
+    border-radius: 8px;
+    background: var(--navy-mid);
+  }
+
+  .k-big {
+    font-size: 32px;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .k-unit {
+    font-size: 14px;
+    color: var(--text-dim);
+    margin-top: 6px;
+  }
+
+  .k-severity-col {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .no-data-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .im-topbar {
+    height: 3px;
+    background: linear-gradient(90deg, #0d9488, #38bdf8, #a78bfa, #0d9488);
+    background-size: 300% 100%;
+    animation: im-shimmer 6s linear infinite;
+  }
+  @keyframes im-shimmer { 0%{background-position:0% 0%} 100%{background-position:300% 0%} }
+  .im-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--teal-light);
+    background: rgba(14,165,160,0.08);
+    border: 1px solid rgba(14,165,160,0.25);
+    padding: 4px 12px;
+    border-radius: 99px;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+  .im-home-btn:hover { background: rgba(14,165,160,0.18); }
+</style>
+</head>
+<body>
+
+<div class="im-topbar"></div>
+
+<header>
+  <div style="flex:1">
+    <h1>Hypokalemia Etiology Analyzer</h1>
+    <p>Stepwise hypokalemia diagnostic and management workup &mdash; Internal Medicine Clinical Decision Support</p>
+  </div>
+  <a class="im-home-btn" href="index.html">← Toolkit</a>
+</header>
+
+<div class="container">
+
+  <!-- ========== INPUT FORM ========== -->
+  <form id="mainForm" autocomplete="off">
+
+    <div class="form-grid">
+
+      <!-- Core Labs -->
+      <div class="form-section">
+        <div class="section-title">Core Labs</div>
+
+        <div class="field-row">
+          <label>Serum K<span class="req">*</span></label>
+          <input type="number" id="serum_k" step="0.1" min="0" max="10" placeholder="3.2">
+          <span class="unit">mEq/L</span>
+        </div>
+        <div class="field-row">
+          <label>Serum Na<span class="req">*</span></label>
+          <input type="number" id="serum_na" step="1" min="100" max="200" placeholder="138">
+          <span class="unit">mEq/L</span>
+        </div>
+        <div class="field-row">
+          <label>Serum Cl</label>
+          <input type="number" id="serum_cl" step="1" placeholder="104">
+          <span class="unit">mEq/L</span>
+        </div>
+        <div class="field-row">
+          <label>Serum HCO3</label>
+          <input type="number" id="serum_hco3" step="1" placeholder="24">
+          <span class="unit">mEq/L</span>
+        </div>
+        <div class="field-row">
+          <label>BUN</label>
+          <input type="number" id="serum_bun" step="1" placeholder="18">
+          <span class="unit">mg/dL</span>
+        </div>
+        <div class="field-row">
+          <label>Creatinine</label>
+          <input type="number" id="serum_cr" step="0.1" placeholder="1.0">
+          <span class="unit">mg/dL</span>
+        </div>
+        <div class="field-row">
+          <label>Glucose</label>
+          <input type="number" id="serum_glucose" step="1" placeholder="95">
+          <span class="unit">mg/dL</span>
+        </div>
+        <div class="field-row">
+          <label>Magnesium</label>
+          <input type="number" id="serum_mg" step="0.1" placeholder="1.9">
+          <span class="unit">mg/dL</span>
+        </div>
+        <div class="field-row">
+          <label>Phosphorus</label>
+          <input type="number" id="serum_phos" step="0.1" placeholder="3.5">
+          <span class="unit">mg/dL</span>
+        </div>
+        <div class="field-row">
+          <label>Calcium</label>
+          <input type="number" id="serum_ca" step="0.1" placeholder="9.0">
+          <span class="unit">mg/dL</span>
+        </div>
+      </div>
+
+      <!-- Osmolality + Urine -->
+      <div class="form-section">
+        <div class="section-title">Osmolality</div>
+        <div class="field-row">
+          <label>Measured Osm</label>
+          <input type="number" id="measured_osm" step="1" placeholder="290">
+          <span class="unit">mOsm/kg</span>
+        </div>
+        <div class="field-row">
+          <label>Serum Ethanol</label>
+          <input type="number" id="serum_ethanol" step="1" placeholder="0">
+          <span class="unit">mg/dL</span>
+        </div>
+
+        <div class="section-title" style="margin-top:18px;">Urine Studies</div>
+        <div class="field-row">
+          <label>Urine K</label>
+          <input type="number" id="urine_k" step="1" placeholder="—">
+          <span class="unit">mEq/L</span>
+        </div>
+        <div class="field-row">
+          <label>Urine Creatinine</label>
+          <input type="number" id="urine_cr" step="1" placeholder="—">
+          <span class="unit">mg/dL</span>
+        </div>
+        <div class="field-row">
+          <label>Urine Na</label>
+          <input type="number" id="urine_na" step="1" placeholder="—">
+          <span class="unit">mEq/L</span>
+        </div>
+        <div class="field-row">
+          <label>Urine Cl</label>
+          <input type="number" id="urine_cl" step="1" placeholder="—">
+          <span class="unit">mEq/L</span>
+        </div>
+        <div class="field-row">
+          <label>Urine Osm</label>
+          <input type="number" id="urine_osm" step="1" placeholder="—">
+          <span class="unit">mOsm/kg</span>
+        </div>
+      </div>
+
+      <!-- Clinical Context -->
+      <div class="form-section">
+        <div class="section-title">Clinical Context</div>
+        <div class="field-row">
+          <label>Systolic BP</label>
+          <input type="number" id="bp_systolic" step="1" placeholder="120">
+          <span class="unit">mmHg</span>
+        </div>
+        <div class="field-row">
+          <label>Diastolic BP</label>
+          <input type="number" id="bp_diastolic" step="1" placeholder="80">
+          <span class="unit">mmHg</span>
+        </div>
+        <div class="field-row">
+          <label>Volume Status</label>
+          <select id="volume_status" class="wide">
+            <option value="">-- not specified --</option>
+            <option value="hypovolemic">Hypovolemic</option>
+            <option value="euvolemic">Euvolemic</option>
+            <option value="hypervolemic">Hypervolemic</option>
+            <option value="unknown">Unknown</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label>Weight</label>
+          <input type="number" id="weight_kg" step="0.5" placeholder="70">
+          <span class="unit">kg</span>
+        </div>
+        <div class="field-row">
+          <label>Sex</label>
+          <select id="sex">
+            <option value="">-- not specified --</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+          </select>
+        </div>
+        <div style="margin-top:12px;">
+          <div class="check-group">
+            <label><input type="checkbox" id="dka_present"> DKA present</label>
+            <label><input type="checkbox" id="refeeding_risk"> Refeeding risk</label>
+            <label><input type="checkbox" id="on_dialysis"> On dialysis</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Symptoms -->
+      <div class="form-section">
+        <div class="section-title">Symptoms</div>
+        <div class="check-group">
+          <label><input type="checkbox" class="symptom" value="muscle weakness"> Muscle weakness</label>
+          <label><input type="checkbox" class="symptom" value="cramps"> Cramps</label>
+          <label><input type="checkbox" class="symptom" value="palpitations"> Palpitations</label>
+          <label><input type="checkbox" class="symptom" value="paralysis"> Paralysis</label>
+          <label><input type="checkbox" class="symptom" value="ileus"> Ileus</label>
+          <label><input type="checkbox" class="symptom" value="ascending weakness"> Ascending weakness</label>
+          <label><input type="checkbox" class="symptom" value="nausea and vomiting"> Nausea / Vomiting</label>
+        </div>
+
+        <div class="section-title" style="margin-top:22px;">Medications</div>
+        <div class="sub-label">Comma-separated — e.g. furosemide, digoxin, albuterol, insulin</div>
+        <input type="text" id="medications" placeholder="furosemide, digoxin..."
+          style="width:100%;background:var(--navy-mid);border:1px solid var(--card-border);border-radius:6px;
+                 color:var(--text);font-family:'Inter',sans-serif;font-size:13px;padding:8px 12px;">
+      </div>
+
+    </div><!-- /form-grid -->
+
+    <button type="button" class="run-btn" onclick="runAnalyzer()">Run Hypokalemia Analyzer</button>
+  </form>
+
+  <!-- ========== OUTPUT ========== -->
+  <div id="output">
+
+    <!-- 1. Serum Osmolality -->
+    <div class="out-card" id="card-osm">
+      <div class="out-card-title">1. Serum Osmolality</div>
+      <div id="osm-content"></div>
+    </div>
+
+    <!-- 2. Potassium Assessment -->
+    <div class="out-card" id="card-k">
+      <div class="out-card-title">2. Potassium Assessment</div>
+      <div id="k-content"></div>
+    </div>
+
+    <!-- 3. Magnesium -->
+    <div class="out-card" id="card-mg">
+      <div class="out-card-title">3. Magnesium &mdash; Gating Step</div>
+      <div id="mg-content"></div>
+    </div>
+
+    <!-- 4. Acid-Base -->
+    <div class="out-card" id="card-ab">
+      <div class="out-card-title">4. Acid-Base Context</div>
+      <div id="ab-content"></div>
+    </div>
+
+    <!-- 5. Urine Studies -->
+    <div class="out-card" id="card-urine">
+      <div class="out-card-title">5. Urine Studies</div>
+      <div id="urine-content"></div>
+    </div>
+
+    <!-- 6. Transcellular Shift -->
+    <div class="out-card" id="card-shift" style="display:none;">
+      <div class="out-card-title">6. Transcellular Shift Screen</div>
+      <div id="shift-content"></div>
+    </div>
+
+    <!-- 7. Etiology -->
+    <div class="out-card" id="card-etio">
+      <div class="out-card-title">7. Etiology Classification</div>
+      <div id="etio-content"></div>
+    </div>
+
+    <!-- 8. Medication Culprits -->
+    <div class="out-card" id="card-meds" style="display:none;">
+      <div class="out-card-title">8. Medication Culprits</div>
+      <div id="meds-content"></div>
+    </div>
+
+    <!-- 9. Management -->
+    <div class="out-card" id="card-mgmt">
+      <div class="out-card-title">9. Management Recommendations</div>
+      <div id="mgmt-content"></div>
+    </div>
+
+    <!-- 10. Danger Flags -->
+    <div class="out-card" id="card-flags" style="display:none;">
+      <div class="out-card-title">10. Danger Flags</div>
+      <div id="flags-content"></div>
+    </div>
+
+    <!-- References -->
+    <div class="out-card">
+      <div class="out-card-title">References</div>
+      <div class="ref-list">
+        [1] E. Kardalas et al., Endocr. Connect. 2018;7:R135-R146. doi:10.1530/EC-18-0109<br>
+        [2] I. D. Weiner &amp; J. W. Wingo, J. Am. Soc. Nephrol. 1997;8:1179-1188. doi:10.1681/ASN.V871179<br>
+        [3] J. E. Macdonald &amp; A. D. Struthers, JACC 2004;43:155-161. doi:10.1016/j.jacc.2003.06.021<br>
+        [4] B. Pitt et al. (RALES), N. Engl. J. Med. 1999;341:709-717. doi:10.1056/NEJM199909023411001<br>
+        [5] H. J. Adrogue &amp; N. E. Madias, N. Engl. J. Med. 2000;342:1493-1499. doi:10.1056/NEJM200005183422006
+      </div>
+    </div>
+
+  </div><!-- /output -->
+</div><!-- /container -->
+
+<footer>
+  Educational decision support only &mdash; not a substitute for clinical judgment.
+  K &lt;2.5 mEq/L or ECG changes require immediate physician review.
+</footer>
+
+<script>
+// ============================================================
+// K_WASTING_MEDICATIONS database
+// ============================================================
+const K_WASTING_MEDICATIONS = {
+  "furosemide": {
+    mechanism: "Loop diuretic — blocks Na/K/2Cl in thick ascending limb → increased distal K delivery → kaliuresis",
+    effect: "Renal K wasting",
+    action: "Assess whether loop diuretic can be dose-reduced; add K-sparing agent or oral KCl supplementation."
+  },
+  "bumetanide": {
+    mechanism: "Loop diuretic — same mechanism as furosemide",
+    effect: "Renal K wasting",
+    action: "Oral KCl supplementation; consider adding spironolactone/amiloride."
+  },
+  "torsemide": {
+    mechanism: "Loop diuretic",
+    effect: "Renal K wasting",
+    action: "Oral KCl supplementation; consider adding K-sparing agent."
+  },
+  "hydrochlorothiazide": {
+    mechanism: "Thiazide — blocks NaCl in DCT → increased distal Na delivery → K secretion",
+    effect: "Renal K wasting (less than loops)",
+    action: "Add K supplementation; consider switching to potassium-sparing diuretic if K repeatedly low."
+  },
+  "chlorthalidone": {
+    mechanism: "Thiazide-like — same DCT mechanism",
+    effect: "Renal K wasting",
+    action: "K supplementation; monitor closely."
+  },
+  "metolazone": {
+    mechanism: "Thiazide-like diuretic",
+    effect: "Significant K wasting, especially combined with loop diuretics",
+    action: "Close monitoring; aggressive K supplementation."
+  },
+  "amphotericin b": {
+    mechanism: "Forms pores in tubular epithelium → K leaks into tubular lumen",
+    effect: "Severe renal K (and Mg) wasting",
+    action: "Aggressive K and Mg replacement; use liposomal formulation if possible (less nephrotoxic)."
+  },
+  "aminoglycosides": {
+    mechanism: "Proximal tubular toxicity → K and Mg wasting",
+    effect: "Renal K wasting",
+    action: "Monitor K and Mg; supplement aggressively."
+  },
+  "cisplatin": {
+    mechanism: "Proximal and distal tubular toxicity → Mg and K wasting",
+    effect: "Severe renal Mg and K wasting",
+    action: "Mg replacement is gating step; K will not correct without Mg."
+  },
+  "insulin": {
+    mechanism: "Activates Na/K-ATPase → drives K into cells (transcellular shift)",
+    effect: "Transcellular shift (not true K deficit if exogenous administration)",
+    action: "Monitor K during insulin infusion (especially DKA); replace K when K <5.5 mEq/L."
+  },
+  "albuterol": {
+    mechanism: "Beta-2 agonist → activates Na/K-ATPase → K into cells",
+    effect: "Transcellular shift",
+    action: "Transient; K will redistribute back. Do not over-replace if beta-agonist is cause."
+  },
+  "salmeterol": {
+    mechanism: "Long-acting beta-2 agonist → transcellular K shift",
+    effect: "Transcellular shift",
+    action: "Transient effect; usually mild."
+  },
+  "fludrocortisone": {
+    mechanism: "Mineralocorticoid → increased aldosterone effect → ENaC activation → K excretion",
+    effect: "Renal K wasting",
+    action: "Reduce dose if possible; add K supplementation."
+  },
+  "hydrocortisone": {
+    mechanism: "Has mineralocorticoid activity at high doses → K wasting",
+    effect: "Renal K wasting (dose-dependent)",
+    action: "Monitor K with high-dose steroids; supplement as needed."
+  },
+  "prednisone": {
+    mechanism: "Mild mineralocorticoid activity at high doses",
+    effect: "Mild renal K wasting",
+    action: "Monitor K; supplement if persistently low."
+  },
+  "digoxin": {
+    mechanism: "Inhibits Na/K-ATPase — does not cause hypokalemia, but hypokalemia potentiates digoxin toxicity",
+    effect: "DANGER: Hypokalemia dramatically increases digoxin toxicity risk",
+    action: "TARGET K ≥ 4.0 mEq/L in all digoxin patients. Aggressive replacement."
+  },
+  "laxatives": {
+    mechanism: "GI K loss in stool (direct secretory loss in colon)",
+    effect: "GI K wasting",
+    action: "Reduce or stop laxative; oral K replacement."
+  },
+  "vancomycin": {
+    mechanism: "High doses may contribute to mild K wasting via renal tubular effects",
+    effect: "Mild renal K wasting",
+    action: "Monitor K during prolonged courses."
+  }
+};
+
+// ============================================================
+// Helper functions
+// ============================================================
+function getVal(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const v = parseFloat(el.value);
+  return isNaN(v) ? null : v;
+}
+
+function getStr(id) {
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
+
+function getBool(id) {
+  const el = document.getElementById(id);
+  return el ? el.checked : false;
+}
+
+function getSymptoms() {
+  return Array.from(document.querySelectorAll('.symptom:checked')).map(c => c.value);
+}
+
+function getMeds() {
+  const raw = getStr('medications');
+  if (!raw) return [];
+  return raw.split(',').map(m => m.trim().toLowerCase()).filter(m => m.length > 0);
+}
+
+// ============================================================
+// Section 1: Osmolality
+// ============================================================
+function calcOsm(na, glucose, bun) {
+  if (glucose === null || bun === null) return null;
+  return Math.round((2 * na + glucose / 18 + bun / 2.8) * 10) / 10;
+}
+
+function calcEffOsm(na, glucose) {
+  if (glucose === null) return Math.round(2 * na * 10) / 10;
+  return Math.round((2 * na + glucose / 18) * 10) / 10;
+}
+
+function calcOsmGap(measOsm, na, glucose, bun, ethanol) {
+  if (glucose === null || bun === null) return null;
+  const ethanolContrib = ethanol ? ethanol / 3.7 : 0;
+  const calc = 2 * na + glucose / 18 + bun / 2.8 + ethanolContrib;
+  return Math.round((measOsm - calc) * 10) / 10;
+}
+
+function correctedNa(na, glucose) {
+  if (glucose === null || glucose <= 100) return null;
+  return Math.round((na + 2.4 * ((glucose - 100) / 100)) * 10) / 10;
+}
+
+function interpretCalcOsm(osm) {
+  if (osm === null) return { text: 'Cannot calculate — glucose and/or BUN not provided', cls: 'text-dim' };
+  if (osm < 275)  return { text: `${osm} mOsm/kg — LOW (hypoosmolar)`, cls: 'text-amber' };
+  if (osm <= 295) return { text: `${osm} mOsm/kg — Normal (275–295)`, cls: 'text-green' };
+  if (osm <= 320) return { text: `${osm} mOsm/kg — Elevated (mild hyperosmolality)`, cls: 'text-amber' };
+  return { text: `${osm} mOsm/kg — Markedly elevated (>320)`, cls: 'text-red' };
+}
+
+function interpretEffOsm(osm) {
+  if (osm === null) return { text: 'Cannot calculate', cls: 'text-dim' };
+  if (osm < 275)  return { text: `${osm} mOsm/kg — Hypotonic (true osmolar deficit)`, cls: 'text-amber' };
+  if (osm <= 295) return { text: `${osm} mOsm/kg — Normal tonicity`, cls: 'text-green' };
+  return { text: `${osm} mOsm/kg — Hypertonic (effective osmoles elevated)`, cls: 'text-amber' };
+}
+
+// ============================================================
+// Section 2: K Severity
+// ============================================================
+function classifyK(k) {
+  if (k < 2.0) return {
+    severity: 'Critical', level: 'critical',
+    ecgRisk: 'Extreme — VT/VF/torsades imminent',
+    urgency: 'Immediate IV replacement via central access',
+    monitoring: 'Continuous telemetry mandatory; ICU consideration'
+  };
+  if (k < 2.5) return {
+    severity: 'Severe', level: 'severe',
+    ecgRisk: 'High — QU prolongation, PVCs, torsades risk',
+    urgency: 'IV replacement required; central access preferred',
+    monitoring: 'Continuous telemetry required'
+  };
+  if (k < 3.0) return {
+    severity: 'Moderate', level: 'moderate',
+    ecgRisk: 'Moderate — U waves, T-wave flattening, ST changes',
+    urgency: 'IV or aggressive oral replacement; recheck in 4–6 hr',
+    monitoring: 'Telemetry if symptoms, cardiac history, or QTc-prolonging drugs'
+  };
+  if (k < 3.5) return {
+    severity: 'Mild', level: 'mild',
+    ecgRisk: 'Low — T-wave flattening possible',
+    urgency: 'Oral KCl preferred; recheck in 24 hr',
+    monitoring: 'Routine; ECG if symptomatic or on digoxin/QTc drugs'
+  };
+  return {
+    severity: 'Normal', level: 'normal',
+    ecgRisk: 'None',
+    urgency: 'No replacement indicated',
+    monitoring: 'Routine'
+  };
+}
+
+function checkDigoxin(meds, k) {
+  if (meds.some(m => m.includes('digoxin') || m.includes('digitalis') || m.includes('lanoxin'))) {
+    if (k < 4.0) return true;
+  }
+  return false;
+}
+
+// ============================================================
+// Section 3: Magnesium
+// ============================================================
+function assessMg(mg) {
+  if (mg === null) return {
+    status: 'Not provided',
+    flag: true,
+    cls: 'text-red',
+    message: 'Magnesium not provided. ALWAYS check Mg in hypokalemia. Hypomagnesemia causes renal K wasting via ROMK channels — K will not correct without fixing Mg first.'
+  };
+  if (mg < 1.5) return {
+    status: `Low — ${mg} mg/dL`,
+    flag: true,
+    cls: 'text-red',
+    message: `Mg ${mg} mg/dL — CRITICAL gating issue. Replace Mg before or simultaneously with K. Low Mg inhibits renal K conservation (ROMK channel disinhibition). Replace: MgSO4 2–4 g IV for Mg <1.5 or symptomatic. Oral Mg oxide 400–800 mg/day for mild deficiency.`
+  };
+  if (mg < 1.8) return {
+    status: `Low-normal — ${mg} mg/dL`,
+    flag: true,
+    cls: 'text-amber',
+    message: `Mg ${mg} mg/dL — borderline. Consider oral Mg supplementation. May contribute to K replacement resistance.`
+  };
+  return {
+    status: `Normal — ${mg} mg/dL`,
+    flag: false,
+    cls: 'text-green',
+    message: 'Magnesium is adequate. Mg deficiency is not limiting K correction.'
+  };
+}
+
+// ============================================================
+// Section 4: Acid-Base
+// ============================================================
+function interpretAcidBase(hco3) {
+  if (hco3 === null) return {
+    status: 'Unknown',
+    clue: 'HCO3 not provided — cannot assess acid-base context for etiology narrowing.'
+  };
+  if (hco3 > 26) return {
+    status: `Metabolic alkalosis (HCO3 ${hco3} mEq/L)`,
+    clue: 'Alkalosis + hypokalemia → suggests vomiting/NG suction, loop or thiazide diuretics, hyperaldosteronism, Bartter/Gitelman syndrome, or post-hypercapnia. In alkalosis, H+ exits cells and K+ enters cells (transcellular shift contribution). Check urine Cl: <25 mEq/L = saline-responsive (vomiting, diuretics off); >40 mEq/L = saline-resistant (hyperaldosteronism, active diuretic use, Bartter/Gitelman).'
+  };
+  if (hco3 < 22) return {
+    status: `Metabolic acidosis (HCO3 ${hco3} mEq/L)`,
+    clue: 'Acidosis + hypokalemia → suggests diarrhea (hyperchloremic NAGMA), distal RTA (type 1), proximal RTA (type 2), or DKA (K shifts back in as acidosis corrects). In diarrhea: urine K low (<20 mEq/day or urine K/Cr <13). In RTA type 1: urine pH inappropriately >5.5 despite acidosis; urine K HIGH (renal wasting).'
+  };
+  return {
+    status: `Normal HCO3 (${hco3} mEq/L)`,
+    clue: 'Normal acid-base — does not narrow etiology significantly. Consider transcellular shift (insulin, beta-agonist, refeeding), poor intake, or early GI/renal losses without acid-base derangement yet.'
+  };
+}
+
+// ============================================================
+// Section 5: Urine K
+// ============================================================
+function assessUrineK(urineK, urineCr, urineNa) {
+  if (urineK === null) return {
+    ratio: null,
+    interpretation: 'Urine K not provided.',
+    direction: 'Send urine K/Cr ratio (spot urine) — this is the most important test to differentiate renal K wasting from GI/transcellular causes.'
+  };
+  if (urineCr !== null && urineCr > 0) {
+    const ratio = Math.round((urineK / (urineCr / 100)) * 10) / 10;
+    if (ratio > 13) return {
+      ratio,
+      interpretation: `Urine K/Cr = ${ratio} mEq/g Cr — ELEVATED (>13 mEq/g Cr)`,
+      direction: 'Renal potassium wasting. Kidney is inappropriately losing K despite hypokalemia. Etiologies: loop/thiazide diuretics, hyperaldosteronism, Bartter/Gitelman, RTA type 1 or 2, amphotericin B, aminoglycosides, hypomagnesemia, Cushing syndrome, excess mineralocorticoid.'
+    };
+    return {
+      ratio,
+      interpretation: `Urine K/Cr = ${ratio} mEq/g Cr — Low (<13 mEq/g Cr)`,
+      direction: 'Extrarenal K loss. Kidney is appropriately conserving K. Etiologies: diarrhea, vomiting (note: vomiting → volume depletion → aldosterone → urine K HIGH paradoxically — check clinical context), laxative abuse, low dietary intake, transcellular shift.'
+    };
+  }
+  if (urineK > 20) return {
+    ratio: null,
+    interpretation: `Urine K ${urineK} mEq/L — suggests renal wasting (>20 mEq/L)`,
+    direction: 'High urine K in context of hypokalemia → renal K wasting likely. Send urine Cr simultaneously for K/Cr ratio for more reliable interpretation.'
+  };
+  return {
+    ratio: null,
+    interpretation: `Urine K ${urineK} mEq/L — suggests extrarenal loss (<20 mEq/L)`,
+    direction: 'Low urine K → kidney conserving K appropriately → GI loss or transcellular shift. Send urine Cr for K/Cr ratio.'
+  };
+}
+
+// ============================================================
+// Section 6: Transcellular Shift
+// ============================================================
+function screenShift(data, meds) {
+  const shifts = [];
+  if (data.dkaPresent) {
+    shifts.push('DKA / insulin infusion: K shifts intracellularly as insulin drives glucose and K into cells. Total body K deficit is REAL but serum K may appear deceptively normal on admission. Replace K when K <5.5 mEq/L AND UOP confirmed. HOLD insulin if K <3.5 — cardiac arrest risk.');
+  }
+  if (meds.some(m => m.includes('insulin')) && !data.dkaPresent) {
+    shifts.push('Insulin administration: activates Na/K-ATPase → drives K into cells. Shift is transient (4–6 hr). May not represent true body K deficit.');
+  }
+  const betaAgonists = ['albuterol','salmeterol','levalbuterol','formoterol','terbutaline'];
+  if (meds.some(m => betaAgonists.some(b => m.includes(b)))) {
+    shifts.push('Beta-2 agonist: activates Na/K-ATPase → K into cells. Shift usually mild (−0.5 to −1.0 mEq/L). Transient. Do not aggressively over-replace — will rebound.');
+  }
+  if (data.refeedingRisk) {
+    shifts.push('Refeeding syndrome risk: rapid carbohydrate load → insulin surge → K (+ Mg, Phos) driven into cells. Monitor K, Mg, Phos q6h for 72 hr after reintroducing nutrition. Replace proactively.');
+  }
+  if (data.hco3 !== null && data.hco3 > 28) {
+    shifts.push('Metabolic alkalosis: H+ exits cells, K+ enters cells to maintain electroneutrality. Contributes ~0.3 mEq/L drop in K per 0.1 pH unit rise. Treating the alkalosis will help restore K.');
+  }
+  if (data.symptoms.some(s => s.toLowerCase().includes('paralysis'))) {
+    shifts.push('Hypokalemic periodic paralysis suspected (symptom noted). This is a PURE transcellular shift — no true body K deficit. Do NOT replace K as aggressively as true deficit — will cause rebound hyperkalemia. Treat underlying cause (thyrotoxicosis in Asian patients → check TSH). K replacement: 40–60 mEq PO cautiously; avoid glucose/carbohydrate loads.');
+  }
+  return shifts;
+}
+
+// ============================================================
+// Section 7: Etiology Classification
+// ============================================================
+function classifyEtiology(data, meds, urineResult) {
+  const findings = [];
+  const loopDiuretics = ['furosemide','bumetanide','torsemide','ethacrynic acid'];
+  const thiazides = ['hydrochlorothiazide','hctz','chlorthalidone','metolazone','indapamide'];
+  const hasRenalWasting = urineResult.ratio !== null && urineResult.ratio > 13;
+  const hasGILoss = urineResult.ratio !== null && urineResult.ratio <= 13;
+  const symptoms = data.symptoms.map(s => s.toLowerCase());
+
+  if (loopDiuretics.some(d => meds.some(m => m.includes(d)))) {
+    findings.push({
+      etiology: 'Loop diuretic-induced renal K wasting',
+      likelihood: 'HIGH',
+      basis: 'Loop diuretic identified in medication list. Most common cause of hypokalemia in hospitalized patients.'
+    });
+  }
+
+  if (thiazides.some(t => meds.some(m => m.includes(t)))) {
+    findings.push({
+      etiology: 'Thiazide diuretic-induced renal K wasting',
+      likelihood: 'HIGH',
+      basis: 'Thiazide identified in medication list. DCT Na/Cl blockade → increased distal K secretion.'
+    });
+  }
+
+  if (symptoms.some(s => ['vomiting','nausea and vomiting','ng suction','emesis'].includes(s))) {
+    findings.push({
+      etiology: 'Vomiting / NG suction — secondary renal K wasting',
+      likelihood: 'HIGH',
+      basis: 'Vomiting causes volume depletion → aldosterone activation → Na conserved in exchange for K in distal tubule. K is lost primarily in urine, not vomitus. Expect: metabolic alkalosis (HCO3 high), urine Na low (<20), urine K paradoxically HIGH.'
+    });
+  }
+
+  if (symptoms.some(s => ['diarrhea','loose stools','ostomy','fistula','ileostomy'].includes(s))) {
+    findings.push({
+      etiology: 'Diarrhea / lower GI K loss',
+      likelihood: 'HIGH',
+      basis: 'Lower GI fluid contains 20–80 mEq/L K. Direct colonic K secretion. Expect: metabolic acidosis (HCO3 low), urine K LOW (<13 mEq/g Cr — kidney conserving K).'
+    });
+  }
+
+  const hypertensive = data.sbp !== null && data.sbp > 140;
+  const alkalotic = data.hco3 !== null && data.hco3 > 26;
+
+  if (hypertensive && alkalotic && (hasRenalWasting || urineResult.ratio === null)) {
+    findings.push({
+      etiology: 'Primary hyperaldosteronism (Conn syndrome) — consider workup',
+      likelihood: 'MODERATE — warrants workup',
+      basis: `HTN (SBP ${data.sbp}) + hypokalemia + metabolic alkalosis. Classic triad for primary hyperaldosteronism. Workup: aldosterone:renin ratio (ARR) — stop diuretics, ACEi/ARB, and beta-blockers ≥2 weeks before testing. ARR >30 with aldosterone >15 ng/dL is highly suggestive. If confirmed: adrenal CT (adenoma vs. bilateral hyperplasia); ± adrenal vein sampling.`
+    });
+  }
+
+  if (data.hco3 !== null && data.hco3 < 22 && hasRenalWasting) {
+    findings.push({
+      etiology: 'Renal tubular acidosis (RTA type 1 or type 2)',
+      likelihood: 'MODERATE',
+      basis: 'Metabolic acidosis + renal K wasting. RTA type 1 (distal): urine pH >5.5 despite systemic acidosis; K very low; nephrocalcinosis on imaging. RTA type 2 (proximal): bicarbonaturia; K wasting; associated with Fanconi syndrome (glucosuria, phosphaturia). Check urine pH, urine glucose, urine phosphate.'
+    });
+  }
+
+  const normotensive = data.sbp === null || data.sbp <= 130;
+  const noDiuretics = !loopDiuretics.some(d => meds.some(m => m.includes(d))) &&
+                      !thiazides.some(t => meds.some(m => m.includes(t)));
+
+  if (normotensive && alkalotic && hasRenalWasting && noDiuretics) {
+    findings.push({
+      etiology: 'Bartter or Gitelman syndrome — consider if persistent and unexplained',
+      likelihood: 'LOW-MODERATE (after ruling out diuretics/vomiting)',
+      basis: 'Normotensive + metabolic alkalosis + renal K wasting + no diuretics. Bartter: loop-like defect (NKCC2 or ROMK mutation); hypomagnesemia variable; presents in childhood/young adults. Gitelman: thiazide-like defect (NCC mutation); always hypomagnesemic; low urine Ca; often discovered incidentally as mild-moderate K loss. Genetic testing confirms; management: K/Mg supplementation, NSAIDs (Bartter), amiloride (Gitelman).'
+    });
+  }
+
+  const nephrotoxicWasters = ['amphotericin','aminoglycoside','gentamicin','tobramycin','amikacin','cisplatin'];
+  nephrotoxicWasters.forEach(drug => {
+    if (meds.some(m => m.includes(drug))) {
+      findings.push({
+        etiology: `Drug-induced renal K wasting — ${drug}`,
+        likelihood: 'HIGH (drug identified)',
+        basis: 'Renal tubular toxicity causing K and Mg wasting. Mg replacement is the gating step — K will not correct without correcting Mg first.'
+      });
+    }
+  });
+
+  const shiftCauses = [];
+  if (data.dkaPresent) shiftCauses.push('DKA/insulin');
+  if (meds.some(m => m.includes('insulin')) && !data.dkaPresent) shiftCauses.push('exogenous insulin');
+  const betaAgonists = ['albuterol','salmeterol','levalbuterol'];
+  if (meds.some(m => betaAgonists.some(b => m.includes(b)))) shiftCauses.push('beta-2 agonist');
+  if (data.refeedingRisk) shiftCauses.push('refeeding syndrome');
+
+  if (shiftCauses.length > 0) {
+    findings.push({
+      etiology: `Transcellular K shift — ${shiftCauses.join(', ')}`,
+      likelihood: 'HIGH (mechanism identified)',
+      basis: 'K moved into cells — may NOT represent true total body K deficit. Treat underlying cause; replace cautiously if K <3.0 or symptomatic.'
+    });
+  }
+
+  const poorIntake = ['not eating','poor intake','anorexia','npo','malnutrition'];
+  if (symptoms.some(s => poorIntake.includes(s)) && hasGILoss) {
+    findings.push({
+      etiology: 'Inadequate dietary K intake',
+      likelihood: 'CONTRIBUTING',
+      basis: 'Poor oral intake combined with inability to conserve K below ~20 mEq/day. Usually not sole cause — look for concurrent GI or renal loss.'
+    });
+  }
+
+  if (findings.length === 0) {
+    findings.push({
+      etiology: 'Etiology undetermined with available data',
+      likelihood: 'UNKNOWN',
+      basis: 'Insufficient data for etiology classification. Recommended: urine K/Cr ratio, urine Na, urine Cl, serum Mg, acid-base status, and full medication review.'
+    });
+  }
+
+  return findings;
+}
+
+// ============================================================
+// Section 8: Medication Screen
+// ============================================================
+function screenMeds(meds) {
+  const flagged = [];
+  Object.entries(K_WASTING_MEDICATIONS).forEach(([drug, info]) => {
+    if (meds.some(m => m.includes(drug))) {
+      flagged.push({ drug, ...info });
+    }
+  });
+  return flagged;
+}
+
+// ============================================================
+// Section 9: Management
+// ============================================================
+function generateManagement(data, severity, meds) {
+  const k = data.k;
+  const recs = [];
+
+  // Mg first
+  if (data.mg === null) {
+    recs.push('CHECK MAGNESIUM IMMEDIATELY — required before K replacement protocol.');
+  } else if (data.mg < 1.8) {
+    recs.push(`REPLACE MAGNESIUM FIRST (Mg ${data.mg} mg/dL). MgSO4 2–4 g IV over 2–4 hr (or oral Mg oxide 400–800 mg/day if mild). K will not correct without adequate Mg.`);
+  } else {
+    recs.push(`Magnesium adequate (${data.mg} mg/dL). Proceed with K replacement.`);
+  }
+
+  // Route
+  if (k < 2.5) {
+    recs.push('ROUTE: IV potassium chloride (KCl) required. Peripheral IV: max 10 mEq/hr in 100 mL (irritating — phlebitis risk above this rate). Central IV: up to 20–40 mEq/hr with CONTINUOUS telemetry. NEVER give IV K as bolus/push — fatal cardiac arrhythmia.');
+  } else if (k < 3.0) {
+    recs.push('ROUTE: Oral KCl preferred if tolerating PO (20–40 mEq q4–6h). If unable to tolerate PO: IV KCl 10 mEq/hr peripheral; 20 mEq/hr central with telemetry.');
+  } else {
+    recs.push('ROUTE: Oral KCl preferred (20–40 mEq PO q6–8h). Take with food or water to reduce GI irritation. Use liquid formulation if esophageal dysmotility is a concern.');
+  }
+
+  // Estimated deficit
+  if (k < 3.5) {
+    let deficit;
+    if (k >= 3.0) deficit = '~100–200 mEq estimated total body K deficit';
+    else if (k >= 2.5) deficit = '~200–400 mEq estimated total body K deficit';
+    else deficit = '>400 mEq estimated total body K deficit';
+    recs.push(`ESTIMATED DEFICIT: ${deficit}. This is a rough guide — actual deficit is unpredictable. Serial K checks are the only reliable guide to replacement adequacy.`);
+  }
+
+  // Monitoring
+  if (k < 2.5) {
+    recs.push('MONITORING: Serum K q2h during active IV replacement. ECG continuously.');
+  } else if (k < 3.0) {
+    recs.push('MONITORING: Serum K q4–6h. Telemetry if cardiac history, digoxin, or QTc-prolonging drugs.');
+  } else {
+    recs.push('MONITORING: Serum K in 24 hr after oral replacement. Routine ECG unless symptomatic.');
+  }
+
+  // DKA
+  if (data.dkaPresent) {
+    recs.push('DKA PROTOCOL: Hold insulin if K <3.5 mEq/L — start insulin only after K ≥3.5. Begin K replacement when K <5.5 AND UOP confirmed (>50 mL/hr). Target K 4.0–5.0 mEq/L throughout insulin infusion. K will drop rapidly as insulin drives glucose and K into cells.');
+  }
+
+  // Digoxin
+  if (meds.some(m => m.includes('digoxin') || m.includes('lanoxin'))) {
+    recs.push('DIGOXIN PATIENT: Target K ≥4.0 mEq/L. Check digoxin level. Signs of toxicity: bradycardia, AV block, nausea, visual changes, bidirectional VT.');
+  }
+
+  // Prevention
+  const loopDiuretics = ['furosemide','bumetanide','torsemide'];
+  const thiazides = ['hydrochlorothiazide','hctz','chlorthalidone','metolazone'];
+  if ([...loopDiuretics,...thiazides].some(d => meds.some(m => m.includes(d)))) {
+    recs.push('ONGOING PREVENTION: Patient on diuretic — prescribe standing KCl supplementation (20–40 mEq PO daily to TID) and/or add K-sparing agent (spironolactone, amiloride, eplerenone). Monitor K q3–7 days after diuretic initiation or dose change.');
+  }
+
+  return recs;
+}
+
+// ============================================================
+// Section 10: Danger Flags
+// ============================================================
+function generateDangerFlags(data, meds) {
+  const flags = [];
+  const k = data.k;
+
+  if (k < 2.5) {
+    flags.push(`K ${k} mEq/L — SEVERE: Immediate IV replacement required. Risk of VT/VF, torsades de pointes, respiratory muscle paralysis.`);
+  }
+
+  if (meds.some(m => m.includes('digoxin') || m.includes('lanoxin')) && k < 4.0) {
+    flags.push(`DIGOXIN + K ${k} mEq/L — EXTREME DANGER. Target K ≥4.0 mEq/L. Check digoxin level immediately.`);
+  }
+
+  const qtcDrugs = ['amiodarone','sotalol','dofetilide','haloperidol','quetiapine','methadone','azithromycin','ciprofloxacin','ondansetron','hydroxychloroquine'];
+  if (meds.some(m => qtcDrugs.some(q => m.includes(q))) && k < 3.0) {
+    flags.push(`QTc-PROLONGING DRUG DETECTED + K ${k} mEq/L. Extremely high torsades de pointes risk. Obtain ECG now. Consider stopping QTc drug if K cannot be rapidly corrected.`);
+  }
+
+  if (data.symptoms.some(s => ['paralysis','ascending weakness'].includes(s.toLowerCase()))) {
+    flags.push('MUSCLE PARALYSIS REPORTED — consider hypokalemic periodic paralysis vs. true K deficit. If periodic paralysis: avoid glucose/carbohydrate (worsens shift); replace K cautiously PO.');
+  }
+
+  if (data.dkaPresent && k < 3.5) {
+    flags.push(`DKA + K ${k} mEq/L — HOLD INSULIN. Do not start insulin until K ≥3.5 mEq/L. Start IV KCl replacement first.`);
+  }
+
+  if (data.mg !== null && data.mg < 1.5 && k < 3.0) {
+    flags.push(`CRITICAL Mg + K deficit (Mg ${data.mg} mg/dL, K ${k} mEq/L). Replace Mg FIRST. K will not correct without Mg.`);
+  }
+
+  if (data.refeedingRisk) {
+    flags.push('REFEEDING SYNDROME RISK: Monitor K, Mg, Phos q6h for 72 hr after refeeding initiation.');
+  }
+
+  return flags;
+}
+
+// ============================================================
+// Render helpers
+// ============================================================
+function row(label, val, cls='') {
+  return `<div class="out-row"><span class="out-label">${label}</span><span class="out-val ${cls}">${val}</span></div>`;
+}
+
+function infoBlock(text) {
+  return `<div class="info-block">${text}</div>`;
+}
+
+function likelihoodClass(lk) {
+  if (lk.startsWith('HIGH')) return 'badge-high';
+  if (lk.startsWith('MODERATE') || lk.startsWith('LOW-MODERATE')) return 'badge-moderate';
+  if (lk.startsWith('LOW')) return 'badge-low';
+  if (lk.startsWith('CONTRIBUTING')) return 'badge-contrib';
+  return 'badge-unknown';
+}
+
+// ============================================================
+// Main runner
+// ============================================================
+function runAnalyzer() {
+  const k  = getVal('serum_k');
+  const na = getVal('serum_na');
+
+  if (k === null || na === null) {
+    alert('Serum K and Serum Na are required fields.');
+    return;
+  }
+
+  const data = {
+    k, na,
+    cl:         getVal('serum_cl'),
+    hco3:       getVal('serum_hco3'),
+    bun:        getVal('serum_bun'),
+    cr:         getVal('serum_cr'),
+    glucose:    getVal('serum_glucose'),
+    mg:         getVal('serum_mg'),
+    phos:       getVal('serum_phos'),
+    ca:         getVal('serum_ca'),
+    measOsm:    getVal('measured_osm'),
+    ethanol:    getVal('serum_ethanol'),
+    urineK:     getVal('urine_k'),
+    urineCr:    getVal('urine_cr'),
+    urineNa:    getVal('urine_na'),
+    urineCl:    getVal('urine_cl'),
+    urineOsm:   getVal('urine_osm'),
+    sbp:        getVal('bp_systolic'),
+    dbp:        getVal('bp_diastolic'),
+    volStatus:  getStr('volume_status'),
+    weight:     getVal('weight_kg'),
+    sex:        getStr('sex'),
+    dkaPresent:   getBool('dka_present'),
+    refeedingRisk: getBool('refeeding_risk'),
+    onDialysis:   getBool('on_dialysis'),
+    symptoms:   getSymptoms(),
+  };
+
+  const meds = getMeds();
+
+  // ---- SECTION 1: Osmolality ----
+  const calcOsm  = calcOsm(na, data.glucose, data.bun);
+  const effOsm   = calcEffOsm(na, data.glucose);
+  const osmI     = interpretCalcOsm(calcOsm);
+  const effI     = interpretEffOsm(effOsm);
+  const corrNa   = correctedNa(na, data.glucose);
+
+  let osmHtml = '';
+  osmHtml += row('Calculated Osm (2×Na + Gluc/18 + BUN/2.8)', osmI.text, osmI.cls);
+  osmHtml += row('Effective Osm / Tonicity (2×Na + Gluc/18)', effI.text, effI.cls);
+  osmHtml += `<div class="out-row text-muted" style="font-size:11px;">Normal range: 275–295 mOsm/kg | Effective Osm excludes BUN (freely permeable)</div>`;
+
+  if (corrNa !== null && data.glucose !== null && data.glucose > 150) {
+    osmHtml += row('Glucose-corrected Na (Hillier +2.4/100 mg/dL)', `${corrNa} mEq/L`, 'text-amber bold');
+  }
+
+  if (data.measOsm !== null && data.glucose !== null && data.bun !== null) {
+    const gap = calcOsmGap(data.measOsm, na, data.glucose, data.bun, data.ethanol);
+    if (gap !== null) {
+      if (gap < 10 && gap >= 0) {
+        osmHtml += `<div class="osm-ok">Osmolar Gap: ${gap} mOsm/kg — Normal (&lt;10)</div>`;
+      } else if (gap >= 10) {
+        osmHtml += `<div class="osm-flag">Osmolar Gap: ${gap} mOsm/kg — ELEVATED (&gt;10). Consider: methanol, ethylene glycol, isopropanol, propylene glycol, mannitol.</div>`;
+      } else {
+        osmHtml += `<div class="warn-banner">Osmolar Gap: ${gap} mOsm/kg — Negative. Consider lab error or pseudohyponatremia (hyperlipidemia, paraprotein).</div>`;
+      }
+    }
+  } else if (data.measOsm !== null) {
+    osmHtml += `<div class="out-row text-muted" style="font-size:11px;">Measured Osm provided but glucose or BUN missing — osmolar gap cannot be calculated.</div>`;
+  } else {
+    osmHtml += `<div class="out-row text-muted" style="font-size:11px;">Measured osmolality not provided — osmolar gap not calculated.</div>`;
+  }
+  document.getElementById('osm-content').innerHTML = osmHtml;
+
+  // ---- SECTION 2: K Assessment ----
+  const sev = classifyK(k);
+  const digAlert = checkDigoxin(meds, k);
+
+  let kColorClass = '';
+  let tagClass = '';
+  if (sev.level === 'critical' || sev.level === 'severe') { kColorClass = 'text-red'; tagClass = `tag-${sev.level}`; }
+  else if (sev.level === 'moderate') { kColorClass = 'text-amber'; tagClass = 'tag-moderate'; }
+  else { kColorClass = 'text-green'; tagClass = sev.level === 'mild' ? 'tag-mild' : 'tag-normal'; }
+
+  let kHtml = `
+    <div class="k-value-display">
+      <div>
+        <div class="k-big ${kColorClass}">${k}</div>
+        <div class="k-unit">mEq/L</div>
+      </div>
+      <div class="k-severity-col">
+        <span class="tag ${tagClass}">${sev.severity}</span>
+        ${data.na ? `<span class="tag" style="background:var(--navy-light);border:1px solid var(--card-border);color:var(--text-dim);">Na ${data.na} mEq/L</span>` : ''}
+      </div>
+    </div>
+  `;
+  kHtml += row('ECG Risk', sev.ecgRisk);
+  kHtml += row('Urgency', sev.urgency);
+  kHtml += row('Monitoring', sev.monitoring);
+  if (data.cl !== null) kHtml += row('Serum Cl', `${data.cl} mEq/L`);
+  if (data.hco3 !== null) kHtml += row('HCO3', `${data.hco3} mEq/L`);
+  if (data.cr !== null) kHtml += row('Creatinine', `${data.cr} mg/dL`);
+
+  if (digAlert) {
+    kHtml += `
+      <div class="digoxin-banner">
+        <div class="dg-icon">⚠️</div>
+        <div class="dg-text">
+          DIGOXIN DETECTED — K is ${k} mEq/L.<br>
+          Target K ≥ 4.0 mEq/L in all digoxin patients.<br>
+          Hypokalemia dramatically potentiates digoxin toxicity (both compete for Na/K-ATPase).<br>
+          Replace aggressively but carefully; check digoxin level.
+        </div>
+      </div>`;
+  }
+  document.getElementById('k-content').innerHTML = kHtml;
+
+  // ---- SECTION 3: Magnesium ----
+  const mgResult = assessMg(data.mg);
+  let mgHtml = '';
+  if (mgResult.flag) {
+    mgHtml = `<div class="mg-warn">${mgResult.flag && data.mg !== null && data.mg < 1.5 ? '⚠ REPLACE Mg FIRST — ' : '⚠ '}${mgResult.status}<br><br>${mgResult.message}</div>`;
+  } else {
+    mgHtml = `<div class="mg-ok">${mgResult.status}<br>${mgResult.message}</div>`;
+  }
+  document.getElementById('mg-content').innerHTML = mgHtml;
+
+  // ---- SECTION 4: Acid-Base ----
+  const ab = interpretAcidBase(data.hco3);
+  let abHtml = row('Status', ab.status);
+  abHtml += infoBlock(ab.clue);
+  document.getElementById('ab-content').innerHTML = abHtml;
+
+  // ---- SECTION 5: Urine Studies ----
+  const urineResult = assessUrineK(data.urineK, data.urineCr, data.urineNa);
+  let urineHtml = `<div class="out-row"><span class="out-val bold">${urineResult.interpretation}</span></div>`;
+  urineHtml += infoBlock(urineResult.direction);
+  if (data.urineNa !== null) {
+    urineHtml += row('Urine Na', `${data.urineNa} mEq/L`);
+    urineHtml += `<div class="out-row text-muted" style="font-size:11px;padding-left:188px;">&lt;20 = avid Na retention (volume depletion/CHF/cirrhosis) | &gt;40 = SIADH, diuretic, RTA, AI</div>`;
+  }
+  if (data.urineCl !== null) {
+    urineHtml += row('Urine Cl', `${data.urineCl} mEq/L`);
+    urineHtml += `<div class="out-row text-muted" style="font-size:11px;padding-left:188px;">&lt;25 = saline-responsive alkalosis | &gt;40 = saline-resistant (hyperaldo, active diuretic, Bartter)</div>`;
+  }
+  if (data.urineOsm !== null) {
+    urineHtml += row('Urine Osm', `${data.urineOsm} mOsm/kg`);
+  }
+  if (data.urineK === null && data.urineCr === null && data.urineNa === null && data.urineCl === null && data.urineOsm === null) {
+    urineHtml += `<div class="out-row"><span class="no-data-note">No urine studies provided. Urine K/Cr ratio is the most important test to differentiate renal vs. extrarenal K loss.</span></div>`;
+  }
+  document.getElementById('urine-content').innerHTML = urineHtml;
+
+  // ---- SECTION 6: Transcellular Shift ----
+  const shifts = screenShift(data, meds);
+  if (shifts.length > 0) {
+    let shiftHtml = shifts.map(s => `<div class="shift-item">→ ${s}</div>`).join('');
+    document.getElementById('shift-content').innerHTML = shiftHtml;
+    document.getElementById('card-shift').style.display = '';
+  } else {
+    document.getElementById('card-shift').style.display = 'none';
+  }
+
+  // ---- SECTION 7: Etiology ----
+  const etiologies = classifyEtiology(data, meds, urineResult);
+  let etioHtml = etiologies.map(e => `
+    <div class="etiology-item">
+      <div class="etio-name">${e.etiology}</div>
+      <div><span class="${likelihoodClass(e.likelihood)}" style="font-size:12px;">Likelihood: ${e.likelihood}</span></div>
+      <div class="etio-basis">${e.basis}</div>
+    </div>
+  `).join('');
+  document.getElementById('etio-content').innerHTML = etioHtml;
+
+  // ---- SECTION 8: Medication Culprits ----
+  const flaggedMeds = screenMeds(meds);
+  if (flaggedMeds.length > 0) {
+    let medsHtml = flaggedMeds.map(fm => `
+      <div class="med-item">
+        <div class="med-name">${fm.drug.replace(/\b\w/g, c => c.toUpperCase())}</div>
+        <div class="med-row"><strong>Mechanism:</strong> ${fm.mechanism}</div>
+        <div class="med-row"><strong>Effect:</strong> ${fm.effect}</div>
+        <div class="med-row"><strong>Action:</strong> ${fm.action}</div>
+      </div>
+    `).join('');
+    document.getElementById('meds-content').innerHTML = medsHtml;
+    document.getElementById('card-meds').style.display = '';
+  } else if (meds.length === 0) {
+    document.getElementById('meds-content').innerHTML = '<div class="no-data-note">No medications entered. Enter medications to screen for K-wasting culprits.</div>';
+    document.getElementById('card-meds').style.display = '';
+  } else {
+    document.getElementById('meds-content').innerHTML = '<div class="no-data-note">No recognized K-wasting medications identified in the list provided.</div>';
+    document.getElementById('card-meds').style.display = '';
+  }
+
+  // ---- SECTION 9: Management ----
+  const sev2 = classifyK(k);
+  const mgmtRecs = generateManagement(data, sev2, meds);
+  let mgmtHtml = mgmtRecs.map((r, i) => `<div class="mgmt-item"><strong>${i+1}.</strong> ${r}</div>`).join('');
+  document.getElementById('mgmt-content').innerHTML = mgmtHtml;
+
+  // ---- SECTION 10: Danger Flags ----
+  const flags = generateDangerFlags(data, meds);
+  if (flags.length > 0) {
+    let flagsHtml = flags.map(f => `
+      <div class="danger-flag">
+        <div class="df-icon">!</div>
+        <div class="df-text">${f}</div>
+      </div>
+    `).join('');
+    document.getElementById('flags-content').innerHTML = flagsHtml;
+    document.getElementById('card-flags').style.display = '';
+  } else {
+    document.getElementById('flags-content').innerHTML = '<div style="color:var(--green);font-size:13px;">No critical danger flags identified with current values.</div>';
+    document.getElementById('card-flags').style.display = '';
+  }
+
+  // Show output
+  document.getElementById('output').style.display = 'block';
+  document.getElementById('output').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>
