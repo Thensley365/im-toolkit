@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IM Toolkit">
+<meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f4f6fb" media="(prefers-color-scheme: light)">
+<title>IM Toolkit</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root{
+  --bg:#f4f6fb; --card:#ffffff; --card2:#eef1f7; --ink:#12151c; --muted:#5b6472;
+  --line:#e2e6ee; --accent:#0a6cff; --accent-ink:#ffffff;
+  --warn:#c0392b; --warnbg:#fdeceb; --tip:#0a8a5f; --tipbg:#e8f6f0;
+  --note:#5a4bd6; --notebg:#eeecfc; --ok:#0a8a5f; --okbg:#e8f6f0;
+  --chip:#e7ecf6; --star:#f5a623;
+  --safe-b:env(safe-area-inset-bottom); --safe-t:env(safe-area-inset-top);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0b1220; --card:#151c2b; --card2:#1c2536; --ink:#eef2f8; --muted:#9aa6b8;
+    --line:#26304380; --accent:#4f9dff; --accent-ink:#08101f;
+    --warn:#ff8a80; --warnbg:#3a1f1f; --tip:#5ce0ad; --tipbg:#123028;
+    --note:#b3a7ff; --notebg:#241f45; --ok:#5ce0ad; --okbg:#123028;
+    --chip:#232d40; --star:#ffcb57;
+  }
+}
+/* Manual theme override (◐ button) — mirrors the two palettes above */
+html[data-force="light"]{
+  --bg:#f4f6fb; --card:#ffffff; --card2:#eef1f7; --ink:#12151c; --muted:#5b6472;
+  --line:#e2e6ee; --accent:#0a6cff; --accent-ink:#ffffff;
+  --warn:#c0392b; --warnbg:#fdeceb; --tip:#0a8a5f; --tipbg:#e8f6f0;
+  --note:#5a4bd6; --notebg:#eeecfc; --ok:#0a8a5f; --okbg:#e8f6f0;
+  --chip:#e7ecf6; --star:#f5a623;
+}
+html[data-force="dark"]{
+  --bg:#0b1220; --card:#151c2b; --card2:#1c2536; --ink:#eef2f8; --muted:#9aa6b8;
+  --line:#26304380; --accent:#4f9dff; --accent-ink:#08101f;
+  --warn:#ff8a80; --warnbg:#3a1f1f; --tip:#5ce0ad; --tipbg:#123028;
+  --note:#b3a7ff; --notebg:#241f45; --ok:#5ce0ad; --okbg:#123028;
+  --chip:#232d40; --star:#ffcb57;
+}
+/* In-note table of contents for long notes */
+.toc{background:var(--card2); border:1px solid var(--line); border-radius:12px; padding:11px 13px; margin:.4em 0 1em}
+.toc .ct{font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:.5px; margin-bottom:5px; color:var(--muted)}
+.toc ul{margin:0; padding-left:18px}
+.toc li{margin:2px 0}
+.toc a{cursor:pointer}
+article h2,article h3{scroll-margin-top:118px}
+/* Tool link cards match qcards */
+a.qcard{color:var(--ink); display:flex}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg); color:var(--ink);
+  font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  -webkit-text-size-adjust:100%; overflow-x:hidden;
+}
+a{color:var(--accent); text-decoration:none}
+.hidden{display:none !important}
+
+/* Top bar */
+header{
+  position:sticky; top:0; z-index:40; background:var(--bg);
+  padding:calc(var(--safe-t) + 8px) 14px 8px; border-bottom:1px solid var(--line);
+}
+.hrow{display:flex; align-items:center; gap:10px}
+#backBtn{
+  border:none; background:var(--card); color:var(--accent); font-size:16px; font-weight:600;
+  padding:8px 12px; border-radius:12px; display:none; align-items:center; gap:4px; cursor:pointer;
+}
+.htitle{font-size:20px; font-weight:800; letter-spacing:-.3px; flex:1; min-width:0;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+#themeBtn{border:none;background:var(--card);color:var(--ink);width:38px;height:38px;border-radius:12px;font-size:18px;cursor:pointer}
+.searchwrap{margin-top:8px; position:relative}
+#search{
+  width:100%; border:1px solid var(--line); background:var(--card); color:var(--ink);
+  padding:12px 40px 12px 40px; border-radius:14px; font-size:16px; outline:none;
+}
+.searchwrap .ico{position:absolute; left:13px; top:50%; transform:translateY(-50%); color:var(--muted); font-size:16px}
+#clearS{position:absolute; right:8px; top:50%; transform:translateY(-50%); border:none; background:var(--chip); color:var(--muted);
+  width:26px;height:26px;border-radius:50%;font-size:15px; display:none; cursor:pointer}
+
+main{padding:12px 14px calc(96px + var(--safe-b)); max-width:820px; margin:0 auto}
+
+/* Section labels */
+.sec{font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin:18px 4px 8px}
+
+/* Quick access grid */
+.qgrid{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.qcard{
+  background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px;
+  display:flex; flex-direction:column; gap:6px; cursor:pointer; min-height:84px; justify-content:space-between;
+}
+.qcard:active{transform:scale(.98)}
+.qcard .qi{font-size:22px}
+.qcard .qt{font-weight:700; font-size:15px; line-height:1.2}
+.qcard .qs{font-size:12px; color:var(--muted)}
+.qcard.wide{grid-column:1 / -1; flex-direction:row; align-items:center; gap:12px; min-height:56px}
+.qcard.wide .qt{flex:1}
+
+/* Specialty list */
+.slist{display:flex; flex-direction:column; gap:1px; background:var(--line); border-radius:16px; overflow:hidden; border:1px solid var(--line)}
+.srow{background:var(--card); padding:14px; display:flex; align-items:center; gap:12px; cursor:pointer}
+.srow:active{background:var(--card2)}
+.srow .em{font-size:20px; width:26px; text-align:center}
+.srow .snm{flex:1; font-weight:600}
+.srow .cnt{color:var(--muted); font-size:13px; background:var(--chip); padding:2px 9px; border-radius:20px}
+.srow .chev{color:var(--muted); font-size:18px}
+
+/* Note list */
+.nlist{display:flex; flex-direction:column; gap:1px; background:var(--line); border-radius:16px; overflow:hidden; border:1px solid var(--line)}
+.nrow{background:var(--card); padding:13px 14px; display:flex; align-items:center; gap:10px; cursor:pointer}
+.nrow:active{background:var(--card2)}
+.nrow .nt{flex:1; min-width:0}
+.nrow .nt b{font-weight:600; display:block}
+.nrow .nt small{color:var(--muted); font-size:12px}
+.nrow .star{font-size:18px; color:var(--line); padding:4px}
+.nrow .star.on{color:var(--star)}
+.tag{font-size:11px; font-weight:700; padding:2px 7px; border-radius:6px; background:var(--chip); color:var(--muted); text-transform:uppercase; letter-spacing:.4px}
+
+.empty{color:var(--muted); text-align:center; padding:40px 20px}
+.hl{background:rgba(245,166,35,.35); border-radius:3px}
+
+/* Note content */
+article{background:var(--card); border:1px solid var(--line); border-radius:16px; padding:16px 16px 22px; margin-top:6px}
+article h1{font-size:22px; margin:.2em 0 .5em; letter-spacing:-.3px}
+article h2{font-size:19px; margin:1.1em 0 .4em; padding-top:.3em; border-top:1px solid var(--line)}
+article h2:first-of-type{border-top:none}
+article h3{font-size:16px; margin:1em 0 .3em}
+article h4{font-size:14px; margin:.9em 0 .2em; color:var(--muted); text-transform:uppercase; letter-spacing:.4px}
+article p{margin:.5em 0}
+article ul,article ol{margin:.4em 0; padding-left:1.3em}
+article li{margin:.25em 0}
+article li.l2{margin-left:1.1em}
+article strong{font-weight:700}
+article hr{border:none; border-top:1px solid var(--line); margin:1em 0}
+article code{background:var(--card2); padding:1px 5px; border-radius:5px; font-size:.9em; font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+article pre{background:var(--card2); padding:12px; border-radius:12px; overflow-x:auto; -webkit-overflow-scrolling:touch}
+article pre code{background:none; padding:0; font-size:13px; line-height:1.55; white-space:pre}
+.tbl-wrap{overflow-x:auto; -webkit-overflow-scrolling:touch; margin:.6em 0; border:1px solid var(--line); border-radius:12px}
+table{border-collapse:collapse; width:100%; font-size:14px; min-width:100%}
+th,td{border-bottom:1px solid var(--line); padding:8px 10px; text-align:left; vertical-align:top}
+th{background:var(--card2); font-weight:700; white-space:nowrap}
+tr:last-child td{border-bottom:none}
+blockquote{margin:.6em 0; padding:.4em .9em; border-left:3px solid var(--line); color:var(--muted)}
+.callout{margin:.7em 0; border-radius:12px; padding:11px 13px; border:1px solid var(--line)}
+.callout .ct{font-weight:800; font-size:13px; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px; display:flex; gap:6px; align-items:center}
+.callout.warning{background:var(--warnbg); border-color:var(--warn)} .callout.warning .ct{color:var(--warn)}
+.callout.tip{background:var(--tipbg); border-color:var(--tip)} .callout.tip .ct{color:var(--tip)}
+.callout.success{background:var(--okbg); border-color:var(--ok)} .callout.success .ct{color:var(--ok)}
+.callout.note,.callout.info,.callout.abstract{background:var(--notebg); border-color:var(--note)} .callout.note .ct,.callout.info .ct,.callout.abstract .ct{color:var(--note)}
+.callout p{margin:.3em 0}
+.deadlink{color:var(--muted); border-bottom:1px dashed var(--line)}
+.wl{color:var(--accent); border-bottom:1px solid transparent; cursor:pointer}
+.notemeta{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:8px}
+.starbig{border:none;background:var(--card2);color:var(--line);font-size:20px;width:40px;height:40px;border-radius:12px;cursor:pointer}
+.starbig.on{color:var(--star)}
+.pathline{font-size:12px; color:var(--muted); margin-top:14px; word-break:break-all}
+
+/* Bottom tab bar */
+nav.tabs{
+  position:fixed; left:0; right:0; bottom:0; z-index:50;
+  background:color-mix(in srgb,var(--bg) 88%, transparent);
+  backdrop-filter:saturate(160%) blur(14px); -webkit-backdrop-filter:saturate(160%) blur(14px);
+  border-top:1px solid var(--line); display:flex; padding:6px 6px calc(6px + var(--safe-b));
+}
+nav.tabs button{flex:1; border:none; background:none; color:var(--muted); font-size:11px; font-weight:600;
+  display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 2px; cursor:pointer}
+nav.tabs button .ti{font-size:21px}
+nav.tabs button.active{color:var(--accent)}
+
+.foot{color:var(--muted); font-size:12px; text-align:center; margin:20px 6px 0}
+</style>
+</head>
+<body>
+<header>
+  <div class="hrow">
+    <button id="backBtn" aria-label="Back">‹ Back</button>
+    <div class="htitle" id="hTitle">IM Toolkit</div>
+    <button id="themeBtn" aria-label="Theme">◐</button>
+  </div>
+  <div class="searchwrap">
+    <span class="ico">⌕</span>
+    <input id="search" type="search" placeholder="Search workflows, scores, drugs…" aria-label="Search all notes" autocomplete="off" autocorrect="off" autocapitalize="off">
+    <button id="clearS" aria-label="Clear search">✕</button>
+  </div>
+</header>
+
+<main id="view"></main>
+
+<nav class="tabs">
+  <button data-tab="home" class="active"><span class="ti">▦</span>Home</button>
+  <button data-tab="workflows"><span class="ti">☰</span>Workflows</button>
+  <button data-tab="favorites"><span class="ti">★</span>Saved</button>
+  <button data-tab="about"><span class="ti">ⓘ</span>Info</button>
+</nav>
+
+<script>
+"use strict";
+const BUNDLE = /*INJECT_DATA*/{"generated":"","count":0,"notes":[],"res":{},"catOrder":[]};
+const NOTES = BUNDLE.notes;
+const RES = BUNDLE.res;
+
+const EMOJI = {
+  Cardiology:"❤️", Pulmonology:"🫁", "Critical Care":"🚨", "Infectious Disease":"🦠",
+  Nephrology:"🫘", Gastroenterology:"🩻", Endocrinology:"🧬", Hepatology:"🫄",
+  Hematology:"🩸", Neurology:"🧠", "Hospital Medicine":"🏥", "General IM":"🩺",
+  Rheumatology:"🦴", Oncology:"🎗️", Connections:"🔗", References:"📄"
+};
+const TOOLS = [
+  {f:"antibiotic_advisor.html",   t:"Antibiotic Advisor",     s:"Interactive empiric picker",  i:"💊"},
+  {f:"admission_orders.html",     t:"Admission Orders",       s:"Interactive order sets",      i:"📋"},
+  {f:"aki_analyzer.html",         t:"AKI Analyzer",           s:"Stepwise AKI workup",         i:"🫘"},
+  {f:"acid_base_analyzer.html",   t:"Acid–Base Analyzer",     s:"ABG interpretation",          i:"🧪"},
+  {f:"hyponatremia_analyzer.html",t:"Hyponatremia Analyzer",  s:"Diagnostic algorithm",        i:"🧂"},
+  {f:"hyponatremia_mgmt.html",    t:"Hyponatremia Mgmt",      s:"Correction & monitoring",     i:"📈"},
+  {f:"hypokalemia_analyzer.html", t:"Hypokalemia Analyzer",   s:"Workup & repletion",          i:"🍌"}
+];
+const FEATURES = [
+  {key:"labs",       t:"Lab Workups",      s:"First panel + branches", i:"🧪"},
+  {key:"differentials",t:"Differentials",  s:"By chief complaint",      i:"🔍"},
+  {key:"admission",  t:"Admission Orders", s:"Order-set by condition",  i:"📋"},
+  {key:"antibiotics",t:"Antibiotics",      s:"Empiric selection",       i:"💊"},
+  {key:"scores",     t:"Scores & Criteria",s:"Thresholds that act",     i:"🎯"}
+];
+
+/* ---------- storage ---------- */
+const LS = {
+  get(k,d){ try{return JSON.parse(localStorage.getItem("imtk_"+k)) ?? d}catch(e){return d} },
+  set(k,v){ try{localStorage.setItem("imtk_"+k, JSON.stringify(v))}catch(e){} }
+};
+const PATH2IDX = {}; NOTES.forEach(n=>{ PATH2IDX[n.path]=n.i; });
+/* favorites & recents are keyed by note *path* (stable across rebuilds);
+   old numeric entries from previous versions are migrated best-effort */
+const asPath = v => typeof v==="number" ? (NOTES[v] && NOTES[v].path) : v;
+let favPaths = new Set(LS.get("favs",[]).map(asPath).filter(p=>p && PATH2IDX[p]!==undefined));
+LS.set("favs",[...favPaths]);
+function favHas(i){ const n=NOTES[+i]; return !!n && favPaths.has(n.path); }
+function toggleFav(i){ const n=NOTES[+i]; if(!n)return;
+  if(favPaths.has(n.path))favPaths.delete(n.path); else favPaths.add(n.path);
+  LS.set("favs",[...favPaths]); }
+function pushRecent(i){ const n=NOTES[+i]; if(!n)return;
+  let r=LS.get("recent",[]).map(asPath).filter(p=>p && PATH2IDX[p]!==undefined && p!==n.path);
+  r.unshift(n.path); r=r.slice(0,10); LS.set("recent",r); }
+
+/* ---------- theme ---------- */
+const themeBtn=document.getElementById("themeBtn");
+function applyTheme(){ const t=LS.get("theme","auto");
+  document.documentElement.style.colorScheme = t==="auto"?"light dark":t;
+  if(t!=="auto") document.documentElement.setAttribute("data-force",t); else document.documentElement.removeAttribute("data-force");
+}
+themeBtn.onclick=()=>{ const cur=LS.get("theme","auto"); const nx=cur==="auto"?"light":cur==="light"?"dark":"auto"; LS.set("theme",nx); applyTheme(); };
+applyTheme();
+
+/* ================= Markdown renderer ================= */
+function esc(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function normKey(t){ return t.trim().replace(/#.*$/,"").replace(/\.md$/i,"").trim().toLowerCase(); }
+function inline(t){
+  const codes=[];
+  t=t.replace(/`([^`]+)`/g,(m,c)=>{codes.push(c);return " "+(codes.length-1)+" ";});
+  t=esc(t);
+  // wikilinks [[target|display]]
+  t=t.replace(/\[\[([^\]]+)\]\]/g,(m,inner)=>{
+    let target=inner, disp=inner;
+    const bar=inner.indexOf("|");
+    if(bar>-1){ target=inner.slice(0,bar); disp=inner.slice(bar+1); }
+    const id=RES[normKey(target)];
+    disp=disp.replace(/#.*/,"").trim()||disp;
+    if(id!==undefined) return `<span class="wl" data-nav="${id}" role="link" tabindex="0">${esc(disp)}</span>`;
+    return esc(disp); // unresolved link → plain text
+  });
+  // md links [text](url)
+  t=t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,(m,tx,u)=>{
+    const ext=/^https?:\/\//i.test(u);
+    return `<a href="${esc(u)}"${ext?' target="_blank" rel="noopener"':''}>${esc(tx)}</a>`;
+  });
+  t=t.replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>");
+  t=t.replace(/(^|[^*])\*([^*\n]+)\*(?!\*)/g,"$1<em>$2</em>");
+  t=t.replace(/ (\d+) /g,(m,n)=>"<code>"+esc(codes[+n])+"</code>");
+  return t;
+}
+function splitRow(line){
+  line=line.trim().replace(/^\|/,"").replace(/\|$/,"");
+  const cells=[]; let cur=""; let depth=0;
+  for(let k=0;k<line.length;k++){ const c=line[k];
+    if(c==="["&&line[k+1]==="[")  {depth++; cur+="[["; k++; continue;}
+    if(c==="]"&&line[k+1]==="]")  {depth--; cur+="]]"; k++; continue;}
+    if(c==="\\"&&line[k+1]==="|") {cur+="|"; k++; continue;}
+    if(c==="|"&&depth<=0){cells.push(cur); cur=""; continue;}
+    cur+=c;
+  }
+  cells.push(cur); return cells.map(c=>c.trim());
+}
+function render(md){
+  const L=md.replace(/\r\n/g,"\n").split("\n");
+  let h=""; let i=0;
+  const isTableSep=s=>/^\s*\|?[:\-\s|]+\|[:\-\s|]*$/.test(s)&&s.includes("-");
+  while(i<L.length){
+    let ln=L[i];
+    if(/^\s*$/.test(ln)){i++;continue;}
+    // fenced code
+    if(/^\s*```/.test(ln)){ i++; let buf=[]; while(i<L.length&&!/^\s*```/.test(L[i])){buf.push(L[i]);i++;} i++;
+      h+="<pre><code>"+esc(buf.join("\n"))+"</code></pre>"; continue; }
+    // callout
+    let cm=ln.match(/^>\s*\[!(\w+)\]\s*(.*)$/);
+    if(cm){ const type=cm[1].toLowerCase(); const title=cm[2].trim(); i++; let buf=[];
+      while(i<L.length&&/^>/.test(L[i])){ buf.push(L[i].replace(/^>\s?/,"")); i++; }
+      h+=`<div class="callout ${type}"><div class="ct">${esc(title||type)}</div>`+render(buf.join("\n"))+`</div>`; continue; }
+    // blockquote
+    if(/^>/.test(ln)){ let buf=[]; while(i<L.length&&/^>/.test(L[i])){buf.push(L[i].replace(/^>\s?/,""));i++;}
+      h+="<blockquote>"+render(buf.join("\n"))+"</blockquote>"; continue; }
+    // table
+    if(ln.includes("|")&&i+1<L.length&&isTableSep(L[i+1])){
+      const head=splitRow(ln); i+=2; let rows=[];
+      while(i<L.length&&L[i].includes("|")&&!/^\s*$/.test(L[i])){ rows.push(splitRow(L[i])); i++; }
+      let t="<div class='tbl-wrap'><table><thead><tr>"+head.map(c=>"<th>"+inline(c)+"</th>").join("")+"</tr></thead><tbody>";
+      for(const r of rows){ t+="<tr>"+r.map(c=>"<td>"+inline(c)+"</td>").join("")+"</tr>"; }
+      h+=t+"</tbody></table></div>"; continue;
+    }
+    // hr
+    if(/^\s*(---|\*\*\*|___)\s*$/.test(ln)){ h+="<hr>"; i++; continue; }
+    // heading
+    let hm=ln.match(/^(#{1,6})\s+(.*)$/);
+    if(hm){ const lv=hm[1].length; h+=`<h${lv}>`+inline(hm[2].replace(/\s+#*\s*$/,""))+`</h${lv}>`; i++; continue; }
+    // unordered list
+    if(/^\s*[-*+]\s+/.test(ln)){ let items=[];
+      while(i<L.length&&/^\s*[-*+]\s+/.test(L[i])){ const ind=(L[i].match(/^\s*/)[0].length); const txt=L[i].replace(/^\s*[-*+]\s+/,"");
+        items.push(`<li class="${ind>=2?'l2':''}">`+inline(txt)+"</li>"); i++; }
+      h+="<ul>"+items.join("")+"</ul>"; continue; }
+    // ordered list
+    if(/^\s*\d+\.\s+/.test(ln)){ let items=[];
+      while(i<L.length&&/^\s*\d+\.\s+/.test(L[i])){ items.push("<li>"+inline(L[i].replace(/^\s*\d+\.\s+/,""))+"</li>"); i++; }
+      h+="<ol>"+items.join("")+"</ol>"; continue; }
+    // paragraph
+    let buf=[ln]; i++;
+    while(i<L.length&&!/^\s*$/.test(L[i])&&!/^\s*(#{1,6}\s|[-*+]\s|\d+\.\s|>|```|---|\*\*\*)/.test(L[i])&&!(L[i].includes("|")&&i+1<L.length&&isTableSep(L[i+1]))){
+      buf.push(L[i]); i++;
+    }
+    h+="<p>"+inline(buf.join(" "))+"</p>";
+  }
+  return h;
+}
+
+/* ================= Views ================= */
+const view=document.getElementById("view");
+const hTitle=document.getElementById("hTitle");
+const backBtn=document.getElementById("backBtn");
+const searchEl=document.getElementById("search");
+const clearS=document.getElementById("clearS");
+
+function catList(){ // ordered categories with counts (non-ref)
+  const counts={};
+  NOTES.forEach(n=>{ if(n.ref)return; counts[n.cat]=(counts[n.cat]||0)+1; });
+  const order=BUNDLE.catOrder.filter(c=>counts[c]);
+  Object.keys(counts).forEach(c=>{ if(!order.includes(c))order.push(c); });
+  return order.map(c=>({cat:c,n:counts[c]}));
+}
+function featNote(key){ return NOTES.find(n=>n.feature===key); }
+
+function goHome(){
+  setChrome("IM Toolkit",false); setTab("home");
+  let h="<div class='sec'>Quick Access</div><div class='qgrid'>";
+  FEATURES.forEach(f=>{ const n=featNote(f.key); if(!n)return;
+    const wide=f.key==="scores";
+    h+=`<div class="qcard ${wide?'wide':''}" data-nav="${n.i}"><div class="qi">${f.i}</div><div><div class="qt">${f.t}</div><div class="qs">${f.s}</div></div></div>`;
+  });
+  h+="</div>";
+  h+="<div class='sec'>Interactive Tools</div><div class='qgrid'>";
+  TOOLS.forEach(t=>{
+    h+=`<a class="qcard" href="${t.f}"><div class="qi">${t.i}</div><div><div class="qt">${t.t}</div><div class="qs">${t.s}</div></div></a>`;
+  });
+  h+="</div>";
+  const rec=LS.get("recent",[]).map(p=>NOTES[PATH2IDX[typeof p==="number"?(NOTES[p]&&NOTES[p].path):p]]).filter(Boolean);
+  if(rec.length){ h+="<div class='sec'>Recently Viewed</div>"+rowsHtml(rec.slice(0,5)); }
+  h+="<div class='sec'>Workflows by Specialty</div><div class='slist'>";
+  catList().forEach(({cat,n})=>{
+    h+=`<div class="srow" data-cat="${encodeURIComponent(cat)}"><span class="em">${EMOJI[cat]||"📁"}</span><span class="snm">${cat}</span><span class="cnt">${n}</span><span class="chev">›</span></div>`;
+  });
+  h+="</div>";
+  h+=`<div class="foot">Updated ${BUNDLE.generated} · ${BUNDLE.count} notes<br>Evidence-based · verify against current guidelines</div>`;
+  view.innerHTML=h; window.scrollTo(0,0);
+}
+function goWorkflows(){
+  setChrome("Workflows",false); setTab("workflows");
+  let h="<div class='slist'>";
+  catList().forEach(({cat,n})=>{
+    h+=`<div class="srow" data-cat="${encodeURIComponent(cat)}"><span class="em">${EMOJI[cat]||"📁"}</span><span class="snm">${cat}</span><span class="cnt">${n}</span><span class="chev">›</span></div>`;
+  });
+  view.innerHTML=h+"</div>"; window.scrollTo(0,0);
+}
+function goCat(cat){
+  setChrome(cat,true);
+  const list=NOTES.filter(n=>n.cat===cat&&!n.ref).sort((a,b)=>a.title.localeCompare(b.title));
+  const refs=NOTES.filter(n=>n.cat===cat&&n.ref).sort((a,b)=>a.title.localeCompare(b.title));
+  let h=rowsHtml(list);
+  if(refs.length){ h+="<div class='sec'>Reference articles</div>"+rowsHtml(refs); }
+  view.innerHTML=h||"<div class='empty'>No notes.</div>"; window.scrollTo(0,0);
+}
+function goFavorites(){
+  setChrome("Saved",false); setTab("favorites");
+  const list=[...favPaths].map(p=>NOTES[PATH2IDX[p]]).filter(Boolean).sort((a,b)=>a.title.localeCompare(b.title));
+  view.innerHTML = list.length ? rowsHtml(list)
+    : "<div class='empty'>No saved notes yet.<br>Tap the ★ on any note to pin it here for fast bedside access.</div>";
+  window.scrollTo(0,0);
+}
+function goAbout(){
+  setChrome("Info",false); setTab("about");
+  view.innerHTML=`<article>
+  <h1>IM Toolkit</h1>
+  <p>A bedside reference generated from your <code>IM/Workflows</code> and <code>IM/connections</code> notes. Fully offline once loaded — add to your Home Screen for an app-like launch.</p>
+  <div class="callout warning"><div class="ct">⚠ Clinical safety</div><p>This is a study & reference aid built from your own notes. It is <strong>not</strong> a substitute for current guidelines, institutional protocols, or clinical judgment. Verify drugs, doses, and thresholds against a primary source before acting.</p></div>
+  <h3>How it stays current</h3>
+  <p>Edit notes in Obsidian → commit & push to GitHub → the build action regenerates this file automatically. No manual export.</p>
+  <h3>Tips</h3>
+  <ul><li>Pull down / use the search bar to find anything across all ${BUNDLE.count} notes.</li>
+  <li>★ a note to pin it under <b>Saved</b>.</li>
+  <li>Blue links jump between related notes; grey dashed links point to notes not in this bundle.</li>
+  <li>Tap ◐ (top right) to switch light / dark / auto.</li></ul>
+  <p class="pathline">Build: ${BUNDLE.generated}</p>
+  </article>`;
+  window.scrollTo(0,0);
+}
+function rowsHtml(list){
+  if(!list.length) return "";
+  let h="<div class='nlist'>";
+  list.forEach(n=>{
+    h+=`<div class="nrow" data-nav="${n.i}"><div class="nt"><b>${escH(n.title)}</b><small>${n.cat}${n.type==='moc'?' · index':''}</small></div>`+
+       `<span class="star ${favHas(n.i)?'on':''}" data-fav="${n.i}">★</span></div>`;
+  });
+  return h+"</div>";
+}
+function escH(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+
+function goNote(i){ i=+i; const n=NOTES[i]; if(!n){goHome();return;}
+  pushRecent(i);
+  setChrome(n.title,true);
+  let h=`<div class="notemeta"><span class="tag">${n.type==='moc'?'Index':'Workflow'}</span><span class="tag">${n.cat}</span>`+
+        `<button class="starbig ${favHas(i)?'on':''}" id="starBig">★</button></div>`;
+  h+="<article>"+render(n.body)+`<div class="pathline">${escH(n.path)}</div></article>`;
+  view.innerHTML=h;
+  // mini table of contents for long notes
+  const art=view.querySelector("article");
+  const hs=art?[...art.querySelectorAll("h2")]:[];
+  if(hs.length>=5){
+    let toc="<div class='toc'><div class='ct'>On this page</div><ul>";
+    hs.forEach((el,k)=>{ el.id="sec"+k; toc+=`<li><a data-toc="sec${k}">${escH(el.textContent)}</a></li>`; });
+    toc+="</ul></div>";
+    art.insertAdjacentHTML("afterbegin",toc);
+  }
+  document.getElementById("starBig").onclick=()=>{ toggleFav(i); document.getElementById("starBig").classList.toggle("on"); };
+  window.scrollTo(0,0);
+}
+
+/* ---------- search ---------- */
+function runSearch(q){
+  q=q.trim().toLowerCase();
+  if(!q){ route(); return; }
+  setChrome("Search",false); backBtn.style.display="none";
+  const toks=q.split(/\s+/).filter(Boolean);
+  const scored=[];
+  for(const n of NOTES){
+    const t=n.title.toLowerCase();
+    let sc=0, snip="";
+    if(t===q){ sc=1000; }
+    else{
+      // every token must match somewhere (title > alias > category > body)
+      let ok=true, s=0;
+      const body=n.body.toLowerCase();
+      for(const tk of toks){
+        if(t.includes(tk)){ s+=300+(t.startsWith(tk)?150:0); continue; }
+        if((n.aliases||[]).some(a=>a.toLowerCase().includes(tk))){ s+=200; continue; }
+        if(n.cat.toLowerCase().includes(tk)){ s+=100; continue; }
+        const idx=body.indexOf(tk);
+        if(idx>-1){ s+=40; if(!snip)snip=n.body.slice(Math.max(0,idx-30),idx+50); continue; }
+        ok=false; break;
+      }
+      if(ok)sc=s;
+    }
+    if(sc){ if(n.ref)sc-=200; scored.push([sc,n,snip]); }
+  }
+  scored.sort((a,b)=>b[0]-a[0]);
+  if(!scored.length){ view.innerHTML="<div class='empty'>No matches for “"+escH(q)+"”.</div>"; return; }
+  let h="<div class='nlist'>";
+  scored.slice(0,60).forEach(([sc,n,snip])=>{
+    const sub=snip?("…"+escH(snip.replace(/\s+/g,' ').trim())+"…"):n.cat;
+    h+=`<div class="nrow" data-nav="${n.i}"><div class="nt"><b>${escH(n.title)}</b><small>${sub}</small></div>`+
+       `<span class="star ${favHas(n.i)?'on':''}" data-fav="${n.i}">★</span></div>`;
+  });
+  view.innerHTML=h+"</div>"; window.scrollTo(0,0);
+}
+
+/* ---------- chrome/tabs/router ---------- */
+function setChrome(title,showBack){ hTitle.textContent=title; backBtn.style.display=showBack?"inline-flex":"none"; }
+function setTab(name){ document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("active",b.dataset.tab===name)); }
+function route(){
+  const hash=location.hash.slice(1); const parts=hash.split("/").filter(Boolean);
+  if(parts[0]==="n"){ goNote(parts[1]); }
+  else if(parts[0]==="cat"){ goCat(decodeURIComponent(parts[1]||"")); }
+  else if(parts[0]==="workflows"){ goWorkflows(); }
+  else if(parts[0]==="favorites"){ goFavorites(); }
+  else if(parts[0]==="about"){ goAbout(); }
+  else goHome();
+}
+window.addEventListener("hashchange",()=>{ if(searchEl.value){searchEl.value="";clearS.style.display="none";} route(); });
+
+/* delegated taps */
+document.addEventListener("keydown",e=>{
+  if(e.key==="Enter"&&e.target.matches(".wl[data-nav]")){ location.hash="/n/"+e.target.dataset.nav; }
+});
+document.addEventListener("click",e=>{
+  const tc=e.target.closest("[data-toc]");
+  if(tc){ const el=document.getElementById(tc.dataset.toc); if(el)el.scrollIntoView({behavior:"smooth",block:"start"}); return; }
+  const fav=e.target.closest("[data-fav]");
+  if(fav){ e.stopPropagation(); const i=+fav.dataset.fav; toggleFav(i); fav.classList.toggle("on"); return; }
+  const nav=e.target.closest("[data-nav]");
+  if(nav){ location.hash="/n/"+nav.dataset.nav; return; }
+  const cat=e.target.closest("[data-cat]");
+  if(cat){ location.hash="/cat/"+cat.dataset.cat; return; }
+});
+backBtn.onclick=()=>{ if(history.length>1)history.back(); else location.hash=""; };
+document.querySelectorAll("nav.tabs button").forEach(b=>{
+  b.onclick=()=>{ const t=b.dataset.tab; location.hash = t==="home"?"":"/"+t; if(t==="home"&&!location.hash)route(); };
+});
+
+let sT;
+searchEl.addEventListener("input",()=>{ clearS.style.display=searchEl.value?"block":"none";
+  clearTimeout(sT); sT=setTimeout(()=>runSearch(searchEl.value),120); });
+clearS.onclick=()=>{ searchEl.value=""; clearS.style.display="none"; searchEl.focus(); route(); };
+
+route();
+
+/* offline support */
+if("serviceWorker" in navigator && location.protocol==="https:"){
+  navigator.serviceWorker.register("sw.js").catch(()=>{});
+}
+</script>
+</body>
+</html>
