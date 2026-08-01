@@ -335,6 +335,14 @@
       .print-box { border-color: #000; }
       .print-row { border-color: #ccc; color: #000; }
     }
+
+    /* ── Phone (iOS) optimizations ── */
+    @media (max-width: 480px) {
+      html, body { overflow-x: hidden; }
+      .page-wrapper { padding: 18px 14px 60px; }
+      input, textarea, select { font-size: 16px; }
+      .dx-grid { grid-template-columns: 1fr; max-height: 260px; }
+    }
   </style>
 </head>
 <body>

@@ -546,6 +546,17 @@
     white-space: nowrap;
   }
   .im-home-btn:hover { background: rgba(14,165,160,0.18); }
+
+  /* ── Phone (iOS) optimizations ── */
+  @media (max-width: 480px) {
+    html, body { overflow-x: hidden; }
+    .container { padding: 16px 14px 48px; }
+    .form-grid { grid-template-columns: 1fr; }
+    .field-row { flex-direction: column; align-items: stretch; gap: 5px; }
+    .field-row label { min-width: 0; }
+    .field-row input[type="number"], .field-row input[type="text"], .field-row select,
+    .field-row input[type="text"].wide, .field-row select.wide { width: 100%; font-size: 16px; }
+  }
 </style>
 </head>
 <body>

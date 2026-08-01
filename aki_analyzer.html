@@ -581,6 +581,14 @@
       font-size: 0.88em;
       color: var(--teal-300);
     }
+
+    /* ── Phone (iOS) optimizations ── */
+    @media (max-width: 480px) {
+      html, body { overflow-x: hidden; }
+      .page-wrapper { padding: 20px 14px 60px; }
+      input, select, textarea { font-size: 16px; }
+      .form-grid, .red-flags-list, .ua-grid { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>

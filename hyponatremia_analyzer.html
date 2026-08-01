@@ -409,6 +409,18 @@
     .cb-grid { grid-template-columns: 1fr; }
     .grid2 { grid-template-columns: 1fr; }
   }
+
+  /* ── Phone (iOS) optimizations ── */
+  @media (max-width: 480px) {
+    html, body { overflow-x: hidden; }
+    header { padding: 14px 16px; }
+    .sidebar { padding: 16px 14px; }
+    .main { padding: 16px 14px; }
+    input, select, textarea { font-size: 16px; }
+    .kv { flex-direction: column; gap: 2px; }
+    .kv-lbl { min-width: 0; }
+    .siadh-label { min-width: 0; }
+  }
 </style>
 </head>
 <body>

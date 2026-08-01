@@ -417,6 +417,17 @@
       white-space: nowrap;
     }
     .im-home-btn:hover { background: rgba(13,148,136,0.16); border-color: rgba(13,148,136,0.5); }
+
+    /* ── Phone (iOS) optimizations ── */
+    @media (max-width: 480px) {
+      html, body { overflow-x: hidden; }
+      header { padding: 1.1rem 1rem; }
+      main { padding: 0 0.85rem; }
+      .form-card { padding: 1.15rem 1rem; }
+      .field-grid { grid-template-columns: 1fr; gap: 0.9rem; }
+      input[type="number"], input[type="text"], select, textarea { font-size: 16px; }
+      .radio-group { flex-wrap: wrap; }
+    }
   </style>
 </head>
 <body>
