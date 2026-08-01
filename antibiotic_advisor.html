@@ -297,7 +297,7 @@ const ANTIBIOTIC_DB = {
   "Ampicillin": {
     "class": "Aminopenicillin",
     "dose": "2g IV q4–6h",
-    "renal": "Dose-reduce if CrCl <30",
+    "renal": "CrCl 10–50 → 2g q6–8h; CrCl <10 → 2g q12h",
     "adr": ["Maculopapular rash (esp. in EBV/mono — not a true IgE-mediated allergy)", "Diarrhea / C. difficile (low risk)", "IgE-mediated anaphylaxis (uncommon)"],
     "ci": [["Penicillin allergy — immediate hypersensitivity / anaphylaxis", "HIGH"], ["Prior ampicillin rash during mononucleosis (EBV)", "LOW — not true allergy; use clinical judgment"]],
     "alt_if_ci": "Listeria: TMP-SMX or meropenem. Enterococcal endocarditis: daptomycin or linezolid (ID consult)."
@@ -305,7 +305,7 @@ const ANTIBIOTIC_DB = {
   "Ampicillin-sulbactam": {
     "class": "Aminopenicillin + beta-lactamase inhibitor",
     "dose": "3g IV q6h",
-    "renal": "Dose-reduce if CrCl <30",
+    "renal": "CrCl 15–29 → 3g q12h; CrCl 5–14 → 3g q24h",
     "adr": ["Diarrhea / C. difficile", "Rash / urticaria", "Anaphylaxis", "Elevated LFTs"],
     "ci": [["Penicillin allergy", "HIGH"]],
     "alt_if_ci": "Aspiration: clindamycin + ciprofloxacin. Intra-abdominal: piperacillin-tazobactam (if no PCN allergy)."
@@ -321,7 +321,7 @@ const ANTIBIOTIC_DB = {
   "Piperacillin-tazobactam": {
     "class": "Antipseudomonal penicillin + beta-lactamase inhibitor",
     "dose": "4.5g IV q6–8h (extended infusion: 3.375g q8h over 4h for better PK/PD)",
-    "renal": "Dose-reduce if CrCl <40",
+    "renal": "CrCl 20–40 → 3.375g q6h; CrCl <20 → 2.25g q6h; HD → 2.25g q8h + 0.75g after each session",
     "adr": ["AKI — markedly increased when combined with vancomycin", "Electrolyte disturbances: hypokalemia, hyponatremia", "C. difficile (moderate risk)", "Neurotoxicity / encephalopathy (renal failure — rare)"],
     "ci": [["Penicillin allergy", "HIGH"], ["Concurrent vancomycin use in patient with elevated baseline creatinine or AKI risk", "MODERATE — monitor Cr q24h; strongly consider cefepime instead"]],
     "alt_if_ci": "Cefepime + metronidazole; meropenem (PCN allergy or MDR risk)."
@@ -329,7 +329,7 @@ const ANTIBIOTIC_DB = {
   "Amoxicillin": {
     "class": "Aminopenicillin (oral)",
     "dose": "500mg–1g PO q8h (or 875mg PO q12h)",
-    "renal": "Dose-reduce if CrCl <30",
+    "renal": "CrCl 10–30 → 500mg q12h; CrCl <10 → 500mg q24h",
     "adr": ["Maculopapular rash (esp. in EBV/mono)", "Diarrhea / C. difficile (low risk)", "IgE-mediated anaphylaxis (uncommon)", "GI upset: nausea, vomiting"],
     "ci": [["Penicillin allergy — immediate hypersensitivity / anaphylaxis", "HIGH"]],
     "alt_if_ci": "Cephalexin (mild SSTI — non-anaphylactic PCN allergy); azithromycin (atypicals); TMP-SMX (UTI)."
@@ -337,7 +337,7 @@ const ANTIBIOTIC_DB = {
   "Amoxicillin-clavulanate": {
     "class": "Aminopenicillin + beta-lactamase inhibitor (oral) — Augmentin",
     "dose": "875/125mg PO q12h or 500/125mg PO q8h",
-    "renal": "Dose-reduce if CrCl 10–30; avoid extended-release if CrCl <30",
+    "renal": "CrCl 10–30 → 500/125mg q12h (avoid 875mg strength + extended-release); CrCl <10 → 500/125mg q24h",
     "adr": ["Diarrhea — most common ADE (clavulanate)", "Nausea / vomiting", "Rash / urticaria", "Cholestatic hepatitis (rare)", "C. difficile (low risk)"],
     "ci": [["Penicillin allergy", "HIGH"], ["Prior amoxicillin-clavulanate-associated cholestatic jaundice", "HIGH"], ["CrCl <30 with extended-release formulation", "HIGH"]],
     "alt_if_ci": "Cephalexin (mild SSTI); clindamycin (oral anaerobic coverage); levofloxacin (respiratory infections)."
@@ -353,7 +353,7 @@ const ANTIBIOTIC_DB = {
   "Penicillin G": {
     "class": "Natural penicillin (IV/IM)",
     "dose": "2–4 million units IV q4–6h (meningitis/endocarditis: 4 million units IV q4h); Benzathine PCN G: 1.2–2.4 million units IM q1–4 weeks",
-    "renal": "Dose-reduce if CrCl <30 — neurotoxicity/seizures at high IV doses with renal failure",
+    "renal": "CrCl 10–50 → reduce dose ~25%; CrCl <10 → reduce ~50% (extend interval) — neurotoxicity/seizures at high IV doses in renal failure",
     "adr": ["IgE-mediated anaphylaxis (0.01–0.05% per course)", "Maculopapular rash (3–5%)", "Neurotoxicity / seizures at very high doses in renal failure", "Hyperkalemia — potassium penicillin G contains 1.7 mEq K+ per million units", "Hemolytic anemia (prolonged high-dose therapy — rare)"],
     "ci": [["Penicillin allergy — immediate hypersensitivity / anaphylaxis", "HIGH"], ["Renal failure with high-dose IV regimen (seizure/neurotoxicity risk)", "MODERATE"]],
     "alt_if_ci": "Ceftriaxone (streptococcal/meningococcal infections); vancomycin (PCN-anaphylaxis + gram-positive infection); meropenem (meningitis with PCN allergy)."
@@ -361,7 +361,7 @@ const ANTIBIOTIC_DB = {
   "Cephalexin": {
     "class": "1st-generation cephalosporin (oral)",
     "dose": "500mg PO q6h",
-    "renal": "Dose-reduce if CrCl <30",
+    "renal": "CrCl 30–59 → max 1g/day; CrCl 15–29 → 250mg q8–12h; CrCl 5–14 → 250mg q24h",
     "adr": ["GI upset / diarrhea", "Rash", "Cross-reactivity with PCN anaphylaxis (~1–2%)"],
     "ci": [["Cephalosporin allergy", "HIGH"], ["History of anaphylaxis to penicillin", "MODERATE — ~1–2% cross-reactivity"]],
     "alt_if_ci": "Clindamycin or doxycycline for non-purulent SSTI."
@@ -369,7 +369,7 @@ const ANTIBIOTIC_DB = {
   "Cefazolin": {
     "class": "1st-generation cephalosporin (IV)",
     "dose": "1–2g IV q8h",
-    "renal": "Dose-reduce if CrCl <35",
+    "renal": "CrCl 35–54 → full dose q8h; CrCl 11–34 → 50% dose q12h; CrCl ≤10 → 50% dose q24h",
     "adr": ["Injection site reactions / phlebitis", "Rash", "C. difficile (low risk)"],
     "ci": [["Cephalosporin allergy", "HIGH"], ["Severe immediate penicillin allergy — anaphylaxis", "MODERATE — low cross-reactivity but avoid if true anaphylaxis"]],
     "alt_if_ci": "Vancomycin for MSSA if truly beta-lactam intolerant (inferior — use reluctantly)."
@@ -377,7 +377,7 @@ const ANTIBIOTIC_DB = {
   "Cefotetan": {
     "class": "2nd-generation cephalosporin — anaerobic and gram-negative coverage (IV)",
     "dose": "1–2g IV q12h",
-    "renal": "Dose-reduce if CrCl <30",
+    "renal": "CrCl 10–30 → usual dose q24h; CrCl <10 → usual dose q48h",
     "adr": ["Disulfiram-like reaction with alcohol (MTT side chain)", "Hypoprothrombinemia / bleeding risk", "C. difficile (moderate risk)", "Rash", "Hemolytic anemia (rare)"],
     "ci": [["Cephalosporin allergy", "HIGH"], ["Active alcohol use — disulfiram-like reaction risk", "MODERATE"], ["Concurrent warfarin / anticoagulation", "MODERATE"]],
     "alt_if_ci": "Cefoxitin (similar coverage, no MTT side chain); metronidazole + ceftriaxone; ampicillin-sulbactam."
@@ -385,7 +385,7 @@ const ANTIBIOTIC_DB = {
   "Cefoxitin": {
     "class": "2nd-generation cephalosporin — anaerobic and gram-negative coverage (IV)",
     "dose": "1–2g IV q6–8h",
-    "renal": "Dose-reduce if CrCl <30",
+    "renal": "CrCl 30–50 → 1–2g q8–12h; CrCl 10–29 → 1–2g q12–24h; CrCl <10 → 1–2g q24–48h",
     "adr": ["C. difficile (moderate risk)", "Rash / urticaria", "Elevated LFTs", "Phlebitis (peripheral IV)"],
     "ci": [["Cephalosporin allergy", "HIGH"]],
     "alt_if_ci": "Ampicillin-sulbactam; piperacillin-tazobactam; cefotetan (if q12h dosing preferred)."
@@ -393,7 +393,7 @@ const ANTIBIOTIC_DB = {
   "Ceftriaxone": {
     "class": "3rd-generation cephalosporin",
     "dose": "1–2g IV q24h (meningitis/endocarditis: 2g IV q12h)",
-    "renal": "No renal adjustment needed",
+    "renal": "No renal adjustment needed (dual biliary/renal clearance); cap 2g/day only if combined hepatic AND renal failure",
     "adr": ["Biliary sludge / pseudolithiasis (prolonged use)", "C. difficile", "Rash"],
     "ci": [["Cephalosporin allergy", "HIGH"]],
     "alt_if_ci": "Levofloxacin or aztreonam (gram-negative); moxifloxacin (CAP monotherapy)."
@@ -401,7 +401,7 @@ const ANTIBIOTIC_DB = {
   "Ceftazidime": {
     "class": "3rd-generation cephalosporin — antipseudomonal (IV)",
     "dose": "2g IV q8h",
-    "renal": "Dose-reduce if CrCl <50 — encephalopathy risk if not adjusted",
+    "renal": "CRITICAL — CrCl 31–50 → 2g q12h; CrCl 16–30 → 2g q24h; CrCl ≤15 → 1g q24h; encephalopathy risk if not adjusted",
     "adr": ["C. difficile (moderate risk)", "Rash / urticaria", "Elevated LFTs", "Neurotoxicity / encephalopathy (high doses in renal failure)"],
     "ci": [["Cephalosporin allergy", "HIGH"], ["Aztreonam allergy — shared R1 side chain cross-reactivity", "HIGH"], ["Renal failure without dose adjustment", "HIGH"]],
     "alt_if_ci": "Cefepime (broader gram-positive coverage); piperacillin-tazobactam; meropenem (MDR/severe)."
@@ -409,7 +409,7 @@ const ANTIBIOTIC_DB = {
   "Cefepime": {
     "class": "4th-generation cephalosporin — antipseudomonal",
     "dose": "2g IV q8–12h",
-    "renal": "CRITICAL — dose-reduce if CrCl <50; neurotoxicity if not adjusted",
+    "renal": "CRITICAL — CrCl 30–60 → 2g q12h; CrCl 11–29 → 2g q24h; CrCl <11 → 1g q24h; neurotoxicity/nonconvulsive seizures if not adjusted",
     "adr": ["Neurotoxicity / encephalopathy / nonconvulsive seizures — especially in renal failure without dose adjustment", "C. difficile (moderate risk)", "Rash"],
     "ci": [["Cephalosporin allergy", "HIGH"], ["Renal failure without dose adjustment", "HIGH — neurotoxicity and seizure risk"]],
     "alt_if_ci": "Piperacillin-tazobactam; aztreonam + metronidazole (PCN/ceph allergy with gram-negative need)."
@@ -417,7 +417,7 @@ const ANTIBIOTIC_DB = {
   "Cefotaxime": {
     "class": "3rd-generation cephalosporin",
     "dose": "2g IV q4–8h (meningitis: 2g q4–6h)",
-    "renal": "Dose-reduce if CrCl <20",
+    "renal": "CrCl <20 → reduce dose by 50%",
     "adr": ["Rash", "C. difficile", "Elevated LFTs"],
     "ci": [["Cephalosporin allergy", "HIGH"]],
     "alt_if_ci": "Ceftriaxone preferred in most settings; meropenem for CNS infections."
@@ -425,7 +425,7 @@ const ANTIBIOTIC_DB = {
   "Ceftaroline": {
     "class": "5th-generation cephalosporin — MRSA-active",
     "dose": "600mg IV q12h",
-    "renal": "Dose-reduce if CrCl <50",
+    "renal": "CrCl 31–50 → 400mg q12h; CrCl 15–30 → 300mg q12h; CrCl <15 / HD → 200mg q12h (dose after HD)",
     "adr": ["Diarrhea / C. difficile", "Rash", "Positive Coombs test", "Hypokalemia"],
     "ci": [["Cephalosporin allergy", "HIGH"]],
     "alt_if_ci": "Vancomycin; linezolid."
@@ -433,7 +433,7 @@ const ANTIBIOTIC_DB = {
   "Meropenem": {
     "class": "Carbapenem — antipseudomonal",
     "dose": "1–2g IV q8h (meningitis: 2g q8h)",
-    "renal": "Dose-reduce if CrCl <50",
+    "renal": "CrCl 26–50 → 1g q12h; CrCl 10–25 → 500mg q12h; CrCl <10 → 500mg q24h (meningitis: keep higher dosing, ID/pharmacy input)",
     "adr": ["Seizures (lowest risk among carbapenems)", "C. difficile (broad spectrum — high risk)", "Diarrhea"],
     "ci": [["Carbapenem allergy", "HIGH"], ["Active seizure disorder", "MODERATE — lowest seizure risk carbapenem but still caution"]],
     "alt_if_ci": "Aztreonam + vancomycin (PCN/beta-lactam allergy for gram-negative coverage); polymyxins (pan-resistant)."
@@ -441,7 +441,7 @@ const ANTIBIOTIC_DB = {
   "Ertapenem": {
     "class": "Carbapenem — NO Pseudomonas activity",
     "dose": "1g IV q24h",
-    "renal": "Dose-reduce if CrCl <30",
+    "renal": "CrCl <30 → 500mg q24h",
     "adr": ["Seizures", "C. difficile", "Diarrhea", "Infusion site reactions"],
     "ci": [["Carbapenem allergy", "HIGH"], ["Pseudomonas coverage is needed", "ABSOLUTE — ertapenem has zero antipseudomonal activity"]],
     "alt_if_ci": "Meropenem or piperacillin-tazobactam when Pseudomonas must be covered."
@@ -449,7 +449,7 @@ const ANTIBIOTIC_DB = {
   "Imipenem-cilastatin": {
     "class": "Carbapenem",
     "dose": "500mg IV q6h",
-    "renal": "Dose-reduce if CrCl <70",
+    "renal": "CrCl 41–70 → 500mg q6–8h; CrCl 21–40 → 500mg q8–12h; CrCl 6–20 → 250–500mg q12h; seizure risk rises if not adjusted",
     "adr": ["Seizures — HIGHEST seizure risk among carbapenems (5–33% in CNS infections)", "C. difficile", "Nausea / vomiting"],
     "ci": [["Carbapenem allergy", "HIGH"], ["CNS infection or history of seizure disorder", "HIGH — avoid entirely; use meropenem"]],
     "alt_if_ci": "Meropenem (preferred carbapenem for all CNS indications)."
@@ -457,7 +457,7 @@ const ANTIBIOTIC_DB = {
   "Ciprofloxacin": {
     "class": "Fluoroquinolone — gram-negative coverage (no atypical/streptococcal coverage)",
     "dose": "400mg IV q8–12h / 500mg PO q12h",
-    "renal": "Dose-reduce if CrCl <30",
+    "renal": "CrCl <30 → 250–500mg PO q18–24h (200–400mg IV q18–24h)",
     "adr": ["QTc prolongation — torsades de pointes risk", "Tendinopathy / tendon rupture (Achilles)", "Peripheral neuropathy — may be irreversible", "Aortic aneurysm / dissection (FDA black box)", "C. difficile (moderate risk)", "CNS effects: insomnia, agitation, confusion (elderly)", "Photosensitivity"],
     "ci": [["QTc >500ms or documented QTc prolongation", "HIGH"], ["Concurrent QTc-prolonging drugs: haloperidol, amiodarone, ondansetron, azithromycin, methadone", "HIGH"], ["Known or suspected aortic aneurysm", "HIGH — FDA black box warning"], ["Myasthenia gravis", "HIGH — worsens neuromuscular blockade"], ["Pregnancy / breastfeeding", "HIGH"], ["Age <18 (cartilage toxicity)", "HIGH"], ["History of tendon rupture or on corticosteroids in patient >60", "MODERATE"]],
     "alt_if_ci": "Ceftriaxone or aztreonam (gram-negative); TMP-SMX (UTI)."
@@ -465,7 +465,7 @@ const ANTIBIOTIC_DB = {
   "Levofloxacin": {
     "class": "Respiratory fluoroquinolone — gram-positive, gram-negative, atypical coverage",
     "dose": "750mg IV/PO q24h",
-    "renal": "Dose-reduce if CrCl <50",
+    "renal": "CrCl 20–49 → 750mg q48h; CrCl <20 → 750mg ×1 then 500mg q48h",
     "adr": ["QTc prolongation", "Tendinopathy / tendon rupture", "Peripheral neuropathy — may be irreversible", "Aortic aneurysm / dissection", "C. difficile", "Photosensitivity", "Seizures (rare)"],
     "ci": [["QTc >500ms or QTc prolongation", "HIGH"], ["Concurrent QTc-prolonging drugs", "HIGH"], ["Known or suspected aortic aneurysm", "HIGH"], ["Myasthenia gravis", "HIGH"], ["Pregnancy / breastfeeding", "HIGH"], ["Age <18", "HIGH"]],
     "alt_if_ci": "Azithromycin + ceftriaxone (CAP); doxycycline (atypicals)."
@@ -489,7 +489,7 @@ const ANTIBIOTIC_DB = {
   "Vancomycin": {
     "class": "Glycopeptide — MRSA, gram-positive coverage",
     "dose": "AUC-guided (target AUC/MIC 400–600); typically 15–20 mg/kg IV q8–12h with pharmacy dosing",
-    "renal": "CRITICAL — dose and interval must be adjusted per CrCl; pharmacy-guided",
+    "renal": "CRITICAL — give full loading dose 20–25 mg/kg (unchanged); titrate maintenance/interval to AUC or trough. CrCl 20–49 → often q24h; CrCl <20 or HD → dose strictly by levels. Pharmacy-guided",
     "adr": ["Nephrotoxicity (AKI) — dramatically increased with concurrent piperacillin-tazobactam", "Red man syndrome (infusion-rate-dependent histamine release — NOT allergy; slow infusion)", "Ototoxicity (high trough levels — rare with AUC-based dosing)", "Thrombophlebitis (peripheral IV)"],
     "ci": [["True vancomycin allergy — IgE mediated (rare)", "HIGH"], ["Concurrent piperacillin-tazobactam use in patient with AKI risk or elevated baseline Cr", "MODERATE — use cefepime instead"]],
     "alt_if_ci": "Daptomycin (MRSA bacteremia/endocarditis — NOT pneumonia); linezolid (MRSA pneumonia/soft tissue); ceftaroline (MRSA CAP)."
@@ -513,7 +513,7 @@ const ANTIBIOTIC_DB = {
   "Daptomycin": {
     "class": "Cyclic lipopeptide — MRSA/VRE bacteremia and endocarditis; NOT for pneumonia",
     "dose": "6 mg/kg IV q24h (endocarditis/bacteremia: 6–10 mg/kg q24h)",
-    "renal": "Dose-reduce or extend interval if CrCl <30",
+    "renal": "CrCl <30 (incl. HD/CAPD) → same mg/kg dose but q48h",
     "adr": ["Myopathy / rhabdomyolysis — check CK at baseline and weekly", "Eosinophilic pneumonia (rare but serious)", "Peripheral neuropathy"],
     "ci": [["Pneumonia or pulmonary source of infection", "ABSOLUTE — inactivated by pulmonary surfactant"], ["Concurrent statin therapy", "MODERATE — increased myopathy risk; hold statin if possible"], ["Pre-existing myopathy or elevated CK (>5× ULN)", "MODERATE"]],
     "alt_if_ci": "Vancomycin; linezolid (MRSA pneumonia when daptomycin is contraindicated)."
@@ -529,7 +529,7 @@ const ANTIBIOTIC_DB = {
   "TMP-SMX": {
     "class": "Folate synthesis inhibitor — gram-positive MRSA SSTI, gram-negative UTI, PCP prophylaxis/treatment",
     "dose": "1–2 DS tabs PO q12h (UTI: 1 DS tab q12h x3d); PCP treatment: 15–20 mg/kg/day TMP in 3–4 divided doses",
-    "renal": "Dose-reduce if CrCl 15–30; avoid if CrCl <15",
+    "renal": "CrCl 15–30 → reduce dose by 50%; CrCl <15 → not recommended (use only with HD support + levels)",
     "adr": ["Stevens-Johnson syndrome / toxic epidermal necrolysis (rare but life-threatening)", "Bone marrow suppression: leukopenia, thrombocytopenia, megaloblastic anemia", "Hyperkalemia — blocks renal K+ excretion", "Nephrotoxicity — blocks creatinine tubular secretion (may falsely elevate Cr)", "Potentiates warfarin (INR elevation)", "Hemolytic anemia in G6PD deficiency", "Photosensitivity"],
     "ci": [["Sulfa allergy", "HIGH"], ["G6PD deficiency", "HIGH — hemolytic anemia"], ["Pregnancy near term / breastfeeding premature infant — kernicterus risk", "HIGH"], ["Severe renal failure (CrCl <15)", "HIGH"], ["Concurrent warfarin therapy", "MODERATE — monitor INR closely"], ["Concurrent ACE inhibitor / ARB / potassium-sparing diuretic", "MODERATE — hyperkalemia risk"]],
     "alt_if_ci": "Nitrofurantoin or fosfomycin (UTI); doxycycline or clindamycin (MRSA SSTI); atovaquone (PCP in sulfa allergy)."
@@ -545,7 +545,7 @@ const ANTIBIOTIC_DB = {
   "Metronidazole": {
     "class": "Nitroimidazole — anaerobes, C. diff (adjunct), Trichomonas, H. pylori",
     "dose": "500mg IV/PO q8h; C. diff adjunct (fulminant): 500mg IV q8h",
-    "renal": "No renal dose adjustment needed",
+    "renal": "No routine adjustment; ESRD/HD → consider 500mg q12h or dose after HD (metabolite accumulation)",
     "adr": ["Metallic taste (common — counsel patients)", "Disulfiram-like reaction with alcohol — avoid ETOH during and 48h after course", "Peripheral neuropathy (prolonged courses >6 weeks)", "Neurotoxicity / encephalopathy (high doses or hepatic failure)", "GI upset: nausea, vomiting, abdominal cramping"],
     "ci": [["Alcohol consumption within 48 hours (disulfiram-like reaction)", "HIGH — counsel strictly"], ["First trimester pregnancy (relative)", "MODERATE"], ["Concurrent lithium therapy", "MODERATE — may increase lithium levels"]],
     "alt_if_ci": "Clindamycin (anaerobes — higher C. diff risk); oral vancomycin or fidaxomicin (C. diff)."
@@ -577,7 +577,7 @@ const ANTIBIOTIC_DB = {
   "Aztreonam": {
     "class": "Monobactam — gram-negative coverage ONLY (no gram-positive, no anaerobic activity)",
     "dose": "2g IV q8h",
-    "renal": "Dose-reduce if CrCl <30",
+    "renal": "CrCl 10–30 → 50% dose (1g q8h); CrCl <10 → 25% dose (500mg q8h)",
     "adr": ["Rash / urticaria", "GI upset", "Elevated LFTs"],
     "ci": [["Aztreonam allergy", "HIGH"], ["Ceftazidime allergy — shared R1 side chain cross-reactivity", "HIGH"], ["Gram-positive or anaerobic infection without additional coverage", "ABSOLUTE — must combine with vancomycin ± metronidazole"]],
     "alt_if_ci": "Aminoglycosides for gram-negative coverage in true beta-lactam/penicillin allergy."
@@ -585,7 +585,7 @@ const ANTIBIOTIC_DB = {
   "Gentamicin": {
     "class": "Aminoglycoside — gram-negative synergy; adjunct for Enterococcal endocarditis",
     "dose": "5–7 mg/kg IV q24h (extended-interval); 1 mg/kg q8h (synergy dosing)",
-    "renal": "CRITICAL — extend interval per CrCl; avoid if CrCl <30 if alternative available",
+    "renal": "CRITICAL — extended-interval: CrCl 40–59 → q36h, CrCl 20–39 → q48h, CrCl <20 → dose by levels. Synergy dosing: extend interval + follow levels (target trough <1). Avoid if CrCl <30 when alternative exists",
     "adr": ["Nephrotoxicity (AKI) — compounded by vancomycin, NSAIDs, contrast", "Ototoxicity: sensorineural hearing loss + vestibular toxicity — may be irreversible", "Neuromuscular blockade (rare)"],
     "ci": [["Pre-existing renal failure (CrCl <30)", "HIGH — accumulation + nephrotoxicity"], ["Pre-existing sensorineural hearing loss", "HIGH — irreversible worsening"], ["Myasthenia gravis", "HIGH — worsens neuromuscular blockade"], ["Concurrent nephrotoxins (vancomycin, contrast, NSAIDs)", "MODERATE"]],
     "alt_if_ci": "Aztreonam (gram-negative coverage); cefepime; ampicillin + ceftriaxone double-beta-lactam (Enterococcal endocarditis)."
@@ -593,7 +593,7 @@ const ANTIBIOTIC_DB = {
   "Tobramycin": {
     "class": "Aminoglycoside — gram-negative, enhanced Pseudomonas activity (IV/Inhaled)",
     "dose": "5–7 mg/kg IV q24h (extended-interval; pharmacy-guided); inhaled: 300mg nebulized q12h (CF/bronchiectasis only)",
-    "renal": "CRITICAL — extend interval per CrCl; avoid if CrCl <30 if alternative available",
+    "renal": "CRITICAL — extended-interval: CrCl 40–59 → q36h, CrCl 20–39 → q48h, CrCl <20 → dose by levels. Avoid if CrCl <30 when alternative exists",
     "adr": ["Nephrotoxicity (AKI)", "Ototoxicity: cochlear (hearing loss) and vestibular toxicity — may be irreversible", "Neuromuscular blockade (rare)"],
     "ci": [["Pre-existing renal failure (CrCl <30)", "HIGH"], ["Pre-existing sensorineural hearing loss", "HIGH"], ["Myasthenia gravis", "HIGH"], ["Concurrent nephrotoxins", "MODERATE"]],
     "alt_if_ci": "Aztreonam or cefepime (gram-negative coverage)."
@@ -601,7 +601,7 @@ const ANTIBIOTIC_DB = {
   "Amikacin": {
     "class": "Aminoglycoside — broadest gram-negative coverage including many MDR organisms (IV)",
     "dose": "15–20 mg/kg IV q24h (extended-interval; pharmacy-guided)",
-    "renal": "CRITICAL — extend interval per CrCl; pharmacy-guided AUC monitoring",
+    "renal": "CRITICAL — extended-interval: CrCl 40–59 → q36h, CrCl 20–39 → q48h, CrCl <20 → dose by levels; pharmacy-guided AUC/level monitoring",
     "adr": ["Nephrotoxicity (AKI)", "Ototoxicity: predominantly cochlear (hearing loss > vestibular) — may be irreversible", "Neuromuscular blockade (rare)"],
     "ci": [["Pre-existing renal failure (CrCl <30)", "HIGH"], ["Pre-existing sensorineural hearing loss", "HIGH"], ["Myasthenia gravis", "HIGH"], ["Concurrent nephrotoxins", "MODERATE"]],
     "alt_if_ci": "Aztreonam or cefepime (gram-negative); ceftazidime-avibactam (MDR gram-negative — ID consult required)."
@@ -1172,6 +1172,7 @@ function showDrug(name) {
           <span>🫘</span>
           <span><strong>Renal:</strong> ${drug.renal}</span>
         </div>
+        <div class="source-cite">Renal dosing: manufacturer labeling / Sanford Guide 2024; vancomycin per ASHP–IDSA–SIDP 2020 consensus; aminoglycosides pharmacy/level-guided. CrCl in mL/min — verify with pharmacy.</div>
       </div>
     </div>
 
