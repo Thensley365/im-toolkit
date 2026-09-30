@@ -583,4 +583,545 @@ const popupObserver=new MutationObserver(()=>{
 });
 popupObserver.observe(document.getElementById('content'),{childList:true});
 
+/* ============================================================
+   ORGANISM Rx EXPANSION  (50 organisms)
+   Per-site: Empiric (pre-sensitivities) -> Oral step-down -> Duration, each cited.
+   Expanded second-line alternatives per bug. ASCII-only (esc() handles HTML).
+   ============================================================ */
+D.BUG_RX = {
+  "mrsa":{ display:"MRSA - Methicillin-Resistant Staphylococcus aureus", group:"Gram-positive",
+    infections:["Bacteremia / endocarditis","Pneumonia (HAP/CAP)","SSTI","Osteomyelitis / septic arthritis"],
+    key_pearl:"ID consult for ALL MRSA bacteremia. Source control (pull lines, drain collections). NEVER use daptomycin for pneumonia - inactivated by surfactant. If it turns out to be MSSA, de-escalate to a beta-lactam (vancomycin is inferior).",
+    second_line:["Linezolid 600 mg IV/PO q12h","Daptomycin 6-10 mg/kg IV q24h (non-pulmonary only)","Ceftaroline 600 mg IV q8-12h","TMP-SMX (SSTI)","Doxycycline or Minocycline (SSTI)","Clindamycin (SSTI, if D-test negative)","Dalbavancin / Oritavancin (long-acting, select ABSSSI)"],
+    sites:[
+      {site:"Bacteremia / endocarditis", empiric:"Vancomycin (AUC-guided) or Daptomycin 6-10 mg/kg IV q24h", oral:"None - complete full IV course (ID managed)", duration:"Uncomplicated bacteremia >=14 days from first negative culture; endocarditis 6 weeks (4 weeks uncomplicated right-sided)", source:"IDSA MRSA 2011; AHA Endocarditis 2015"},
+      {site:"Pneumonia (HAP/CAP)", empiric:"Vancomycin (AUC-guided) or Linezolid 600 mg IV q12h", oral:"Linezolid 600 mg PO q12h (100% bioavailable) once improving", duration:"7 days", source:"IDSA/ATS HAP/VAP 2016"},
+      {site:"SSTI - mild (outpatient)", empiric:"TMP-SMX DS PO q12h or Doxycycline 100 mg PO q12h", oral:"Same agent (already oral)", duration:"5-7 days", source:"IDSA SSTI 2014"},
+      {site:"SSTI - severe / inpatient", empiric:"Vancomycin IV (AUC-guided)", oral:"Linezolid 600 mg PO q12h or TMP-SMX per susceptibility", duration:"7-14 days", source:"IDSA SSTI 2014"},
+      {site:"Osteomyelitis / septic arthritis", empiric:"Vancomycin IV (AUC-guided)", oral:"Linezolid or TMP-SMX +/- rifampin per ID (prosthetic joint)", duration:"Osteomyelitis 6 weeks; native-joint septic arthritis ~3-4 weeks", source:"IDSA Osteomyelitis / PJI"}
+    ]
+  },
+  "mssa":{ display:"MSSA - Methicillin-Susceptible Staphylococcus aureus", group:"Gram-positive",
+    infections:["Bacteremia / endocarditis","Pneumonia","SSTI","Osteomyelitis"],
+    key_pearl:"CRITICAL: vancomycin is INFERIOR to beta-lactams for MSSA. De-escalate from vancomycin to nafcillin or cefazolin the MOMENT MSSA is confirmed.",
+    second_line:["Nafcillin or Oxacillin 2 g IV q4h","Cefazolin 2 g IV q8h","Dicloxacillin or Cephalexin (oral)","Clindamycin (if susceptible)","Ceftriaxone (OPAT convenience, selected)","Vancomycin (only if beta-lactam anaphylaxis - inferior)"],
+    sites:[
+      {site:"Bacteremia / endocarditis", empiric:"Cefazolin 2 g IV q8h OR Nafcillin 2 g IV q4h", oral:"None - complete IV course (ID managed)", duration:"Uncomplicated bacteremia >=14 days; endocarditis 6 weeks", source:"AHA Endocarditis 2015"},
+      {site:"Pneumonia", empiric:"Cefazolin or Nafcillin", oral:"Dicloxacillin or Cephalexin 500 mg PO q6h once improving", duration:"7 days", source:"IDSA/ATS HAP/VAP 2016"},
+      {site:"SSTI - mild", empiric:"Cephalexin 500 mg PO q6h or Dicloxacillin", oral:"Same (already oral)", duration:"5-7 days", source:"IDSA SSTI 2014"},
+      {site:"SSTI - moderate / inpatient", empiric:"Cefazolin 1-2 g IV q8h", oral:"Cephalexin 500 mg PO q6h", duration:"5-7 days", source:"IDSA SSTI 2014"},
+      {site:"Osteomyelitis", empiric:"Cefazolin or Nafcillin", oral:"Consider OPAT IV; oral step-down per ID", duration:"6 weeks", source:"IDSA Osteomyelitis"}
+    ]
+  },
+  "strep_pneumo":{ display:"Streptococcus pneumoniae", group:"Gram-positive",
+    infections:["CAP","Meningitis","Bacteremia","Sinusitis / AOM"],
+    key_pearl:"Add vancomycin empirically in ALL suspected pneumococcal meningitis - resistance varies by region. De-escalate once susceptibilities return.",
+    second_line:["Levofloxacin or Moxifloxacin (CAP)","Amoxicillin high-dose (oral)","Doxycycline","Meropenem (penicillin-resistant meningitis)","Linezolid or Vancomycin (highly resistant)"],
+    sites:[
+      {site:"CAP (hospitalized)", empiric:"Ceftriaxone 1-2 g IV q24h (+ azithromycin for atypical coverage)", oral:"High-dose amoxicillin 1 g PO q8h, or levofloxacin 750 mg PO q24h, per susceptibility", duration:"Minimum 5 days; continue until afebrile >=48h and clinically stable", source:"ATS/IDSA CAP 2019"},
+      {site:"Meningitis", empiric:"Vancomycin + Ceftriaxone 2 g IV q12h (+ dexamethasone)", oral:"None - complete IV course", duration:"10-14 days", source:"IDSA Bacterial Meningitis 2004"},
+      {site:"Bacteremia", empiric:"Ceftriaxone; Penicillin G if MIC <=0.06 mcg/mL", oral:"Amoxicillin step-down per susceptibility", duration:"~7-14 days depending on source", source:"IDSA"},
+      {site:"Sinusitis / AOM", empiric:"Amoxicillin-clavulanate 875/125 mg PO q12h", oral:"Same (already oral)", duration:"5-7 days", source:"IDSA Rhinosinusitis 2012"}
+    ]
+  },
+  "e_coli":{ display:"Escherichia coli", group:"Gram-negative",
+    infections:["Uncomplicated cystitis","Pyelonephritis","Bacteremia / sepsis","Intra-abdominal / SBP"],
+    key_pearl:"Fluoroquinolone resistance is high (often >20-30%) in many US regions - do not use empirically for pyelonephritis without local data. ESBL = carbapenem.",
+    second_line:["Ciprofloxacin or Levofloxacin (if susceptible)","Cefepime","Ertapenem or Meropenem (ESBL)","TMP-SMX","Gentamicin or Amikacin (adjunct)","Cephalexin or Cefpodoxime (cystitis)","Amoxicillin-clavulanate"],
+    sites:[
+      {site:"Uncomplicated cystitis", empiric:"Nitrofurantoin 100 mg PO q12h, Fosfomycin 3 g PO x1, or TMP-SMX (if local resistance <20%)", oral:"Same (already oral)", duration:"Nitrofurantoin 5 days; fosfomycin single dose; TMP-SMX 3 days", source:"IDSA Uncomplicated Cystitis 2010"},
+      {site:"Pyelonephritis", empiric:"Ceftriaxone 1 g IV q24h", oral:"Ciprofloxacin, levofloxacin, TMP-SMX, or cefpodoxime per susceptibility", duration:"5-7 days (fluoroquinolone) or 10-14 days (beta-lactam)", source:"IDSA Pyelonephritis 2010"},
+      {site:"Bacteremia / sepsis", empiric:"Ceftriaxone (if susceptible); Ertapenem or Meropenem if ESBL", oral:"Step down to fluoroquinolone or TMP-SMX once source-controlled and improving", duration:"7 days for uncomplicated Gram-negative bacteremia (14 if complicated)", source:"Yahav 2019 (CID); Tamma IDSA guidance"},
+      {site:"ESBL E. coli", empiric:"Ertapenem 1 g IV q24h (no Pseudomonas risk) or Meropenem", oral:"Fluoroquinolone or TMP-SMX if susceptible", duration:"7 days (uncomplicated)", source:"IDSA AMR guidance 2023"}
+    ]
+  },
+  "proteus_mirabilis":{ display:"Proteus mirabilis", group:"Gram-negative",
+    infections:["UTI / pyelonephritis","Bacteremia","Wound infections"],
+    key_pearl:"Intrinsically resistant to nitrofurantoin AND tetracyclines - do not use them. Urease-producer -> struvite stones. ESBL requires a carbapenem.",
+    second_line:["Cefepime","Ciprofloxacin (if susceptible)","TMP-SMX","Ampicillin or Amoxicillin-clavulanate (if susceptible)","Gentamicin","Carbapenem (ESBL)"],
+    sites:[
+      {site:"Uncomplicated cystitis", empiric:"TMP-SMX (if susceptible) or Cephalexin - NOT nitrofurantoin", oral:"Same (already oral)", duration:"3-7 days", source:"IDSA Uncomplicated Cystitis 2010"},
+      {site:"Pyelonephritis", empiric:"Ceftriaxone 1 g IV q24h", oral:"Fluoroquinolone or TMP-SMX per susceptibility", duration:"7-14 days", source:"IDSA Pyelonephritis 2010"},
+      {site:"Bacteremia / sepsis", empiric:"Ceftriaxone (susceptible); Cefepime or Meropenem if ESBL", oral:"Fluoroquinolone or TMP-SMX step-down when improving", duration:"7 days (uncomplicated)", source:"Yahav 2019 (CID)"}
+    ]
+  },
+  "klebsiella":{ display:"Klebsiella pneumoniae", group:"Gram-negative",
+    infections:["UTI","Pneumonia","Bacteremia","Liver abscess (hypermucoviscous)"],
+    key_pearl:"Intrinsically resistant to ampicillin. CRKP (KPC): ID consult mandatory - ceftazidime-avibactam or meropenem-vaborbactam; mortality is high.",
+    second_line:["Ciprofloxacin or Levofloxacin (if susceptible)","Cefepime","Meropenem or Ertapenem (ESBL)","TMP-SMX","Gentamicin or Amikacin","Ceftazidime-avibactam (CRKP)"],
+    sites:[
+      {site:"UTI", empiric:"Ceftriaxone or TMP-SMX (if susceptible)", oral:"Fluoroquinolone or TMP-SMX per susceptibility", duration:"7-14 days (complicated)", source:"IDSA Pyelonephritis 2010"},
+      {site:"Pneumonia / bacteremia", empiric:"Ceftriaxone (susceptible); Cefepime or Piperacillin-tazobactam (moderate severity)", oral:"Fluoroquinolone step-down when improving", duration:"7 days", source:"IDSA/ATS HAP/VAP 2016; Yahav 2019"},
+      {site:"ESBL Klebsiella", empiric:"Meropenem or Ertapenem", oral:"Fluoroquinolone or TMP-SMX if susceptible", duration:"7 days (uncomplicated)", source:"IDSA AMR guidance 2023"},
+      {site:"Carbapenem-resistant (CRKP)", empiric:"Ceftazidime-avibactam (ID consult)", oral:"None - IV, ID directed", duration:"Individualized by ID", source:"IDSA AMR guidance 2023"}
+    ]
+  },
+  "pseudomonas":{ display:"Pseudomonas aeruginosa", group:"Gram-negative",
+    infections:["HAP/VAP","UTI","Bacteremia / sepsis","Diabetic foot / wound"],
+    key_pearl:"Ertapenem has ZERO Pseudomonas activity - classic pitfall. Anti-pseudomonal agents: cefepime, pip-tazo, meropenem, ciprofloxacin, aztreonam, ceftolozane-tazobactam.",
+    second_line:["Meropenem","Aztreonam","Ciprofloxacin or Levofloxacin (susceptibility-guided)","Ceftazidime","Tobramycin or Amikacin (adjunct)","Ceftolozane-tazobactam / Ceftazidime-avibactam / Cefiderocol (MDR)"],
+    sites:[
+      {site:"HAP / VAP", empiric:"Cefepime 2 g IV q8h OR Piperacillin-tazobactam 4.5 g IV q6h", oral:"Ciprofloxacin 750 mg PO q12h or levofloxacin 750 mg PO q24h if susceptible", duration:"7 days", source:"IDSA/ATS HAP/VAP 2016"},
+      {site:"UTI", empiric:"Ciprofloxacin (if susceptible) or Cefepime", oral:"Ciprofloxacin or levofloxacin per susceptibility", duration:"7-14 days", source:"IDSA Pyelonephritis 2010"},
+      {site:"Bacteremia / sepsis", empiric:"Piperacillin-tazobactam or Cefepime; Meropenem if MDR risk", oral:"Fluoroquinolone step-down if susceptible and source-controlled", duration:"7 days (uncomplicated)", source:"Yahav 2019 (CID)"},
+      {site:"Carbapenem-resistant (CRPA)", empiric:"Ceftolozane-tazobactam or Ceftazidime-avibactam (ID consult)", oral:"None - IV, ID directed", duration:"Individualized by ID", source:"IDSA AMR guidance 2023"}
+    ]
+  },
+  "escappm":{ display:"ESCAPPM (Enterobacter, Serratia, Citrobacter, Aeromonas, Providencia, Proteus vulgaris, Morganella)", group:"Gram-negative",
+    infections:["HAP/VAP","UTI / pyelonephritis","Bacteremia / sepsis","Wound / intra-abdominal"],
+    key_pearl:"Inducible AmpC beta-lactamase: 3rd-gen cephalosporins (ceftriaxone/cefotaxime) can SELECT for resistance mid-treatment. Use CEFEPIME or a carbapenem for serious infection. Do NOT use ceftriaxone for Enterobacter bacteremia.",
+    second_line:["Meropenem or Imipenem-cilastatin","Ciprofloxacin or Levofloxacin","TMP-SMX","Aztreonam","Gentamicin or Amikacin"],
+    sites:[
+      {site:"Empiric - non-severe", empiric:"Cefepime 2 g IV q8h (avoid 3rd-gen cephalosporins)", oral:"Fluoroquinolone or TMP-SMX per susceptibility", duration:"By source (7 days for uncomplicated bacteremia)", source:"IDSA AMR guidance 2023"},
+      {site:"Severe / ICU", empiric:"Meropenem or Imipenem-cilastatin", oral:"Fluoroquinolone step-down when improving", duration:"7 days (uncomplicated)", source:"IDSA AMR guidance 2023; Yahav 2019"},
+      {site:"UTI (outpatient, susceptible)", empiric:"Ciprofloxacin or TMP-SMX per susceptibility", oral:"Same (already oral)", duration:"7-14 days", source:"IDSA Pyelonephritis 2010"}
+    ]
+  },
+  "n_gonorrhoeae":{ display:"Neisseria gonorrhoeae", group:"Gram-negative",
+    infections:["Urethritis / cervicitis / PID","Disseminated gonococcal infection (DGI)","Septic arthritis"],
+    key_pearl:"Fluoroquinolone-resistant gonorrhea is widespread - do NOT use ciprofloxacin/levofloxacin empirically. Always co-treat presumptively for Chlamydia (doxycycline).",
+    second_line:["Cefixime 800 mg PO x1 (only if ceftriaxone unavailable)","Gentamicin 240 mg IM x1 + azithromycin 2 g PO x1 (cephalosporin allergy)","Spectinomycin (where available)"],
+    sites:[
+      {site:"Uncomplicated urogenital / rectal / pharyngeal", empiric:"Ceftriaxone 500 mg IM x1 (1 g IM if >=150 kg)", oral:"None - IM dose; add doxycycline 100 mg PO q12h x7d for chlamydia co-treatment", duration:"Single dose", source:"CDC STI Guidelines 2021"},
+      {site:"Disseminated (DGI) / septic arthritis", empiric:"Ceftriaxone 1 g IV/IM q24h", oral:"Cefixime 400 mg PO q12h after clinical improvement (per CDC)", duration:"At least 7 days (>=14 days if meningitis/endocarditis)", source:"CDC STI Guidelines 2021"},
+      {site:"PID (outpatient, mild)", empiric:"Ceftriaxone 500 mg IM x1 + Doxycycline 100 mg PO q12h + Metronidazole 500 mg PO q12h", oral:"Doxycycline + metronidazole component (oral)", duration:"14 days", source:"CDC STI Guidelines 2021"}
+    ]
+  },
+  "n_meningitidis":{ display:"Neisseria meningitidis", group:"Gram-negative",
+    infections:["Bacterial meningitis","Meningococcemia"],
+    key_pearl:"Droplet precautions until 24h of effective therapy. Close contacts need chemoprophylaxis: ciprofloxacin 500 mg PO x1 or rifampin 600 mg PO q12h x2 days.",
+    second_line:["Meropenem","Chloramphenicol (penicillin allergy - limited US availability)","Ciprofloxacin or Rifampin (contact prophylaxis)"],
+    sites:[
+      {site:"Meningitis / meningococcemia", empiric:"Penicillin G 4 million units IV q4h OR Ceftriaxone 2 g IV q12h", oral:"None - complete IV course", duration:"7 days", source:"IDSA Bacterial Meningitis 2004"}
+    ]
+  },
+  "anaerobes":{ display:"Mixed Anaerobes (intra-abdominal / aspiration / necrotizing)", group:"Anaerobes",
+    infections:["Intra-abdominal infection","Aspiration pneumonia (abscess/empyema)","Necrotizing / dental"],
+    key_pearl:"Avoid double anaerobic coverage - pip-tazo and meropenem already cover anaerobes, so do not add metronidazole on top. Source control is definitive.",
+    second_line:["Meropenem or Ertapenem","Piperacillin-tazobactam","Cefoxitin or Cefotetan","Ampicillin-sulbactam / Amoxicillin-clavulanate","Metronidazole (with a Gram-negative agent)","Moxifloxacin (variable)","Clindamycin (rising resistance)"],
+    sites:[
+      {site:"Intra-abdominal", empiric:"Metronidazole 500 mg IV q8h + Ceftriaxone; OR Piperacillin-tazobactam monotherapy", oral:"Metronidazole 500 mg PO q8h + oral fluoroquinolone/cephalosporin, or amoxicillin-clavulanate", duration:"4-7 days after adequate source control", source:"STOP-IT 2015 (NEJM); SIS/IDSA IAI 2010"},
+      {site:"Aspiration pneumonia (only if abscess/empyema)", empiric:"Ampicillin-sulbactam 3 g IV q6h or Piperacillin-tazobactam", oral:"Amoxicillin-clavulanate 875/125 mg PO q12h", duration:"5-7 days (longer for abscess/empyema)", source:"ATS/IDSA CAP 2019"}
+    ]
+  },
+  "atypicals":{ display:"Atypicals (Mycoplasma, Chlamydia pneumoniae, Legionella)", group:"Atypicals",
+    infections:["CAP - atypical coverage","Legionnaires disease"],
+    key_pearl:"Atypicals have no cell wall (or are intracellular) - beta-lactams have ZERO activity. Hospitalized CAP always needs beta-lactam PLUS atypical coverage.",
+    second_line:["Doxycycline 100 mg PO/IV q12h","Levofloxacin or Moxifloxacin","Clarithromycin"],
+    sites:[
+      {site:"CAP - atypical coverage (with a beta-lactam)", empiric:"Azithromycin 500 mg IV/PO q24h added to beta-lactam", oral:"Azithromycin or doxycycline (oral)", duration:"Minimum 5 days; until afebrile >=48h and stable", source:"ATS/IDSA CAP 2019"},
+      {site:"Legionella pneumonia", empiric:"Levofloxacin 750 mg IV/PO q24h (preferred) or Azithromycin 500 mg q24h", oral:"Levofloxacin or azithromycin (oral)", duration:"5-7 days (immunocompetent); up to 21 days if immunocompromised/severe", source:"ATS/IDSA CAP 2019"}
+    ]
+  },
+  "enterococcus":{ display:"Enterococcus faecalis / faecium", group:"Gram-positive",
+    infections:["UTI","Bacteremia","Endocarditis","Intra-abdominal"],
+    key_pearl:"Cephalosporins have ZERO enterococcal activity (intrinsic resistance). E. faecalis is usually ampicillin-susceptible; E. faecium is often ampicillin-resistant and more likely VRE.",
+    second_line:["Vancomycin (ampicillin-resistant, non-VRE)","Linezolid (VRE)","Daptomycin (VRE bacteremia)","Nitrofurantoin or Fosfomycin (cystitis)","Ampicillin + Ceftriaxone (E. faecalis endocarditis)","Ampicillin + Gentamicin (alternative - more nephrotoxic)"],
+    sites:[
+      {site:"UTI (E. faecalis)", empiric:"Ampicillin or Amoxicillin", oral:"Amoxicillin 500 mg PO q8h", duration:"5-7 days (7-14 if complicated)", source:"IDSA"},
+      {site:"Bacteremia (E. faecalis)", empiric:"Ampicillin 2 g IV q4h", oral:"Amoxicillin step-down (limited data - usually complete IV)", duration:"7-14 days depending on source", source:"IDSA / AHA"},
+      {site:"Endocarditis (E. faecalis)", empiric:"Ampicillin 2 g IV q4h + Ceftriaxone 2 g IV q12h (double beta-lactam)", oral:"None - complete IV course", duration:"6 weeks", source:"AHA Endocarditis 2015"},
+      {site:"VRE (E. faecium)", empiric:"Linezolid 600 mg IV/PO q12h or Daptomycin 8-12 mg/kg IV q24h (ID consult)", oral:"Linezolid 600 mg PO q12h", duration:"By source (7-14 days bacteremia; 6 weeks endocarditis)", source:"IDSA"}
+    ]
+  },
+  "listeria":{ display:"Listeria monocytogenes", group:"Gram-positive",
+    infections:["Meningitis / rhombencephalitis","Bacteremia","Neonatal sepsis"],
+    key_pearl:"Cephalosporins have NO activity - this is why ampicillin is added to empiric meningitis therapy in patients >50, immunocompromised, or pregnant.",
+    second_line:["TMP-SMX (penicillin allergy)","Meropenem","Ampicillin + Gentamicin (synergy, severe disease)"],
+    sites:[
+      {site:"Bacteremia", empiric:"Ampicillin 2 g IV q4h (+ gentamicin for synergy in severe disease)", oral:"Limited - TMP-SMX PO if step-down needed", duration:"At least 2 weeks", source:"IDSA / AAN"},
+      {site:"Meningitis", empiric:"Ampicillin 2 g IV q4h (+ gentamicin synergy)", oral:"None - complete IV course", duration:"At least 21 days", source:"IDSA Bacterial Meningitis 2004"},
+      {site:"Rhombencephalitis / brain abscess", empiric:"Ampicillin 2 g IV q4h + gentamicin", oral:"None - complete IV course", duration:"6 weeks or longer", source:"IDSA"}
+    ]
+  },
+  "c_diff_bug":{ display:"Clostridioides difficile", group:"Anaerobes",
+    infections:["CDI - diarrhea / pseudomembranous colitis / fulminant colitis"],
+    key_pearl:"Stop the offending antibiotic if at all possible. Avoid anti-motility agents. FMT is highly effective for recurrent CDI (>90% cure).",
+    second_line:["Vancomycin 125 mg PO q6h","Fidaxomicin 200 mg PO q12h","Metronidazole IV (fulminant adjunct, or if oral agents unavailable)","Bezlotoxumab (recurrence prevention)","Fecal microbiota transplant (>=2nd recurrence)"],
+    sites:[
+      {site:"Initial nonfulminant episode", empiric:"Fidaxomicin 200 mg PO q12h (preferred) OR Vancomycin 125 mg PO q6h", oral:"Both agents ARE oral (not systemically absorbed)", duration:"10 days", source:"IDSA/SHEA CDI 2021"},
+      {site:"Fulminant CDI (hypotension, ileus, megacolon)", empiric:"Vancomycin 500 mg PO/NGT q6h + Metronidazole 500 mg IV q8h", oral:"Oral/NGT vancomycin component; add vancomycin enema if ileus", duration:">=10 days; urgent surgery for peritonitis/toxic megacolon", source:"IDSA/SHEA CDI 2021"}
+    ]
+  },
+
+  "strep_pyogenes":{ display:"Streptococcus pyogenes (Group A Strep)", group:"Gram-positive",
+    infections:["Pharyngitis","Cellulitis / erysipelas","Necrotizing fasciitis / toxic shock","Bacteremia"],
+    key_pearl:"Universally penicillin-susceptible. ADD clindamycin for toxin suppression in invasive disease (nec fasc, TSS). Surgery is definitive for necrotizing infection.",
+    second_line:["Cephalexin or Cefazolin","Clindamycin (toxin suppression)","Amoxicillin (oral)","Azithromycin or Clarithromycin (penicillin allergy - check macrolide resistance)","Vancomycin (severe penicillin allergy)"],
+    sites:[
+      {site:"Pharyngitis", empiric:"Penicillin V 500 mg PO q12h or Amoxicillin 500 mg PO q12h", oral:"Same (already oral)", duration:"10 days", source:"IDSA GAS Pharyngitis 2012"},
+      {site:"Cellulitis / erysipelas (nonpurulent)", empiric:"Cefazolin IV or Penicillin G IV", oral:"Penicillin V, Amoxicillin, or Cephalexin", duration:"5 days (extend if not improving)", source:"IDSA SSTI 2014"},
+      {site:"Necrotizing fasciitis / toxic shock", empiric:"Penicillin G 4 million units IV q4h + Clindamycin 900 mg IV q8h + urgent surgical debridement", oral:"None - IV until source controlled", duration:"Until debridement no longer needed and clinically stable", source:"IDSA SSTI 2014"}
+    ]
+  },
+  "strep_agalactiae":{ display:"Streptococcus agalactiae (Group B Strep)", group:"Gram-positive",
+    infections:["Bacteremia / SSTI (adult)","Meningitis","Osteomyelitis / septic arthritis","Neonatal/peripartum"],
+    key_pearl:"Universally penicillin-susceptible. Intrapartum prophylaxis (penicillin) for colonized pregnant patients prevents neonatal disease.",
+    second_line:["Cefazolin or Ceftriaxone","Amoxicillin (oral step-down)","Vancomycin (penicillin allergy)","Clindamycin (if susceptible)"],
+    sites:[
+      {site:"Bacteremia / SSTI (adult)", empiric:"Penicillin G or Ampicillin 2 g IV q4h", oral:"Amoxicillin 500 mg PO q8h step-down", duration:"~10-14 days depending on source", source:"IDSA"},
+      {site:"Meningitis", empiric:"Penicillin G or Ampicillin (+ consider gentamicin)", oral:"None - complete IV course", duration:"14-21 days", source:"IDSA Bacterial Meningitis 2004"}
+    ]
+  },
+  "viridans_strep":{ display:"Viridans group streptococci", group:"Gram-positive",
+    infections:["Endocarditis","Neutropenic bacteremia","Dental / abscess"],
+    key_pearl:"MIC-directed therapy for endocarditis. In neutropenic patients can cause a sepsis/ARDS syndrome (viridans strep shock). Some isolates are penicillin-tolerant/resistant.",
+    second_line:["Vancomycin (penicillin allergy or resistant)","Ampicillin","Penicillin G + Gentamicin (short-course endocarditis)"],
+    sites:[
+      {site:"Endocarditis (penicillin-susceptible)", empiric:"Penicillin G or Ceftriaxone 2 g IV q24h (+/- gentamicin for 2-week regimen)", oral:"None - complete IV course", duration:"4 weeks (2 weeks with gentamicin synergy, selected)", source:"AHA Endocarditis 2015"},
+      {site:"Neutropenic bacteremia", empiric:"Ceftriaxone or Vancomycin (if resistant/severe)", oral:"None initially", duration:"Until count recovery and cleared, typically 7-14 days", source:"IDSA Febrile Neutropenia 2010"}
+    ]
+  },
+  "cons":{ display:"Coagulase-negative staph (S. epidermidis)", group:"Gram-positive",
+    infections:["Line-associated bacteremia (CLABSI)","Prosthetic device / hardware infection","Prosthetic valve endocarditis"],
+    key_pearl:"Frequently a blood-culture CONTAMINANT - require multiple positive sets and clinical correlation. Most are methicillin-resistant. Remove the line/hardware.",
+    second_line:["Daptomycin","Linezolid","Nafcillin or Cefazolin (if methicillin-susceptible)","Rifampin combination (retained hardware, per ID)"],
+    sites:[
+      {site:"Line-associated bacteremia (true infection)", empiric:"Vancomycin (AUC-guided)", oral:"None - complete IV; remove catheter", duration:"5-7 days after line removal (uncomplicated)", source:"IDSA CLABSI 2009"},
+      {site:"Prosthetic material / hardware", empiric:"Vancomycin +/- rifampin (per ID)", oral:"Per ID (device retention protocols)", duration:"Prolonged - device- and surgery-dependent", source:"IDSA PJI / prosthetic valve"}
+    ]
+  },
+  "vre":{ display:"VRE - Vancomycin-Resistant Enterococcus (E. faecium)", group:"Gram-positive",
+    infections:["Bacteremia","UTI","Endocarditis","Intra-abdominal"],
+    key_pearl:"ID consult. Source control is essential. Linezolid and daptomycin are the workhorses; do not use daptomycin for pneumonia.",
+    second_line:["Linezolid 600 mg IV/PO q12h","Daptomycin 8-12 mg/kg IV q24h","Nitrofurantoin or Fosfomycin (lower UTI if susceptible)","Tigecycline (non-bacteremia)"],
+    sites:[
+      {site:"Bacteremia", empiric:"Daptomycin 8-12 mg/kg IV q24h or Linezolid 600 mg IV q12h", oral:"Linezolid 600 mg PO q12h", duration:"7-14 days depending on source", source:"IDSA"},
+      {site:"UTI", empiric:"Linezolid; or Nitrofurantoin/Fosfomycin if lower-tract and susceptible", oral:"Linezolid or nitrofurantoin (oral)", duration:"5-7 days (7-14 complicated)", source:"IDSA"},
+      {site:"Endocarditis", empiric:"Daptomycin high-dose + ampicillin or ceftaroline (ID directed)", oral:"None - complete IV course", duration:"6 weeks", source:"AHA Endocarditis 2015"}
+    ]
+  },
+  "cutibacterium":{ display:"Cutibacterium acnes (Propionibacterium)", group:"Gram-positive",
+    infections:["Prosthetic shoulder/joint infection","Hardware / CNS shunt infection","Endocarditis (rare)"],
+    key_pearl:"Indolent; requires prolonged anaerobic culture (up to 14 days). Common shoulder arthroplasty pathogen and a frequent contaminant - correlate clinically.",
+    second_line:["Vancomycin","Ceftriaxone","Clindamycin","Doxycycline"],
+    sites:[
+      {site:"Prosthetic joint / hardware", empiric:"Penicillin G or Ceftriaxone IV", oral:"Amoxicillin or Doxycycline step-down (per ID)", duration:"Prolonged (weeks) with surgical management", source:"IDSA PJI"}
+    ]
+  },
+  "enterobacter":{ display:"Enterobacter cloacae", group:"Gram-negative",
+    infections:["HAP/VAP","Bacteremia / sepsis","UTI","Wound / intra-abdominal"],
+    key_pearl:"Inducible AmpC - do NOT use ceftriaxone/cefotaxime for serious infection (selects resistance). Use cefepime or a carbapenem.",
+    second_line:["Meropenem or Imipenem-cilastatin","Ciprofloxacin or Levofloxacin","TMP-SMX","Aztreonam","Amikacin"],
+    sites:[
+      {site:"Bacteremia / serious infection", empiric:"Cefepime 2 g IV q8h (severe: Meropenem)", oral:"Fluoroquinolone or TMP-SMX per susceptibility", duration:"7 days (uncomplicated)", source:"IDSA AMR guidance 2023; Yahav 2019"},
+      {site:"UTI (susceptible)", empiric:"Ciprofloxacin or TMP-SMX per susceptibility", oral:"Same (already oral)", duration:"7-14 days", source:"IDSA Pyelonephritis 2010"}
+    ]
+  },
+  "serratia":{ display:"Serratia marcescens", group:"Gram-negative",
+    infections:["HAP/VAP","Bacteremia","UTI","Wound / device"],
+    key_pearl:"Inducible AmpC (use cefepime or carbapenem for serious infection). Intrinsically resistant to nitrofurantoin and colistin; often nosocomial.",
+    second_line:["Meropenem","Ciprofloxacin or Levofloxacin","TMP-SMX","Amikacin"],
+    sites:[
+      {site:"Bacteremia / serious infection", empiric:"Cefepime 2 g IV q8h (severe: Meropenem)", oral:"Fluoroquinolone or TMP-SMX per susceptibility", duration:"7 days (uncomplicated)", source:"IDSA AMR guidance 2023"},
+      {site:"UTI (susceptible)", empiric:"Ciprofloxacin or TMP-SMX - NOT nitrofurantoin", oral:"Same (already oral)", duration:"7-14 days", source:"IDSA Pyelonephritis 2010"}
+    ]
+  },
+  "citrobacter":{ display:"Citrobacter freundii", group:"Gram-negative",
+    infections:["Bacteremia","UTI","HAP","Intra-abdominal"],
+    key_pearl:"Inducible AmpC (C. freundii) - cefepime or carbapenem for serious infection; avoid 3rd-gen cephalosporins.",
+    second_line:["Meropenem","Ciprofloxacin or Levofloxacin","TMP-SMX","Amikacin"],
+    sites:[
+      {site:"Bacteremia / serious infection", empiric:"Cefepime 2 g IV q8h (severe: Meropenem)", oral:"Fluoroquinolone or TMP-SMX per susceptibility", duration:"7 days (uncomplicated)", source:"IDSA AMR guidance 2023"},
+      {site:"UTI (susceptible)", empiric:"Ciprofloxacin or TMP-SMX per susceptibility", oral:"Same (already oral)", duration:"7-14 days", source:"IDSA Pyelonephritis 2010"}
+    ]
+  },
+  "morganella":{ display:"Morganella morganii", group:"Gram-negative",
+    infections:["UTI","Bacteremia","Wound infections"],
+    key_pearl:"Inducible AmpC. Intrinsically resistant to nitrofurantoin, tetracyclines, and polymyxins. Use cefepime or a carbapenem for serious infection.",
+    second_line:["Meropenem","Ciprofloxacin or Levofloxacin","TMP-SMX","Amikacin"],
+    sites:[
+      {site:"Bacteremia / serious infection", empiric:"Cefepime 2 g IV q8h (severe: Meropenem)", oral:"Fluoroquinolone or TMP-SMX per susceptibility", duration:"7 days (uncomplicated)", source:"IDSA AMR guidance 2023"},
+      {site:"UTI (susceptible)", empiric:"Ciprofloxacin or TMP-SMX - NOT nitrofurantoin/tetracyclines", oral:"Same (already oral)", duration:"7-14 days", source:"IDSA Pyelonephritis 2010"}
+    ]
+  },
+  "salmonella":{ display:"Salmonella (non-typhoidal)", group:"Gram-negative",
+    infections:["Gastroenteritis","Bacteremia","Endovascular / focal infection"],
+    key_pearl:"Do NOT treat uncomplicated gastroenteritis in healthy hosts (prolongs shedding). Treat if severe, <12 months, >50 with atherosclerosis, immunocompromised, prosthetics, or bacteremic. Endovascular seeding risk in older adults.",
+    second_line:["Azithromycin","TMP-SMX","Ampicillin (if susceptible)"],
+    sites:[
+      {site:"Gastroenteritis (only if treatment indicated)", empiric:"Ciprofloxacin 500 mg PO q12h or Azithromycin 500 mg PO q24h", oral:"Same (already oral)", duration:"3-7 days (7-14 if immunocompromised)", source:"IDSA Infectious Diarrhea 2017"},
+      {site:"Bacteremia", empiric:"Ceftriaxone 2 g IV q24h or Ciprofloxacin", oral:"Ciprofloxacin or azithromycin once improving", duration:"7-14 days (longer/surgery if endovascular)", source:"IDSA"}
+    ]
+  },
+  "shigella":{ display:"Shigella spp.", group:"Gram-negative",
+    infections:["Dysentery / gastroenteritis"],
+    key_pearl:"Highly contagious (low inoculum). Rising fluoroquinolone and azithromycin resistance, especially among MSM - check susceptibilities.",
+    second_line:["Ceftriaxone","TMP-SMX (resistance common)","Ciprofloxacin (if susceptible)"],
+    sites:[
+      {site:"Dysentery (immunocompetent)", empiric:"Azithromycin 500 mg PO day 1 then 250 mg x4 days, or Ciprofloxacin", oral:"Same (already oral)", duration:"3 days (5 days if immunocompromised)", source:"IDSA Infectious Diarrhea 2017"}
+    ]
+  },
+  "esbl":{ display:"ESBL-producing Enterobacterales", group:"Gram-negative",
+    infections:["Bacteremia / sepsis","Complicated UTI / pyelonephritis","Intra-abdominal"],
+    key_pearl:"A carbapenem is first-line for serious ESBL infection. Piperacillin-tazobactam is NOT reliable for ESBL bacteremia (MERINO trial). Carbapenem-spare in cystitis when possible.",
+    second_line:["Ertapenem (no Pseudomonas risk)","Ceftazidime-avibactam","Ciprofloxacin or TMP-SMX (if susceptible)","Aminoglycoside (adjunct)","Nitrofurantoin or Fosfomycin (cystitis only)"],
+    sites:[
+      {site:"Bacteremia / serious infection", empiric:"Meropenem 1 g IV q8h (or Ertapenem 1 g IV q24h if no Pseudomonas risk)", oral:"Fluoroquinolone or TMP-SMX if susceptible", duration:"7 days (uncomplicated Gram-negative bacteremia)", source:"IDSA AMR guidance 2023; MERINO 2018"},
+      {site:"Complicated UTI / pyelonephritis", empiric:"Ertapenem or Meropenem", oral:"Fluoroquinolone or TMP-SMX per susceptibility", duration:"7-14 days", source:"IDSA AMR guidance 2023"},
+      {site:"Uncomplicated cystitis", empiric:"Nitrofurantoin, Fosfomycin, or TMP-SMX if susceptible (carbapenem-sparing)", oral:"Same (already oral)", duration:"Nitrofurantoin 5 days; fosfomycin single dose", source:"IDSA AMR guidance 2023"}
+    ]
+  },
+  "cre":{ display:"CRE - Carbapenem-Resistant Enterobacterales", group:"Gram-negative",
+    infections:["Bacteremia / sepsis","HAP/VAP","Complicated UTI"],
+    key_pearl:"ID consult MANDATORY - therapy is mechanism-directed (KPC vs OXA-48 vs MBL/NDM). Very high mortality. NDM/MBL: ceftazidime-avibactam PLUS aztreonam, or cefiderocol.",
+    second_line:["Ceftazidime-avibactam","Meropenem-vaborbactam","Imipenem-relebactam","Cefiderocol","Ceftazidime-avibactam + Aztreonam (MBL/NDM)","Aminoglycosides / Tigecycline (adjunct, non-BSI)"],
+    sites:[
+      {site:"Serious infection (mechanism-directed)", empiric:"Ceftazidime-avibactam or Meropenem-vaborbactam (KPC); Cefiderocol or ceftazidime-avibactam + aztreonam (MBL) - ID directed", oral:"None - IV, ID directed", duration:"Individualized by ID and source", source:"IDSA AMR guidance 2023"}
+    ]
+  },
+  "acinetobacter":{ display:"Acinetobacter baumannii", group:"Gram-negative",
+    infections:["HAP/VAP","Bacteremia","Wound / burn infections"],
+    key_pearl:"Often extensively drug-resistant and nosocomial. High-dose ampicillin-sulbactam is a key agent (sulbactam has intrinsic activity). ID consult for MDR isolates.",
+    second_line:["Meropenem or Imipenem (if susceptible)","Minocycline or Tigecycline","Polymyxin B / Colistin","Cefiderocol","Aminoglycoside (amikacin)"],
+    sites:[
+      {site:"Serious infection (MDR)", empiric:"High-dose Ampicillin-sulbactam +/- second agent (polymyxin, minocycline, cefiderocol) - ID directed; Meropenem if susceptible", oral:"Minocycline or TMP-SMX if susceptible", duration:"By source (typically 7-14 days)", source:"IDSA AMR guidance 2023"}
+    ]
+  },
+  "stenotrophomonas":{ display:"Stenotrophomonas maltophilia", group:"Gram-negative",
+    infections:["HAP/VAP","Bacteremia","Line infections"],
+    key_pearl:"Intrinsically resistant to ALL carbapenems (L1 metallo-beta-lactamase) - carbapenems SELECT for it. TMP-SMX is the drug of choice. Do NOT use meropenem.",
+    second_line:["Levofloxacin","Minocycline","Cefiderocol","Ceftazidime-avibactam + Aztreonam (severe, ID directed)"],
+    sites:[
+      {site:"Serious infection", empiric:"TMP-SMX (drug of choice); alternative Levofloxacin or Minocycline", oral:"TMP-SMX or levofloxacin (oral)", duration:"7-14 days by source", source:"IDSA AMR guidance 2023"}
+    ]
+  },
+  "h_influenzae":{ display:"Haemophilus influenzae", group:"Gram-negative",
+    infections:["CAP / COPD exacerbation","Sinusitis / AOM","Meningitis / epiglottitis"],
+    key_pearl:"Beta-lactamase production is common - amoxicillin alone may fail. Use amoxicillin-clavulanate or a cephalosporin.",
+    second_line:["Cefuroxime, Cefpodoxime, or Cefdinir","Ceftriaxone (severe)","Fluoroquinolone","Azithromycin or Doxycycline"],
+    sites:[
+      {site:"Respiratory (CAP / COPD / sinusitis)", empiric:"Amoxicillin-clavulanate 875/125 mg PO q12h or Ceftriaxone (inpatient)", oral:"Amoxicillin-clavulanate or oral cephalosporin", duration:"5-7 days", source:"ATS/IDSA CAP 2019"},
+      {site:"Meningitis / epiglottitis", empiric:"Ceftriaxone 2 g IV q12h", oral:"None - complete IV course", duration:"7-10 days", source:"IDSA Bacterial Meningitis 2004"}
+    ]
+  },
+  "moraxella":{ display:"Moraxella catarrhalis", group:"Gram-negative",
+    infections:["COPD exacerbation","Sinusitis / AOM","CAP"],
+    key_pearl:"Nearly all produce beta-lactamase - amoxicillin alone fails. Use amoxicillin-clavulanate, a cephalosporin, doxycycline, or a macrolide.",
+    second_line:["Cefuroxime or Cefpodoxime","Doxycycline","Azithromycin or Clarithromycin","TMP-SMX"],
+    sites:[
+      {site:"Respiratory (COPD / sinusitis / AOM)", empiric:"Amoxicillin-clavulanate 875/125 mg PO q12h", oral:"Same (already oral)", duration:"5-7 days", source:"ATS/IDSA CAP 2019"}
+    ]
+  },
+  "pasteurella":{ display:"Pasteurella multocida", group:"Gram-negative",
+    infections:["Animal (cat/dog) bite cellulitis","Bacteremia","Osteomyelitis / septic arthritis"],
+    key_pearl:"Resistant to first-generation cephalosporins and clindamycin - do NOT use cephalexin or clindamycin for bite prophylaxis. Amoxicillin-clavulanate is drug of choice (also covers oral anaerobes).",
+    second_line:["Doxycycline","Ceftriaxone","Fluoroquinolone (levofloxacin/moxifloxacin)","Ampicillin-sulbactam (IV)"],
+    sites:[
+      {site:"Bite wound cellulitis", empiric:"Amoxicillin-clavulanate 875/125 mg PO q12h (severe: Ampicillin-sulbactam IV)", oral:"Amoxicillin-clavulanate", duration:"5-7 days (prophylaxis) or 7-14 days (established infection)", source:"IDSA SSTI 2014"}
+    ]
+  },
+  "campylobacter":{ display:"Campylobacter jejuni", group:"Gram-negative",
+    infections:["Gastroenteritis / dysentery"],
+    key_pearl:"Usually self-limited. Fluoroquinolone resistance is high - azithromycin is preferred when treatment is indicated. Associated with Guillain-Barre syndrome.",
+    second_line:["Ciprofloxacin (only if susceptible - high resistance)"],
+    sites:[
+      {site:"Gastroenteritis (if severe/immunocompromised/pregnant/bloody)", empiric:"Azithromycin 500 mg PO q24h", oral:"Same (already oral)", duration:"3 days", source:"IDSA Infectious Diarrhea 2017"}
+    ]
+  },
+  "vibrio_vulnificus":{ display:"Vibrio vulnificus", group:"Gram-negative",
+    infections:["Necrotizing SSTI (seawater wound)","Primary sepsis (raw oysters)"],
+    key_pearl:"Cirrhosis / iron overload = high risk of fulminant sepsis. Combine doxycycline with a 3rd-gen cephalosporin and get URGENT surgical debridement.",
+    second_line:["Cefotaxime","Levofloxacin or Ciprofloxacin","Ceftriaxone"],
+    sites:[
+      {site:"Necrotizing SSTI / sepsis", empiric:"Doxycycline 100 mg IV/PO q12h + Ceftriaxone (or Cefotaxime) + urgent surgical debridement", oral:"Doxycycline step-down when improving", duration:"7-14 days (and until debridement complete)", source:"IDSA SSTI 2014"}
+    ]
+  },
+  "legionella":{ display:"Legionella pneumophila", group:"Atypicals",
+    infections:["Legionnaires pneumonia","Pontiac fever (self-limited)"],
+    key_pearl:"Urinary antigen detects serogroup 1 (most common). Intracellular - beta-lactams are inactive. Levofloxacin preferred over azithromycin for severe disease.",
+    second_line:["Azithromycin","Moxifloxacin","Doxycycline"],
+    sites:[
+      {site:"Pneumonia", empiric:"Levofloxacin 750 mg IV/PO q24h (preferred) or Azithromycin 500 mg q24h", oral:"Levofloxacin or azithromycin (oral)", duration:"5-7 days (immunocompetent); up to 21 days if immunocompromised/severe", source:"ATS/IDSA CAP 2019"}
+    ]
+  },
+  "mycoplasma":{ display:"Mycoplasma pneumoniae", group:"Atypicals",
+    infections:["Atypical CAP (walking pneumonia)"],
+    key_pearl:"No cell wall - beta-lactams are inactive. Macrolide resistance is rising; doxycycline or a respiratory fluoroquinolone are reliable. Cold agglutinins may be present.",
+    second_line:["Doxycycline","Levofloxacin or Moxifloxacin"],
+    sites:[
+      {site:"Atypical CAP", empiric:"Azithromycin 500 mg then 250 mg PO daily, or Doxycycline 100 mg PO q12h", oral:"Same (already oral)", duration:"Azithromycin 5 days; doxycycline 7-14 days", source:"ATS/IDSA CAP 2019"}
+    ]
+  },
+  "chlamydophila":{ display:"Chlamydia pneumoniae", group:"Atypicals",
+    infections:["Atypical CAP","Bronchitis / pharyngitis"],
+    key_pearl:"Intracellular - beta-lactams are inactive. Doxycycline or a macrolide are first-line.",
+    second_line:["Azithromycin or Clarithromycin","Levofloxacin or Moxifloxacin"],
+    sites:[
+      {site:"Atypical CAP", empiric:"Doxycycline 100 mg PO q12h or Azithromycin", oral:"Same (already oral)", duration:"Doxycycline 7-14 days; azithromycin 5 days", source:"ATS/IDSA CAP 2019"}
+    ]
+  },
+  "bacteroides":{ display:"Bacteroides fragilis group", group:"Anaerobes",
+    infections:["Intra-abdominal infection","Abscess","Anaerobic bacteremia"],
+    key_pearl:"Rising clindamycin resistance (~30%) - not reliable empirically. Metronidazole remains reliable. Part of normal gut flora; source control is key.",
+    second_line:["Piperacillin-tazobactam","Meropenem or Ertapenem","Cefoxitin or Cefotetan","Moxifloxacin (variable)","Clindamycin (unreliable - rising resistance)"],
+    sites:[
+      {site:"Intra-abdominal (with a Gram-negative agent)", empiric:"Metronidazole 500 mg IV q8h + Ceftriaxone; OR Piperacillin-tazobactam monotherapy", oral:"Metronidazole 500 mg PO q8h + oral fluoroquinolone/cephalosporin", duration:"4-7 days after source control", source:"STOP-IT 2015; SIS/IDSA IAI 2010"}
+    ]
+  },
+  "clostridium_perfringens":{ display:"Clostridium perfringens", group:"Anaerobes",
+    infections:["Gas gangrene / clostridial myonecrosis","Necrotizing SSTI","Bacteremia"],
+    key_pearl:"Surgical debridement is definitive and emergent. ADD clindamycin for toxin suppression. Consider hyperbaric oxygen as adjunct.",
+    second_line:["Ceftriaxone","Metronidazole","Meropenem","Vancomycin (penicillin allergy)"],
+    sites:[
+      {site:"Gas gangrene / myonecrosis", empiric:"Penicillin G 4 million units IV q4h + Clindamycin 900 mg IV q8h + emergent surgical debridement", oral:"None - IV until source controlled", duration:"Until debridement complete and clinically stable", source:"IDSA SSTI 2014"}
+    ]
+  },
+  "borrelia":{ display:"Borrelia burgdorferi (Lyme disease)", group:"Spirochetes",
+    infections:["Early localized (erythema migrans)","Lyme carditis","Neuroborreliosis","Lyme arthritis"],
+    key_pearl:"Doxycycline is preferred for early disease (also covers Anaplasma co-infection). Single-dose doxycycline 200 mg is prophylaxis after a high-risk tick bite.",
+    second_line:["Amoxicillin","Cefuroxime axetil","Azithromycin (less effective)"],
+    sites:[
+      {site:"Early localized (erythema migrans)", empiric:"Doxycycline 100 mg PO q12h", oral:"Same (already oral)", duration:"10 days (doxycycline); 14 days amoxicillin/cefuroxime", source:"IDSA/AAN/ACR Lyme 2020"},
+      {site:"Lyme carditis or neuroborreliosis", empiric:"Ceftriaxone 2 g IV q24h (oral doxycycline acceptable for many)", oral:"Doxycycline 100 mg PO q12h once stable", duration:"14-21 days", source:"IDSA/AAN/ACR Lyme 2020"},
+      {site:"Lyme arthritis", empiric:"Doxycycline 100 mg PO q12h", oral:"Same (already oral)", duration:"28 days", source:"IDSA/AAN/ACR Lyme 2020"}
+    ]
+  },
+  "rickettsia":{ display:"Rickettsia rickettsii (Rocky Mountain spotted fever)", group:"Spirochetes",
+    infections:["RMSF (fever, rash, tick exposure)"],
+    key_pearl:"Treat EMPIRICALLY on suspicion - do NOT wait for confirmation. Doxycycline is lifesaving and is first-line for ALL ages, including children. Delay increases mortality.",
+    second_line:["Chloramphenicol (historically in pregnancy - inferior)"],
+    sites:[
+      {site:"RMSF", empiric:"Doxycycline 100 mg PO/IV q12h", oral:"Same (already oral)", duration:"At least 3 days after afebrile; usually 7-10 days total", source:"CDC Rickettsial Diseases 2016"}
+    ]
+  },
+  "anaplasma_ehrlichia":{ display:"Anaplasma / Ehrlichia", group:"Spirochetes",
+    infections:["Anaplasmosis / ehrlichiosis (fever, cytopenias, tick exposure)"],
+    key_pearl:"Doxycycline first-line for all ages. Consider Lyme co-infection (shared Ixodes tick). Morulae in leukocytes on smear.",
+    second_line:["Rifampin (pregnancy, for Anaplasma)"],
+    sites:[
+      {site:"Anaplasmosis / ehrlichiosis", empiric:"Doxycycline 100 mg PO/IV q12h", oral:"Same (already oral)", duration:"10 days (or until 3 days afebrile)", source:"CDC Rickettsial Diseases 2016"}
+    ]
+  },
+  "treponema":{ display:"Treponema pallidum (syphilis)", group:"Spirochetes",
+    infections:["Primary / secondary / early latent","Late latent / tertiary","Neurosyphilis"],
+    key_pearl:"Penicillin is the ONLY recommended therapy in pregnancy and neurosyphilis - desensitize if allergic. Watch for Jarisch-Herxheimer reaction after first dose.",
+    second_line:["Doxycycline 100 mg PO q12h x14 days (non-pregnant penicillin allergy)","Ceftriaxone (alternative, per ID)"],
+    sites:[
+      {site:"Early (primary/secondary/early latent)", empiric:"Benzathine penicillin G 2.4 million units IM x1", oral:"None - IM", duration:"Single dose", source:"CDC STI Guidelines 2021"},
+      {site:"Late latent / tertiary", empiric:"Benzathine penicillin G 2.4 million units IM weekly x3", oral:"None - IM", duration:"3 weekly doses", source:"CDC STI Guidelines 2021"},
+      {site:"Neurosyphilis", empiric:"Aqueous crystalline penicillin G 18-24 million units/day IV x10-14 days", oral:"None - IV", duration:"10-14 days", source:"CDC STI Guidelines 2021"}
+    ]
+  },
+  "mtb":{ display:"Mycobacterium tuberculosis", group:"Mycobacteria",
+    infections:["Pulmonary TB","Extrapulmonary / disseminated TB"],
+    key_pearl:"Airborne isolation. Add pyridoxine with isoniazid. Use directly observed therapy. Always send susceptibilities; suspected MDR-TB needs a TB program / ID.",
+    second_line:["Fluoroquinolones (levofloxacin/moxifloxacin)","Bedaquiline, Linezolid (MDR - specialist directed)","Injectable agents (amikacin) - specialist directed"],
+    sites:[
+      {site:"Drug-susceptible pulmonary TB", empiric:"RIPE: Rifampin + Isoniazid + Pyrazinamide + Ethambutol x2 months, then Rifampin + Isoniazid x4 months", oral:"All oral (RIPE)", duration:"6 months total (longer for CNS/bone or slow responders)", source:"ATS/CDC/IDSA TB 2016"}
+    ]
+  },
+  "mac":{ display:"Mycobacterium avium complex (MAC)", group:"Mycobacteria",
+    infections:["Disseminated MAC (advanced HIV)","Pulmonary MAC"],
+    key_pearl:"NEVER use macrolide monotherapy (resistance). Start/optimize ART for disseminated disease. Prolonged multidrug therapy; check macrolide susceptibility.",
+    second_line:["Amikacin (including inhaled liposomal for refractory pulmonary)","Fluoroquinolone (adjunct)","Clofazimine (specialist)"],
+    sites:[
+      {site:"Disseminated (advanced HIV)", empiric:"Azithromycin (or clarithromycin) + Ethambutol +/- Rifabutin", oral:"Oral regimen", duration:">=12 months and until immune reconstitution", source:"IDSA/ATS NTM; HIV OI guidelines"},
+      {site:"Pulmonary MAC", empiric:"Azithromycin + Ethambutol + Rifampin (daily or 3x/week)", oral:"Oral regimen", duration:"Until >=12 months of culture negativity", source:"ATS/IDSA NTM 2020"}
+    ]
+  },
+  "candida_albicans":{ display:"Candida albicans", group:"Yeast",
+    infections:["Candidemia","Invasive candidiasis"],
+    key_pearl:"Echinocandin is first-line for candidemia. Remove central lines and get a dilated eye exam. De-escalate to fluconazole when stable and confirmed susceptible.",
+    second_line:["Fluconazole 800 mg load then 400 mg (step-down if susceptible)","Liposomal amphotericin B","Voriconazole"],
+    sites:[
+      {site:"Candidemia / invasive", empiric:"Micafungin 100 mg IV q24h (echinocandin)", oral:"Fluconazole 400-800 mg PO once stable and azole-susceptible", duration:"14 days after first negative blood culture and resolution of signs", source:"IDSA Candidiasis 2016"}
+    ]
+  },
+  "candida_glabrata":{ display:"Candida glabrata", group:"Yeast",
+    infections:["Candidemia","Invasive candidiasis"],
+    key_pearl:"Reduced azole susceptibility - echinocandin preferred. Step down to azole only if confirmed susceptible (high-dose fluconazole or voriconazole). Echinocandin resistance (FKS mutations) is emerging - check susceptibilities.",
+    second_line:["Liposomal amphotericin B","High-dose fluconazole (only if susceptible)","Voriconazole (if susceptible)"],
+    sites:[
+      {site:"Candidemia / invasive", empiric:"Micafungin 100 mg IV q24h (echinocandin)", oral:"High-dose fluconazole only if confirmed susceptible", duration:"14 days after first negative blood culture and resolution", source:"IDSA Candidiasis 2016"}
+    ]
+  },
+  "cryptococcus":{ display:"Cryptococcus neoformans", group:"Yeast",
+    infections:["Cryptococcal meningitis","Cryptococcemia / pulmonary"],
+    key_pearl:"Manage raised intracranial pressure with serial LPs - it is a major driver of mortality. Time ART carefully to avoid IRIS.",
+    second_line:["Amphotericin B deoxycholate (resource-limited)","Fluconazole + flucytosine (if amphotericin unavailable)"],
+    sites:[
+      {site:"Meningitis - induction", empiric:"Liposomal amphotericin B + Flucytosine", oral:"Flucytosine oral component", duration:"At least 2 weeks induction", source:"IDSA Cryptococcosis 2010"},
+      {site:"Meningitis - consolidation then maintenance", empiric:"Fluconazole 800 mg PO daily (consolidation)", oral:"Fluconazole (all oral)", duration:"Consolidation 8 weeks, then maintenance 200 mg daily for >=1 year", source:"IDSA Cryptococcosis 2010"}
+    ]
+  }
+};
+
+/* Merge BUG_RX into BUG_DB so global search + drug-profile view work for all 50 */
+Object.entries(D.BUG_RX).forEach(function(pair){
+  var k=pair[0], b=pair[1], fl={};
+  (b.sites||[]).forEach(function(s){ fl[s.site]=s.empiric; });
+  D.BUG_DB[k]=Object.assign({}, D.BUG_DB[k]||{}, {display:b.display, infections:b.infections, first_line:fl, second_line:b.second_line, key_pearl:b.key_pearl});
+});
+
+/* Organism menu grouped, kept in sync with BUG_RX */
+(function(){
+  var order=["Gram-positive","Gram-negative","Anaerobes","Atypicals","Spirochetes","Mycobacteria","Yeast"];
+  var keys=Object.keys(D.BUG_RX).sort(function(a,b){
+    var ga=order.indexOf(D.BUG_RX[a].group||"zzz"), gb=order.indexOf(D.BUG_RX[b].group||"zzz");
+    if(ga<0)ga=99; if(gb<0)gb=99;
+    if(ga!==gb)return ga-gb;
+    return D.BUG_RX[a].display.localeCompare(D.BUG_RX[b].display);
+  });
+  D.BUG_MENU=Object.fromEntries(keys.map(function(k,i){return [String(i+1),[k, D.BUG_RX[k].display]];}));
+})();
+
+/* Organism renderer: Empiric -> Oral step-down -> Duration, per site */
+renderBug = function(key){
+  var b = D.BUG_RX && D.BUG_RX[key];
+  if(!b){
+    var lb = D.BUG_DB[key];
+    if(!lb){ $('#content').innerHTML = section('Organism not found') + '<div class="controls"><button class="btn" onclick="showBugs()">Back</button></div>'; return; }
+    var hh = '<div class="header">'+esc(lb.display)+'</div>' + section('Common Infection Sites') + bullets(lb.infections||[]) + section('First-line Treatment by Site');
+    for(var s2 in (lb.first_line||{})){ hh += '<div class="card"><div class="cyan">'+esc(s2)+':</div><div>'+esc(lb.first_line[s2])+'</div></div>'; }
+    hh += '<div class="controls"><button class="btn" onclick="showBugs()">Back</button></div>';
+    $('#content').innerHTML = hh; return;
+  }
+  var h = '<div class="header">'+esc(b.display)+'</div>';
+  h += section('Common Infection Sites') + bullets(b.infections||[]);
+  if(b.key_pearl) h += section('Key Clinical Pearl') + '<div class="card yellow">'+esc(b.key_pearl)+'</div>';
+  h += section('Empiric (pre-sensitivities), Oral Step-down, Duration - by site');
+  (b.sites||[]).forEach(function(s){
+    var meta = mentionedDrugs(s.empiric||'').filter(function(d){return D.ANTIBIOTIC_DB[d];}).map(function(d){return '<div class="meta" style="margin-left:14px">- '+esc(drugLabel(d))+': '+esc(D.ANTIBIOTIC_DB[d].dose)+' [renal: '+esc(D.ANTIBIOTIC_DB[d].renal)+']</div>';}).join('');
+    h += '<div class="card"><div class="cyan">'+esc(s.site)+'</div>'
+      + '<div class="meta"><b>Empiric:</b> '+esc(s.empiric||'')+'</div>' + meta
+      + '<div class="meta"><b>Oral step-down:</b> '+esc(s.oral||'')+'</div>'
+      + '<div class="meta"><b>Duration:</b> '+esc(s.duration||'')+'</div>'
+      + (s.source?'<div class="meta" style="opacity:.7">Source: '+esc(s.source)+'</div>':'')
+      + '</div>';
+  });
+  if(b.second_line && b.second_line.length){ h += section('Second-line / Alternatives') + '<div class="card">'+b.second_line.map(function(x){return '<div>- '+esc(x)+'</div>';}).join('')+'</div>'; }
+  h += '<div class="controls"><button class="btn" onclick="showBugProfiles(\''+key+'\')">Show detailed drug profiles</button><button class="btn" onclick="showBugs()">Back</button></div>';
+  $('#content').innerHTML = h;
+};
+
+/* ---- Spectrum chart: search by bacteria -> what covers it ---- */
+var _origShowSpectrum = (typeof showSpectrum==='function') ? showSpectrum : null;
+showSpectrum = function(){
+  if(_origShowSpectrum) _origShowSpectrum();
+  var content=document.getElementById('content'); if(!content) return;
+  var cols=D.SPECTRUM_COLUMNS||[];
+  var opts=cols.map(function(c){return '<option value="'+esc(c[0])+'">';}).join('');
+  var panel='<div class="card" id="bugCovCard" style="margin-top:12px"><div class="cyan">Search by bacteria - what covers it?</div>'
+    +'<div class="field"><input id="bugCovInput" list="bugCovList" placeholder="Type an organism (e.g., MRSA, E. coli, B. fragilis group)" oninput="renderBugCoverage(this.value)"></div>'
+    +'<datalist id="bugCovList">'+opts+'</datalist>'
+    +'<div id="bugCovResult" class="meta"></div></div>';
+  var header=content.querySelector('.header');
+  if(header) header.insertAdjacentHTML('afterend', panel); else content.insertAdjacentHTML('afterbegin', panel);
+};
+function renderBugCoverage(q){
+  var el=document.getElementById('bugCovResult'); if(!el) return;
+  q=(q||'').trim().toLowerCase(); if(!q){ el.innerHTML=''; return; }
+  var cols=D.SPECTRUM_COLUMNS||[];
+  var col=cols.find(function(c){return c[0].toLowerCase()===q;}) || cols.find(function(c){return c[0].toLowerCase().indexOf(q)>-1 || c[1].toLowerCase().indexOf(q)>-1;});
+  if(!col){ el.innerHTML='<div style="opacity:.7">No spectrum-chart organism matches that. This search covers the '+cols.length+' organisms shown in the chart above.</div>'; return; }
+  var org=col[0];
+  var reliable=Object.keys(D.SPECTRUM_DB||{}).filter(function(d){return (D.SPECTRUM_DB[d]||[]).indexOf(org)>-1;});
+  var variable=Object.keys(D.SPECTRUM_VARIABLE_DB||{}).filter(function(d){return (D.SPECTRUM_VARIABLE_DB[d]||[]).indexOf(org)>-1;});
+  el.innerHTML='<div style="margin-top:6px"><b>'+esc(org)+'</b> ('+esc(col[2])+')</div>'
+    +'<div style="margin-top:6px"><span class="green">Reliable coverage:</span> '+(reliable.length?reliable.map(function(d){return esc(drugLabel(d));}).join(', '):'none listed')+'</div>'
+    +'<div style="margin-top:4px"><span class="yellow">Variable / susceptibility-dependent:</span> '+(variable.length?variable.map(function(d){return esc(drugLabel(d));}).join(', '):'none listed')+'</div>'
+    +'<div style="margin-top:4px;opacity:.7">Always confirm with isolate susceptibilities and your local antibiogram.</div>';
+}
+
 </script></body></html>
