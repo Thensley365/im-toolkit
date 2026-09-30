@@ -1124,4 +1124,28 @@ function renderBugCoverage(q){
     +'<div style="margin-top:4px;opacity:.7">Always confirm with isolate susceptibilities and your local antibiogram.</div>';
 }
 
+/* ---- Spectrum chart: show route (IV/PO) after drug name + narrow the drug column ---- */
+function drugRoute(d){
+  var db=D.ANTIBIOTIC_DB[d]; if(!db||!db.dose) return '';
+  var s=db.dose, r=[];
+  if(/\bIV\b/.test(s)) r.push('IV');
+  if(/\bPO\b/.test(s)) r.push('PO');
+  if(/\bIM\b/.test(s)) r.push('IM');
+  if(/inhal/i.test(s)) r.push('Inh');
+  return r.join('/');
+}
+spectrumRow = function(d, cols){
+  cols = cols || spectrumCols();
+  var cov=D.SPECTRUM_DB[d]||[], vari=(D.SPECTRUM_VARIABLE_DB&&D.SPECTRUM_VARIABLE_DB[d])||[];
+  var route=drugRoute(d), routeHtml=route?' <span class="spec-route">('+esc(route)+')</span>':'';
+  var cells=cols.map(function(c){var gc=specGroupClass(c[2]);
+    return cov.indexOf(c[0])>-1?'<td class="covered '+gc+'" title="Reliable/usual activity">✓</td>'
+      :vari.indexOf(c[0])>-1?'<td class="variablecov '+gc+'" title="Variable / susceptibility-dependent">±</td>'
+      :'<td class="notcovered '+gc+'" title="Not reliable / usually inactive">·</td>';}).join('');
+  return '<tr data-drug="'+esc(d.toLowerCase())+'" data-cov="'+esc(cov.concat(vari).join('|'))+'"><td class="spec-drugcell">'+esc(drugLabel(d,true))+routeHtml+'</td>'+cells+'</tr>';
+};
+(function(){var st=document.createElement('style');
+  st.textContent='.spectrum td:first-child,.spectrum th:first-child{width:1%;white-space:nowrap}.spec-route{color:#93a4bd;font-weight:400;font-size:11px;margin-left:4px}';
+  (document.head||document.getElementsByTagName('head')[0]).appendChild(st);})();
+
 </script></body></html>
