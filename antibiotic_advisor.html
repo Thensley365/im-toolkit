@@ -1148,4 +1148,65 @@ spectrumRow = function(d, cols){
   st.textContent='.spectrum td:first-child,.spectrum th:first-child{width:1%;white-space:nowrap}.spec-route{color:#93a4bd;font-weight:400;font-size:11px;margin-left:4px}';
   (document.head||document.getElementsByTagName('head')[0]).appendChild(st);})();
 
+/* ---- Brand names for antibiotics (searchable + shown in drug profile) ---- */
+D.ABX_BRANDS = {
+  "Cefazolin":"Ancef, Kefzol","Cephalexin":"Keflex","Ceftriaxone":"Rocephin","Cefepime":"Maxipime",
+  "Ceftazidime":"Fortaz, Tazicef","Cefotaxime":"Claforan","Cefoxitin":"Mefoxin","Cefotetan":"Cefotan",
+  "Ceftaroline":"Teflaro","Cefuroxime":"Ceftin, Zinacef","Cefpodoxime":"Vantin","Cefdinir":"Omnicef","Cefixime":"Suprax",
+  "Piperacillin-tazobactam":"Zosyn","Ampicillin-sulbactam":"Unasyn","Amoxicillin-clavulanate":"Augmentin",
+  "Amoxicillin":"Amoxil","Ampicillin":"Principen","Nafcillin":"Nallpen","Oxacillin":"Bactocill","Dicloxacillin":"Dynapen",
+  "Penicillin G":"Pfizerpen; Bicillin L-A (benzathine)","Penicillin V":"Pen-Vee K, Veetids",
+  "Meropenem":"Merrem","Ertapenem":"Invanz","Imipenem-cilastatin":"Primaxin","Aztreonam":"Azactam; Cayston (inhaled)",
+  "Ciprofloxacin":"Cipro","Levofloxacin":"Levaquin","Moxifloxacin":"Avelox","Azithromycin":"Zithromax, Z-Pak",
+  "Clarithromycin":"Biaxin","Doxycycline":"Vibramycin, Doryx","Minocycline":"Minocin",
+  "Vancomycin":"Vancocin","Vancomycin (oral)":"Firvanq","Linezolid":"Zyvox","Tedizolid":"Sivextro","Daptomycin":"Cubicin",
+  "TMP-SMX":"Bactrim, Septra","Nitrofurantoin":"Macrobid, Macrodantin","Fosfomycin":"Monurol","Metronidazole":"Flagyl",
+  "Clindamycin":"Cleocin","Fidaxomicin":"Dificid","Gentamicin":"Garamycin","Tobramycin":"Tobi (inhaled); Nebcin",
+  "Amikacin":"Amikin; Arikayce (inhaled)","Tigecycline":"Tygacil","Ceftolozane-tazobactam":"Zerbaxa",
+  "Ceftazidime-avibactam":"Avycaz","Meropenem-vaborbactam":"Vabomere","Imipenem-relebactam":"Recarbrio",
+  "Cefiderocol":"Fetroja","Rifampin":"Rifadin","Rifaximin":"Xifaxan","Dalbavancin":"Dalvance",
+  "Oritavancin":"Orbactiv","Telavancin":"Vibativ"
+};
+Object.keys(D.ABX_BRANDS).forEach(function(k){ if(D.ANTIBIOTIC_DB[k] && !D.ANTIBIOTIC_DB[k].brand){ D.ANTIBIOTIC_DB[k].brand = D.ABX_BRANDS[k]; } });
+
+/* ---- Spectrum chart: add the missing bacterial organisms (5) ----
+   Non-bacterial bugs (fungi, mycobacteria, spirochetes) are intentionally
+   omitted - the antibacterial agents in this chart do not treat them. */
+D.SPECTRUM_ADD_COLUMNS = [
+  ["Cutibacterium acnes","C.acnes","Gram-positive"],
+  ["Salmonella","Salm","Gram-negative"],
+  ["Shigella","Shig","Gram-negative"],
+  ["Campylobacter","Camp","Gram-negative"],
+  ["Vibrio vulnificus","Vvul","Gram-negative"]
+];
+D.SPECTRUM_ADD = {
+  "Cutibacterium acnes":{
+    reliable:["Penicillin G","Ampicillin","Amoxicillin","Amoxicillin-clavulanate","Ampicillin-sulbactam","Nafcillin","Oxacillin","Cefazolin","Cephalexin","Ceftriaxone","Cefotaxime","Cefepime","Ceftaroline","Ertapenem","Imipenem-cilastatin","Meropenem","Piperacillin-tazobactam","Vancomycin","Daptomycin","Linezolid","Doxycycline"],
+    variable:["Clindamycin","Levofloxacin","Moxifloxacin","TMP-SMX","Azithromycin","Cefoxitin","Cefotetan"]
+  },
+  "Salmonella":{
+    reliable:["Ceftriaxone","Cefotaxime","Ciprofloxacin","Levofloxacin","Azithromycin","Ertapenem","Meropenem","Imipenem-cilastatin"],
+    variable:["Ampicillin","Amoxicillin","Amoxicillin-clavulanate","Ampicillin-sulbactam","Cefepime","Ceftazidime","Piperacillin-tazobactam","Aztreonam","TMP-SMX","Moxifloxacin"]
+  },
+  "Shigella":{
+    reliable:["Ceftriaxone","Azithromycin","Ciprofloxacin"],
+    variable:["Cefotaxime","Levofloxacin","Ampicillin","Amoxicillin-clavulanate","Ampicillin-sulbactam","TMP-SMX","Cefepime","Ceftazidime","Ertapenem","Meropenem","Imipenem-cilastatin","Piperacillin-tazobactam","Aztreonam","Moxifloxacin"]
+  },
+  "Campylobacter":{
+    reliable:["Azithromycin"],
+    variable:["Ciprofloxacin","Levofloxacin","Moxifloxacin","Doxycycline","Gentamicin","Tobramycin","Amikacin","Meropenem","Imipenem-cilastatin","Ertapenem"]
+  },
+  "Vibrio vulnificus":{
+    reliable:["Doxycycline","Ceftriaxone","Cefotaxime","Ciprofloxacin","Levofloxacin"],
+    variable:["Cefepime","Ceftazidime","Azithromycin","TMP-SMX","Meropenem","Imipenem-cilastatin","Ertapenem","Aztreonam","Moxifloxacin","Piperacillin-tazobactam"]
+  }
+};
+D.SPECTRUM_ADD_COLUMNS.forEach(function(col){ if(!D.SPECTRUM_COLUMNS.some(function(x){return x[0]===col[0];})) D.SPECTRUM_COLUMNS.push(col); });
+D.SPECTRUM_VARIABLE_DB = D.SPECTRUM_VARIABLE_DB || {};
+Object.keys(D.SPECTRUM_ADD).forEach(function(org){
+  var cov=D.SPECTRUM_ADD[org];
+  (cov.reliable||[]).forEach(function(dr){ if(D.SPECTRUM_DB[dr] && D.SPECTRUM_DB[dr].indexOf(org)<0) D.SPECTRUM_DB[dr].push(org); });
+  (cov.variable||[]).forEach(function(dr){ if(D.SPECTRUM_DB[dr]){ D.SPECTRUM_VARIABLE_DB[dr]=D.SPECTRUM_VARIABLE_DB[dr]||[]; if(D.SPECTRUM_VARIABLE_DB[dr].indexOf(org)<0) D.SPECTRUM_VARIABLE_DB[dr].push(org); } });
+});
+
 </script></body></html>
